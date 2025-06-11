@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { IntercomClient } = require('intercom-client');
 const nodemailer = require('nodemailer');
 const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
@@ -510,7 +509,7 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
       return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
     }
     const now = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
-    const external_id = require('uuid').v4();
+    const external_id = uuidv4();
     const payload = {
       external_id,
       external_created_at: now,
