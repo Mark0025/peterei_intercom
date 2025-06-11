@@ -10,8 +10,10 @@ function textComponent({ id, text, align = 'left', style = 'body' }) {
 
 // Helper: Build a button component
 function buttonComponent({ id, label, style = 'primary', actionType = 'submit', url, new_tab }) {
-  const action = { type: actionType };
-  if (actionType === 'open_url' && url) {
+  // Map 'open_url' to 'url' for backward compatibility
+  const type = actionType === 'open_url' ? 'url' : actionType;
+  const action = { type };
+  if (type === 'url' && url) {
     action.url = url;
     if (new_tab) action.new_tab = true;
   }
@@ -51,10 +53,16 @@ function canvasResponse({ components, stored_data, event }) {
   return response;
 }
 
+// Debug: Log outgoing Canvas Kit responses
+function debugCanvasResponse(response, context = '') {
+  console.log(`[DEBUG] CanvasKit response${context ? ' (' + context + ')' : ''}:`, JSON.stringify(response, null, 2));
+}
+
 module.exports = {
   textComponent,
   buttonComponent,
   inputComponent,
   errorCanvas,
-  canvasResponse
+  canvasResponse,
+  debugCanvasResponse
 }; 

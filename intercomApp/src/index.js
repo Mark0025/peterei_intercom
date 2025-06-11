@@ -250,7 +250,7 @@ app.post('/popout-submit', express.urlencoded({ extended: true }), async (req, r
 // Remove onboarding logic and only show a Canvas Kit card with two buttons
 app.post('/initialize', (req, res) => {
   try {
-    res.json(canvasKit.canvasResponse({
+    const response = canvasKit.canvasResponse({
       components: [
         canvasKit.textComponent({
           id: 'welcome',
@@ -262,7 +262,7 @@ app.post('/initialize', (req, res) => {
           id: 'open_popout',
           label: 'Open Full Onboarding Form',
           style: 'primary',
-          actionType: 'open_url',
+          actionType: 'url',
           url: 'https://peterei-intercom.onrender.com/popout',
           new_tab: true
         }),
@@ -273,10 +273,14 @@ app.post('/initialize', (req, res) => {
           actionType: 'submit'
         })
       ]
-    }));
+    });
+    canvasKit.debugCanvasResponse(response, '/initialize');
+    res.json(response);
   } catch (err) {
     console.error('[POST /initialize]', err);
-    res.json(canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) }));
+    const errorResponse = canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) });
+    canvasKit.debugCanvasResponse(errorResponse, '/initialize');
+    res.json(errorResponse);
   }
 });
 
@@ -284,8 +288,9 @@ app.post('/initialize', (req, res) => {
 app.post('/submit', (req, res) => {
   try {
     const { component_id, input_values } = req.body;
+    let response;
     if (component_id === 'pete_user_training') {
-      return res.json(canvasKit.canvasResponse({
+      response = canvasKit.canvasResponse({
         components: [
           canvasKit.textComponent({
             id: 'training_intro',
@@ -299,10 +304,12 @@ app.post('/submit', (req, res) => {
           canvasKit.inputComponent({ id: 'external_updated_at', label: 'Updated At (YYYY-MM-DD)', required: true }),
           canvasKit.buttonComponent({ id: 'save_training_topic', label: 'Save Training Topic', style: 'primary', actionType: 'submit' })
         ]
-      }));
+      });
+      canvasKit.debugCanvasResponse(response, '/submit (pete_user_training)');
+      return res.json(response);
     }
     if (component_id === 'save_training_topic') {
-      return res.json(canvasKit.canvasResponse({
+      response = canvasKit.canvasResponse({
         components: [
           canvasKit.textComponent({
             id: 'success',
@@ -311,10 +318,12 @@ app.post('/submit', (req, res) => {
             style: 'header'
           })
         ]
-      }));
+      });
+      canvasKit.debugCanvasResponse(response, '/submit (save_training_topic)');
+      return res.json(response);
     }
     // Default: show main card
-    res.json(canvasKit.canvasResponse({
+    response = canvasKit.canvasResponse({
       components: [
         canvasKit.textComponent({
           id: 'welcome',
@@ -326,7 +335,7 @@ app.post('/submit', (req, res) => {
           id: 'open_popout',
           label: 'Open Full Onboarding Form',
           style: 'primary',
-          actionType: 'open_url',
+          actionType: 'url',
           url: 'https://peterei-intercom.onrender.com/popout',
           new_tab: true
         }),
@@ -337,17 +346,21 @@ app.post('/submit', (req, res) => {
           actionType: 'submit'
         })
       ]
-    }));
+    });
+    canvasKit.debugCanvasResponse(response, '/submit (default)');
+    res.json(response);
   } catch (err) {
     console.error('[POST /submit]', err);
-    res.json(canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) }));
+    const errorResponse = canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) });
+    canvasKit.debugCanvasResponse(errorResponse, '/submit (error)');
+    res.json(errorResponse);
   }
 });
 
 // New endpoint for Canvas Kit to open Pete User Training
 app.post('/pete-user-training', (req, res) => {
   try {
-    res.json({
+    const response = {
       canvas: {
         content: {
           components: [
@@ -364,7 +377,7 @@ app.post('/pete-user-training', (req, res) => {
               style: 'primary',
               id: 'open_training',
               action: {
-                type: 'open_url',
+                type: 'url',
                 url: 'https://peterei-intercom.onrender.com/peteTraining.html',
                 new_tab: true
               }
@@ -372,24 +385,14 @@ app.post('/pete-user-training', (req, res) => {
           ]
         }
       }
-    });
+    };
+    canvasKit.debugCanvasResponse(response, '/pete-user-training');
+    res.json(response);
   } catch (err) {
     console.error('[POST /pete-user-training]', err);
-    res.json({
-      canvas: {
-        content: {
-          components: [
-            {
-              type: 'text',
-              id: 'error',
-              text: 'Something went wrong: ' + (err.message || err),
-              style: 'error',
-              align: 'center'
-            }
-          ]
-        }
-      }
-    });
+    const errorResponse = canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) });
+    canvasKit.debugCanvasResponse(errorResponse, '/pete-user-training (error)');
+    res.json(errorResponse);
   }
 });
 
