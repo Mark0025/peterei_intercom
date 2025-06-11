@@ -261,7 +261,7 @@ app.post("/initialize", async (req, res) => {
                 id: 'open_popout',
                 action: {
                   type: 'open_url',
-                  url: `${process.env.POP_OUT_URL || 'http://localhost:' + (process.env.PORT || 4000) + '/popout'}`,
+                  url: `${process.env.POP_OUT_URL || 'https://peterei-intercom.onrender.com/popout'}`,
                   new_tab: true
                 }
               }
@@ -301,7 +301,7 @@ app.post("/submit", async (req, res) => {
             components: [
               {
                 type: 'popout',
-                url: `${process.env.POP_OUT_URL || 'http://localhost:' + (process.env.PORT || 4000) + '/popout'}`,
+                url: `${process.env.POP_OUT_URL || 'https://peterei-intercom.onrender.com/popout'}`,
                 title: 'Full Onboarding Form'
               }
             ]
@@ -498,6 +498,11 @@ app.get('/hooks', (req, res) => {
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+app.post('/webhooks', (req, res) => {
+  // Handle Intercom event notifications here
+  res.status(200).send('OK');
 });
 
 app.listen(PORT, () => {
