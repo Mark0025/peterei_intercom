@@ -8,6 +8,7 @@ const { IntercomClient } = require('intercom-client');
 const nodemailer = require('nodemailer');
 const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
+const fetch = require('node-fetch');
 
 const app = express();
 app.use(bodyParser.json());
@@ -469,14 +470,17 @@ app.post('/webhooks', (req, res) => {
 // PeteUserTraingTopic: Fetch the latest topic from Intercom custom objects
 app.get('/api/pete-user-training-topic', async (req, res) => {
   try {
-    const client = new IntercomClient({ token: process.env.INTERCOM_ACCESS_TOKEN });
-    // Fetch all instances (may need to paginate for more than 10)
-    const response = await client.customObjectInstances.list({
-      custom_object_type_identifier: 'PeteUserTraingTopic',
-      page: 1,
-      per_page: 10
+    // Fetch all instances (first page, 10 per page)
+    const url = `https://api.intercom.io/custom_object_instances/PeteUserTraingTopic?page=1&per_page=10`;
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Intercom-Version': '2.13',
+        'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
+      }
     });
-    const topics = response.data || [];
+    const data = await resp.json();
+    const topics = data.data || [];
     if (!topics.length) {
       // No topic exists yet; return null instead of error
       return res.json({ topic: null, external_id: null, external_created_at: null, external_updated_at: null });
@@ -492,7 +496,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
       external_updated_at: latest.external_updated_at
     });
   } catch (err) {
-    console.error('[GET /api/pete-user-training-topic]', err.response?.data || err);
+    console.error('[GET /api/pete-user-training-topic]', err);
     // On error, return null topic (fail gracefully)
     res.json({ topic: null, external_id: null, external_created_at: null, external_updated_at: null });
   }
@@ -505,11 +509,9 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
     if (!topic || typeof topic !== 'string' || !topic.trim()) {
       return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
     }
-    const client = new IntercomClient({ token: process.env.INTERCOM_ACCESS_TOKEN });
     const now = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
     const external_id = require('uuid').v4();
     const payload = {
-      custom_object_type_identifier: 'PeteUserTraingTopic',
       external_id,
       external_created_at: now,
       external_updated_at: now,
@@ -517,11 +519,24 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
         Title: topic.trim()
       }
     };
-    const response = await client.customObjectInstances.create(payload);
-    console.log('[DEBUG] Created PeteUserTraingTopic:', response.data);
-    res.status(201).json({ success: true, topic: response.data });
+    const url = 'https://api.intercom.io/custom_object_instances/PeteUserTraingTopic';
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Intercom-Version': '2.13',
+        'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.error || 'Failed to create PeteUserTraingTopic');
+    }
+    console.log('[DEBUG] Created PeteUserTraingTopic:', data);
+    res.status(201).json({ success: true, topic: data });
   } catch (err) {
-    console.error('[POST /api/pete-user-training-topic]', err.response?.data || err);
+    console.error('[POST /api/pete-user-training-topic]', err);
     res.status(500).json({ error: 'Failed to create PeteUserTraingTopic', details: err.message });
   }
 });
