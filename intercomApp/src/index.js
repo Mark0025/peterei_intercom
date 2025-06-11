@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client } = require('intercom-client');
 const nodemailer = require('nodemailer');
+const canvasKit = require('./intercom/canvasKit');
 
 const app = express();
 app.use(bodyParser.json());
@@ -249,59 +250,33 @@ app.post('/popout-submit', express.urlencoded({ extended: true }), async (req, r
 // Remove onboarding logic and only show a Canvas Kit card with two buttons
 app.post('/initialize', (req, res) => {
   try {
-    res.json({
-      canvas: {
-        content: {
-          components: [
-            {
-              type: 'text',
-              id: 'welcome',
-              text: 'Welcome to Pete Intercom App! Choose an action below:',
-              align: 'center',
-              style: 'header'
-            },
-            {
-              type: 'button',
-              label: 'Open Full Onboarding Form',
-              style: 'primary',
-              id: 'open_popout',
-              action: {
-                type: 'open_url',
-                url: 'https://peterei-intercom.onrender.com/popout',
-                new_tab: true
-              }
-            },
-            {
-              type: 'button',
-              label: 'Pete User Training',
-              style: 'secondary',
-              id: 'open_training',
-              action: {
-                type: 'submit',
-                value: 'pete_user_training'
-              }
-            }
-          ]
-        }
-      }
-    });
+    res.json(canvasKit.canvasResponse({
+      components: [
+        canvasKit.textComponent({
+          id: 'welcome',
+          text: 'Welcome to Pete Intercom App! Choose an action below:',
+          align: 'center',
+          style: 'header'
+        }),
+        canvasKit.buttonComponent({
+          id: 'open_popout',
+          label: 'Open Full Onboarding Form',
+          style: 'primary',
+          actionType: 'open_url',
+          url: 'https://peterei-intercom.onrender.com/popout',
+          new_tab: true
+        }),
+        canvasKit.buttonComponent({
+          id: 'pete_user_training',
+          label: 'Pete User Training',
+          style: 'secondary',
+          actionType: 'submit'
+        })
+      ]
+    }));
   } catch (err) {
     console.error('[POST /initialize]', err);
-    res.json({
-      canvas: {
-        content: {
-          components: [
-            {
-              type: 'text',
-              id: 'error',
-              text: 'Something went wrong: ' + (err.message || err),
-              style: 'error',
-              align: 'center'
-            }
-          ]
-        }
-      }
-    });
+    res.json(canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) }));
   }
 });
 
@@ -310,130 +285,62 @@ app.post('/submit', (req, res) => {
   try {
     const { component_id, input_values } = req.body;
     if (component_id === 'pete_user_training') {
-      // Show the Pete User Training form
-      return res.json({
-        canvas: {
-          content: {
-            components: [
-              {
-                type: 'text',
-                id: 'training_intro',
-                text: 'Update Pete User Training Topic',
-                align: 'center',
-                style: 'header'
-              },
-              {
-                type: 'input',
-                id: 'title',
-                label: 'Title',
-                input_type: 'text',
-                required: true
-              },
-              {
-                type: 'input',
-                id: 'external_id',
-                label: 'External ID',
-                input_type: 'text',
-                required: true
-              },
-              {
-                type: 'input',
-                id: 'external_created_at',
-                label: 'Created At (YYYY-MM-DD)',
-                input_type: 'text',
-                required: true
-              },
-              {
-                type: 'input',
-                id: 'external_updated_at',
-                label: 'Updated At (YYYY-MM-DD)',
-                input_type: 'text',
-                required: true
-              },
-              {
-                type: 'button',
-                label: 'Save Training Topic',
-                style: 'primary',
-                id: 'save_training_topic',
-                action: { type: 'submit' }
-              }
-            ]
-          }
-        }
-      });
+      return res.json(canvasKit.canvasResponse({
+        components: [
+          canvasKit.textComponent({
+            id: 'training_intro',
+            text: 'Update Pete User Training Topic',
+            align: 'center',
+            style: 'header'
+          }),
+          canvasKit.inputComponent({ id: 'title', label: 'Title', required: true }),
+          canvasKit.inputComponent({ id: 'external_id', label: 'External ID', required: true }),
+          canvasKit.inputComponent({ id: 'external_created_at', label: 'Created At (YYYY-MM-DD)', required: true }),
+          canvasKit.inputComponent({ id: 'external_updated_at', label: 'Updated At (YYYY-MM-DD)', required: true }),
+          canvasKit.buttonComponent({ id: 'save_training_topic', label: 'Save Training Topic', style: 'primary', actionType: 'submit' })
+        ]
+      }));
     }
     if (component_id === 'save_training_topic') {
-      // Here you would call the Intercom API to update PeteUserTraingTopic
-      // For now, just simulate success
-      return res.json({
-        canvas: {
-          content: {
-            components: [
-              {
-                type: 'text',
-                id: 'success',
-                text: 'Pete User Training Topic updated!',
-                align: 'center',
-                style: 'header'
-              }
-            ]
-          }
-        }
-      });
+      return res.json(canvasKit.canvasResponse({
+        components: [
+          canvasKit.textComponent({
+            id: 'success',
+            text: 'Pete User Training Topic updated!',
+            align: 'center',
+            style: 'header'
+          })
+        ]
+      }));
     }
     // Default: show main card
-    res.json({
-      canvas: {
-        content: {
-          components: [
-            {
-              type: 'text',
-              id: 'welcome',
-              text: 'Welcome to Pete Intercom App! Choose an action below:',
-              align: 'center',
-              style: 'header'
-            },
-            {
-              type: 'button',
-              label: 'Open Full Onboarding Form',
-              style: 'primary',
-              id: 'open_popout',
-              action: {
-                type: 'open_url',
-                url: 'https://peterei-intercom.onrender.com/popout',
-                new_tab: true
-              }
-            },
-            {
-              type: 'button',
-              label: 'Pete User Training',
-              style: 'secondary',
-              id: 'pete_user_training',
-              action: {
-                type: 'submit'
-              }
-            }
-          ]
-        }
-      }
-    });
+    res.json(canvasKit.canvasResponse({
+      components: [
+        canvasKit.textComponent({
+          id: 'welcome',
+          text: 'Welcome to Pete Intercom App! Choose an action below:',
+          align: 'center',
+          style: 'header'
+        }),
+        canvasKit.buttonComponent({
+          id: 'open_popout',
+          label: 'Open Full Onboarding Form',
+          style: 'primary',
+          actionType: 'open_url',
+          url: 'https://peterei-intercom.onrender.com/popout',
+          new_tab: true
+        }),
+        canvasKit.buttonComponent({
+          id: 'pete_user_training',
+          label: 'Pete User Training',
+          style: 'secondary',
+          actionType: 'submit'
+        })
+      ]
+    }));
   } catch (err) {
     console.error('[POST /submit]', err);
-    res.json({
-      canvas: {
-        content: {
-          components: [
-            {
-              type: 'text',
-              id: 'error',
-              text: 'Something went wrong: ' + (err.message || err),
-              style: 'error',
-              align: 'center'
-            }
-          ]
-        }
-      }
-    });
+    res.json(canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) }));
   }
 });
 
