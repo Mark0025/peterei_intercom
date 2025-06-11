@@ -447,7 +447,7 @@ app.get('/hooks', (req, res) => {
   let content = '';
   try {
     content = fs.readFileSync(webhookFile, 'utf8');
-  } catch (err) {
+    } catch (err) {
     content = 'webhook.txt not found or not yet generated.';
   }
   res.send(`

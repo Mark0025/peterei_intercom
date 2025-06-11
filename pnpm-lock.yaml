@@ -11,6 +11,9 @@ importers:
       mermaid:
         specifier: ^11.6.0
         version: 11.6.0
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
 
 packages:
 

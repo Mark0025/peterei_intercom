@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rule: Dependency Management
+
+## Purpose
+Ensure all dependencies are added, updated, or removed in the correct `package.json` for the relevant app or service, especially in monorepos or multi-app workspaces.
+
+## Rules
+- Always check for a local `package.json` in the relevant app/service directory before adding, updating, or removing dependencies.
+- Never add dependencies to the root `package.json` unless the code that requires them is run from the root context.
+- If multiple `package.json` files exist, clarify with the user or inspect which one is used for the running service before making changes.
+- Document all dependency changes in commit messages and, if needed, in the relevant app's README.
+- If in doubt, ask the user for clarification before proceeding.
+
+## Example
+- If `intercomApp/package.json` exists and the backend runs from `intercomApp/`, add dependencies there, not in the root.
+- If only a root `package.json` exists, add dependencies to the root.
+
+## Enforcement
+- Always follow this rule before running any dependency management commands or making related code changes.
