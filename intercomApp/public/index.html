@@ -2,32 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Intercom Messenger App Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pete Intercom App Status</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
-    pre { background: #f4f4f4; padding: 16px; border-radius: 8px; }
-    .webhook-section { margin-top: 32px; }
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; background: #f9f9f9; color: #222; }
+    h1 { color: #2d72d2; }
+    .endpoint { font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px; }
+    .note { color: #888; font-size: 0.95em; }
+    a.button { display: inline-block; margin: 10px 0; padding: 8px 16px; background: #2d72d2; color: #fff; border-radius: 4px; text-decoration: none; }
+    a.button:hover { background: #1a4e8a; }
   </style>
 </head>
 <body>
-  <h1>Intercom Messenger App Test</h1>
-  <p>This is a placeholder page for your Intercom Messenger app backend.</p>
-  <div class="webhook-section">
-    <h2>Current Webhook Endpoints</h2>
-    <pre id="webhook-endpoints">Loading...</pre>
-    <p>Copy these into your Intercom app settings for Canvas Kit webhooks.</p>
-  </div>
-  <script>
-    fetch('/hooks')
-      .then(res => res.text())
-      .then(html => {
-        // Extract the <pre> content from the /hooks HTML
-        const match = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/);
-        document.getElementById('webhook-endpoints').textContent = match ? match[1].trim() : 'Could not load endpoints.';
-      })
-      .catch(() => {
-        document.getElementById('webhook-endpoints').textContent = 'Could not load endpoints.';
-      });
-  </script>
+  <h1>Pete Intercom App Status</h1>
+  <p>✅ <b>Status:</b> Pete Intercom App is running!</p>
+  <p><b>Render Public URL:</b> <span class="endpoint">https://peterei-intercom.onrender.com</span></p>
+  <h2>Intercom Webhook Endpoints</h2>
+  <ul>
+    <li><span class="endpoint">/initialize</span> <span class="note">(POST only, for Intercom Canvas Kit)</span></li>
+    <li><span class="endpoint">/submit</span> <span class="note">(POST only, for Intercom Canvas Kit)</span></li>
+  </ul>
+  <h2>Popout Form</h2>
+  <a class="button" href="/popout" target="_blank">Open Full Onboarding Form (/popout)</a>
+  <p class="note">The popout form is for browser testing and full onboarding submissions.</p>
+  <hr>
+  <p style="font-size:0.9em;color:#888;">&copy; Pete Intercom App &mdash; Render deployment status page</p>
 </body>
 </html>
