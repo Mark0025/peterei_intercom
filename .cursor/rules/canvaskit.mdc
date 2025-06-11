@@ -3,11 +3,19 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+allways: /src/canvaskit.js
+---
+
+
+
+
 # Cursor Rules: Intercom Canvas Kit (Always Apply for Intercom Apps)
 
 ## 1. Use Only Approved Canvas Kit Components
 - Only use components and objects documented in the [Canvas Kit Reference](mdc:https:/developers.intercom.com/canvas-kit-reference/reference/components).
 - Do not invent or use undocumented component types or properties.
+- If you get confused refrence to learn syntex from [messengerApp.md](mdc:DEV_MAN/howTOIntercom/messengerApp.md)
 
 ## 2. Follow the Canvas Kit Request/Response Model
 - All endpoints must accept POST requests from Intercom and respond with valid Canvas Kit JSON objects.
