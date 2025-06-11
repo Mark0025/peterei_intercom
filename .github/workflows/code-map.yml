@@ -1,0 +1,26 @@
+name: Generate Code Map
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - '**'
+
+jobs:
+  code-map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+      - name: Install dependencies
+        run: pnpm install
+      - name: Generate Mermaid code map
+        run: node intercomApp/src/utils/generate-code-map.js
+      - name: Upload Mermaid diagram
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-map
+          path: code-map.mmd

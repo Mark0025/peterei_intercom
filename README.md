@@ -133,3 +133,29 @@ For more details, see `intercomApp/README.md` and `intercomApp/plan.md`.
 **Reference:**
 
 - [Intercom Canvas Kit Docs](https://developers.intercom.com/docs/canvas-kit)
+
+# Status
+
+![Intercom UI Status](https://img.shields.io/badge/Intercom%20UI-working-brightgreen)
+
+- [x] Intercom Canvas Kit UI renders and works (as of tag `intercom-ui-working-v1`)
+- [ ] Data storage and response testing in progress
+
+# How to Test
+
+1. Open the Intercom Inbox or Messenger and add the Pete Intercom App.
+2. Verify that the UI renders with the onboarding and training buttons.
+3. Click each button and confirm the correct UI and actions.
+4. Check server logs for `[DEBUG] CanvasKit response` to verify outgoing payloads.
+5. Submit forms and verify data is stored as expected (see below).
+
+# Next Steps
+
+- [ ] Test all Canvas Kit endpoint responses for correctness
+- [ ] Verify where and how data is stored (Intercom custom objects, local DB, etc.)
+- [ ] Add automated tests for endpoints
+- [ ] Document data flow in README
+
+# Milestone
+
+- UI confirmed working in Intercom as of tag `intercom-ui-working-v1` (2024-06-07)
