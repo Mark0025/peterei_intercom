@@ -323,20 +323,17 @@ app.post('/submit', async (req, res) => {
         canvasKit.debugCanvasResponse(response, '/submit (save_training_topic error)');
         return res.json(response);
       }
-      // Call backend to create the topic
+      // Build the full API URL
+      const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4000';
+      const apiUrl = baseUrl.endsWith('/') ? baseUrl + 'api/pete-user-training-topic' : baseUrl + '/api/pete-user-training-topic';
       try {
+        console.log(`[SUBMIT save_training_topic] Saving new topic: ${topic}`);
         const axios = require('axios');
-        await axios.post(
-          process.env.INTERNAL_API_URL || 'http://localhost:4000/api/pete-user-training-topic',
-          { topic },
-          { timeout: 10000 }
-        );
+        await axios.post(apiUrl, { topic }, { timeout: 10000 });
         // Fetch the latest topic
-        const latestResp = await axios.get(
-          process.env.INTERNAL_API_URL || 'http://localhost:4000/api/pete-user-training-topic',
-          { timeout: 10000 }
-        );
+        const latestResp = await axios.get(apiUrl, { timeout: 10000 });
         const latest = latestResp.data;
+        console.log(`[SUBMIT save_training_topic] Successfully updated topic to: ${latest.topic}`);
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
@@ -519,6 +516,10 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
     console.error('[POST /api/pete-user-training-topic]', err.response?.data || err);
     res.status(500).json({ error: 'Failed to create PeteUserTraingTopic', details: err.message });
   }
+});
+
+app.get('/support', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/support.html'));
 });
 
 app.listen(PORT, () => {
