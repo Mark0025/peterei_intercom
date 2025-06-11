@@ -7,7 +7,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
@@ -329,16 +329,22 @@ app.post('/submit', async (req, res) => {
       try {
         console.log(`[SUBMIT save_training_topic] Saving new topic: ${topic}`);
         const axios = require('axios');
-        await axios.post(apiUrl, { topic }, { timeout: 10000 });
-        // Fetch the latest topic
-        const latestResp = await axios.get(apiUrl, { timeout: 10000 });
-        const latest = latestResp.data;
-        console.log(`[SUBMIT save_training_topic] Successfully updated topic to: ${latest.topic}`);
+        const payload = {
+          topic: topic.trim()
+        };
+        const response = await axios.post(apiUrl, payload, {
+          headers: {
+            'Intercom-Version': '2.13',
+            'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
+          }
+        });
+        const data = await response.data;
+        console.log(`[SUBMIT save_training_topic] Successfully updated topic to: ${data.topic}`);
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
               id: 'success',
-              text: `Pete User Training Topic updated to: "${latest.topic}"`,
+              text: `Pete User Training Topic updated to: "${data.topic}"`,
               align: 'center',
               style: 'header'
             })
@@ -462,7 +468,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/webhooks', (req, res) => {
-  // Handle Intercom event notifications here
+  // Your webhook handling logic here
   res.status(200).send('OK');
 });
 
@@ -471,14 +477,13 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
   try {
     // Fetch all instances (first page, 10 per page)
     const url = `https://api.intercom.io/custom_object_instances/PeteUserTraingTopic?page=1&per_page=10`;
-    const resp = await fetch(url, {
-      method: 'GET',
+    const resp = await axios.get(url, {
       headers: {
         'Intercom-Version': '2.13',
         'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
       }
     });
-    const data = await resp.json();
+    const data = await resp.data;
     const topics = data.data || [];
     if (!topics.length) {
       // No topic exists yet; return null instead of error
@@ -518,17 +523,15 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
         Title: topic.trim()
       }
     };
-    const resp = await fetch('https://api.intercom.io/custom_object_instances/PeteUserTraingTopic', {
-      method: 'POST',
+    const response = await axios.post('https://api.intercom.io/custom_object_instances/PeteUserTraingTopic', payload, {
       headers: {
         'Intercom-Version': '2.13',
         'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`,
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
+      }
     });
-    const data = await resp.json();
-    if (!resp.ok) {
+    const data = await response.data;
+    if (!response.ok) {
       throw new Error(data.error || 'Failed to create PeteUserTraingTopic');
     }
     console.log('[DEBUG] Created PeteUserTraingTopic:', data);
