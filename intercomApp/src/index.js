@@ -497,7 +497,7 @@ app.get('/hooks', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Pete Intercom App is running!');
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 app.listen(PORT, () => {
