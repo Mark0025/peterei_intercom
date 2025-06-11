@@ -549,4 +549,6 @@ app.get('/support', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
-}); 
+});
+
+console.log('Access Token:', process.env.INTERCOM_ACCESS_TOKEN); 
