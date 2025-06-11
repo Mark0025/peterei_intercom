@@ -502,7 +502,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
 });
 
 // PeteUserTraingTopic: Always create a new topic in Intercom custom objects (audit/history pattern)
-app.post('/api/pete-user-training-topic', async (req, res) => {
+app.post('/api/pete-user-training-topic', async (req, res,) => {
   try {
     const { topic } = req.body;
     if (!topic || typeof topic !== 'string' || !topic.trim()) {
@@ -518,8 +518,7 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
         Title: topic.trim()
       }
     };
-    const url = 'https://api.intercom.io/custom_object_instances/PeteUserTraingTopic';
-    const resp = await fetch(url, {
+    const resp = await fetch('https://api.intercom.io/custom_object_instances/PeteUserTraingTopic', {
       method: 'POST',
       headers: {
         'Intercom-Version': '2.13',
