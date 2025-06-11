@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { Client } = require('intercom-client');
+const { IntercomClient } = require('intercom-client');
 const nodemailer = require('nodemailer');
 const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
@@ -469,7 +469,7 @@ app.post('/webhooks', (req, res) => {
 // PeteUserTraingTopic: Fetch the latest topic from Intercom custom objects
 app.get('/api/pete-user-training-topic', async (req, res) => {
   try {
-    const client = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
+    const client = new IntercomClient({ token: process.env.INTERCOM_ACCESS_TOKEN });
     // Use the correct model name as in Intercom
     const response = await client.dataObjects.list({
       model: 'PeteUserTraingTopic',
@@ -480,10 +480,16 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
     if (!topics.length) {
       return res.status(404).json({ error: 'No PeteUserTraingTopic found' });
     }
-    topics.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
+    // Sort by external_updated_at or external_created_at
+    topics.sort((a, b) => new Date(b.external_updated_at || b.external_created_at) - new Date(a.external_updated_at || a.external_created_at));
     const latest = topics[0];
     console.log('[DEBUG] Latest PeteUserTraingTopic:', latest);
-    res.json({ topic: latest.topic, id: latest.id, created_at: latest.created_at, updated_at: latest.updated_at });
+    res.json({
+      topic: latest.Title,
+      external_id: latest.external_id,
+      external_created_at: latest.external_created_at,
+      external_updated_at: latest.external_updated_at
+    });
   } catch (err) {
     console.error('[GET /api/pete-user-training-topic]', err.response?.data || err);
     res.status(500).json({ error: 'Failed to fetch PeteUserTraingTopic', details: err.message });
@@ -497,13 +503,13 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
     if (!topic || typeof topic !== 'string' || !topic.trim()) {
       return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
     }
-    const client = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
+    const client = new IntercomClient({ token: process.env.INTERCOM_ACCESS_TOKEN });
     const now = new Date().toISOString();
     const newTopic = {
-      id: uuidv4(),
-      topic: topic.trim(),
-      created_at: now,
-      updated_at: now
+      external_id: require('uuid').v4(),
+      Title: topic.trim(),
+      external_created_at: now,
+      external_updated_at: now
     };
     // Use the correct model name as in Intercom
     const response = await client.dataObjects.create({
