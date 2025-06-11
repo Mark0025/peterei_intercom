@@ -261,7 +261,7 @@ app.post("/initialize", async (req, res) => {
                 id: 'open_popout',
                 action: {
                   type: 'open_url',
-                  url: `${process.env.POP_OUT_URL || 'https://peterei-intercom.onrender.com/popout'}`,
+                  url: 'https://peterei-intercom.onrender.com/popout',
                   new_tab: true
                 }
               }
@@ -294,15 +294,27 @@ app.post("/submit", async (req, res) => {
     const showPopout = req.body.component_id === 'show_popout' || req.body.input_values?.show_popout === 'show_popout';
 
     if (showPopout) {
-      // Respond with popout card using Canvas Kit 'popout' component
       res.json({
         canvas: {
           content: {
             components: [
               {
-                type: 'popout',
-                url: `${process.env.POP_OUT_URL || 'https://peterei-intercom.onrender.com/popout'}`,
-                title: 'Full Onboarding Form'
+                type: 'text',
+                id: 'popout_intro',
+                text: 'Prefer to fill out the full onboarding form in a separate window? Click below to open the form in a new tab.',
+                align: 'center',
+                style: 'header'
+              },
+              {
+                type: 'button',
+                label: 'Open Full Form in New Tab',
+                style: 'primary',
+                id: 'open_popout',
+                action: {
+                  type: 'open_url',
+                  url: 'https://peterei-intercom.onrender.com/popout',
+                  new_tab: true
+                }
               }
             ]
           }
