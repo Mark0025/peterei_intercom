@@ -286,7 +286,7 @@ app.post('/initialize', (req, res) => {
 });
 
 // /submit can just return the same card for now (or handle future actions)
-app.post('/submit', (req, res) => {
+app.post('/submit', async (req, res) => {
   try {
     const { component_id, input_values } = req.body;
     let response;
@@ -307,18 +307,63 @@ app.post('/submit', (req, res) => {
       return res.json(response);
     }
     if (component_id === 'save_training_topic') {
-      response = canvasKit.canvasResponse({
-        components: [
-          canvasKit.textComponent({
-            id: 'success',
-            text: 'Pete User Training Topic updated!',
-            align: 'center',
-            style: 'header'
-          })
-        ]
-      });
-      canvasKit.debugCanvasResponse(response, '/submit (save_training_topic)');
-      return res.json(response);
+      // Save the new topic
+      const topic = input_values?.title;
+      if (!topic || typeof topic !== 'string' || !topic.trim()) {
+        response = canvasKit.canvasResponse({
+          components: [
+            canvasKit.textComponent({
+              id: 'error',
+              text: 'Topic is required and must be a non-empty string.',
+              align: 'center',
+              style: 'error'
+            })
+          ]
+        });
+        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic error)');
+        return res.json(response);
+      }
+      // Call backend to create the topic
+      try {
+        const axios = require('axios');
+        await axios.post(
+          process.env.INTERNAL_API_URL || 'http://localhost:4000/api/pete-user-training-topic',
+          { topic },
+          { timeout: 10000 }
+        );
+        // Fetch the latest topic
+        const latestResp = await axios.get(
+          process.env.INTERNAL_API_URL || 'http://localhost:4000/api/pete-user-training-topic',
+          { timeout: 10000 }
+        );
+        const latest = latestResp.data;
+        response = canvasKit.canvasResponse({
+          components: [
+            canvasKit.textComponent({
+              id: 'success',
+              text: `Pete User Training Topic updated to: "${latest.topic}"`,
+              align: 'center',
+              style: 'header'
+            })
+          ]
+        });
+        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic)');
+        return res.json(response);
+      } catch (err) {
+        console.error('[SUBMIT save_training_topic] Failed to update or fetch topic:', err.response?.data || err);
+        response = canvasKit.canvasResponse({
+          components: [
+            canvasKit.textComponent({
+              id: 'error',
+              text: 'Failed to update Pete User Training Topic. Please try again.',
+              align: 'center',
+              style: 'error'
+            })
+          ]
+        });
+        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic error)');
+        return res.json(response);
+      }
     }
     // Default: show main card
     response = canvasKit.canvasResponse({
@@ -428,10 +473,9 @@ app.post('/webhooks', (req, res) => {
 app.get('/api/pete-user-training-topic', async (req, res) => {
   try {
     const client = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
-    // Replace 'pete-user-training-topic' with your actual custom object type name if different
+    // Use the correct model name as in Intercom
     const response = await client.dataObjects.list({
-      model: 'pete-user-training-topic',
-      // Intercom API may require pagination; here we fetch the first page and sort client-side
+      model: 'PeteUserTraingTopic',
       page: 1,
       per_page: 10
     });
@@ -439,13 +483,12 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
     if (!topics.length) {
       return res.status(404).json({ error: 'No PeteUserTraingTopic found' });
     }
-    // Sort by updated_at or created_at descending
     topics.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
     const latest = topics[0];
     console.log('[DEBUG] Latest PeteUserTraingTopic:', latest);
     res.json({ topic: latest.topic, id: latest.id, created_at: latest.created_at, updated_at: latest.updated_at });
   } catch (err) {
-    console.error('[GET /api/pete-user-training-topic]', err);
+    console.error('[GET /api/pete-user-training-topic]', err.response?.data || err);
     res.status(500).json({ error: 'Failed to fetch PeteUserTraingTopic', details: err.message });
   }
 });
@@ -465,15 +508,15 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
       created_at: now,
       updated_at: now
     };
-    // Replace 'pete-user-training-topic' with your actual custom object type name if different
+    // Use the correct model name as in Intercom
     const response = await client.dataObjects.create({
-      model: 'pete-user-training-topic',
+      model: 'PeteUserTraingTopic',
       data: newTopic
     });
     console.log('[DEBUG] Created PeteUserTraingTopic:', response.data);
     res.status(201).json({ success: true, topic: response.data });
   } catch (err) {
-    console.error('[POST /api/pete-user-training-topic]', err);
+    console.error('[POST /api/pete-user-training-topic]', err.response?.data || err);
     res.status(500).json({ error: 'Failed to create PeteUserTraingTopic', details: err.message });
   }
 });
