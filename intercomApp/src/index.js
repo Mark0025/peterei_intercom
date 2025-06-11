@@ -308,8 +308,8 @@ app.post('/initialize', (req, res) => {
 // /submit can just return the same card for now (or handle future actions)
 app.post('/submit', (req, res) => {
   try {
-    const { component_id, input_values, value } = req.body;
-    if (component_id === 'open_training' || value === 'pete_user_training') {
+    const { component_id, input_values } = req.body;
+    if (component_id === 'pete_user_training') {
       // Show the Pete User Training form
       return res.json({
         canvas: {
@@ -355,14 +355,14 @@ app.post('/submit', (req, res) => {
                 label: 'Save Training Topic',
                 style: 'primary',
                 id: 'save_training_topic',
-                action: { type: 'submit', value: 'save_training_topic' }
+                action: { type: 'submit' }
               }
             ]
           }
         }
       });
     }
-    if (component_id === 'save_training_topic' || value === 'save_training_topic') {
+    if (component_id === 'save_training_topic') {
       // Here you would call the Intercom API to update PeteUserTraingTopic
       // For now, just simulate success
       return res.json({
@@ -408,10 +408,9 @@ app.post('/submit', (req, res) => {
               type: 'button',
               label: 'Pete User Training',
               style: 'secondary',
-              id: 'open_training',
+              id: 'pete_user_training',
               action: {
-                type: 'submit',
-                value: 'pete_user_training'
+                type: 'submit'
               }
             }
           ]
