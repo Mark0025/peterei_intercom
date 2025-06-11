@@ -76,8 +76,12 @@ flowchart TD
 - Internal API URL bug is fixed; logs are improved for easier debugging.
 - UI now shows the updated topic value after each save.
 - **Backend now uses the correct IntercomClient import and field mapping for custom objects.**
+- **Backend no longer uses the IntercomClient SDK; all Intercom API calls are now made using axios.**
+- **Migration to axios is complete and all endpoints and schema are verified.**
+- **Codebase is ready for production testing.**
 - **Every save creates a new record, preserving a full audit/history trail.**
 - **If no topic exists yet, the UI will see null and can prompt the user to create the first topic.**
+- **Update the related GitHub issue to note the migration from IntercomClient SDK to axios and confirm all endpoints are working.**
 
 flowchart TD
 A["User opens Intercom UI"] --> B["Fetch current PeteUserTraingTopic from Intercom"]
