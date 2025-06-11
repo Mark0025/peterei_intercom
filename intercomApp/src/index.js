@@ -313,6 +313,7 @@ app.post('/submit', async (req, res) => {
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
+              
               id: 'error',
               text: 'Topic is required and must be a non-empty string.',
               align: 'center',
