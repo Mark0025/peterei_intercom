@@ -1,4 +1,4 @@
-git add const { textComponent, buttonComponent, canvasResponse } = require('../intercom/canvasKit');
+const { textComponent, buttonComponent, canvasResponse } = require('../intercom/canvasKit');
 
 function waitForRenderResponse() {
   return canvasResponse({
