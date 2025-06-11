@@ -73,7 +73,7 @@ function buildQuestionCanvas(questionIdx, storedData = {}) {
               label: 'Show popout (all questions)',
               style: 'secondary',
               id: 'show_popout',
-              action: { type: 'submit', value: 'show_popout' }
+              action: { type: 'submit' }
             }
           ]
         },
@@ -119,7 +119,7 @@ function buildQuestionCanvas(questionIdx, storedData = {}) {
             label: 'Show popout (all questions)',
             style: 'secondary',
             id: 'show_popout',
-            action: { type: 'submit', value: 'show_popout' }
+            action: { type: 'submit' }
           }
         ]
       },
@@ -168,7 +168,7 @@ function buildFullFormCanvas(storedData = {}) {
             label: 'Show popout (all questions)',
             style: 'secondary',
             id: 'show_popout',
-            action: { type: 'submit', value: 'show_popout' }
+            action: { type: 'submit' }
           }
         ]
       },
