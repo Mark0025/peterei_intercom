@@ -1,0 +1,314 @@
+All Collections
+Outbound
+Chats, Posts & Banners
+Creating Chats, Posts and Banners
+How to create a banner message
+How to create a banner message
+Create banner messages and engage your customers in an unobtrusive and effective way.
+
+Beth-Ann Sher avatar
+Written by Beth-Ann Sher
+Updated over 4 months ago
+Banners provide an unintrusive, persistent way for you to reach your customers with announcements, promotions, proactive support, and more. 
+
+ 
+
+Create a banner 
+First, go to Outbound from the main menu and click + New message in the top right corner.
+
+ 
+
+
+ 
+
+Then, choose Banner as your content type.
+
+ 
+
+
+You can also choose to start with a pre-made template by picking this content type in the left sidebar.
+
+ 
+
+
+ 
+
+For this example we’ll start from scratch. 👌
+
+ 
+
+Note: Banners is available on mobile web, but not available on mobile SDKs (iOS and Android native apps).
+
+ 
+
+First, give your banner a title:
+
+
+ 
+
+Then compose the content for your banner. You can use bold, italics, links and emoji 😉 
+
+
+ 
+
+To insert emojis, you can:
+
+On macOS - right click anywhere in the input field and select Emojis & Symbols.
+
+On Windows - press keys  Windows  +  . 
+
+ 
+
+Smart links can only be inserted by highlighting the text and using the link inserter for selecting the content type to be connected. For any content to be inserted as a smart link, it has to be live. Paused or unpublished content will not be available for inserting.
+
+ 
+
+Smart links in Banners will not be available on mobile.
+
+It’s a good idea to keep your message succinct. For longer messages, try sending a Chat or Post message.
+
+ 
+
+Where possible, you should personalize your banner message with data attributes like customer name, or company information:
+
+ 
+
+
+ 
+
+Next, choose who the banner should come from and if you’d like to include their avatar:
+
+
+ 
+
+ 
+
+Should the banner be dismissible?
+Next, decide if you'd like to show a dismiss button on your banner:
+
+ 
+
+
+ 
+
+A dismiss button lets your customers hide the message as soon as they've read it:
+
+ 
+
+
+ 
+
+This is perfect for friendly reminders, promotions, or other non-urgent messaging.
+
+ 
+
+If you choose to hide the dismiss button, the banner will persist for your customers until they no longer match the audience rules, or they have completed the action (see below)
+
+ 
+
+Important:
+
+If you hide the dismiss option on an existing banner, anyone who has dismissed it will see it again. 
+
+If a customer matches the audience for multiple banners and the first one is non-dismissible, then they won't receive any subsequent banners. — To send other banners first, temporarily pause the non-dismissible banner, then set it live again and it will send after other live banners.  
+
+Banners in a series will only display once regardless of whether they have a dismiss button or not, then the user will continue down their path in the Series.
+
+ 
+
+Persistent (non-dismissible) banners are perfect for more urgent/important communications with your customers. For example:
+
+Show a banner until a user has paid an unpaid invoice.
+
+Remind a user that they’re working with a test workspace/data.
+
+Show a banner related to platform maintenance for as long as the issue persists.
+
+Choose an action
+Now it’s time to choose the action best suited to your goal for the message:
+
+
+ 
+
+If you’re sending a message to simply notify or alert your customers, and there’s no need for them to take any action, leave this as ‘None’. Otherwise, the banner can:
+
+Open a URL.
+
+Open a URL via a button.
+
+Ask for emoji reactions.
+
+Collect visitor’s email addresses.
+
+Launch a Product Tour.
+
+Depending on the action you choose, there are different options to configure.
+
+ 
+
+Open a URL
+This action adds a CTA (Call to action) at the end of your message, where you can define:
+
+The link text.
+
+The URL to open.
+
+To open the link in a new tab, or not.
+
+To dismiss the banner once the link has been clicked, or not.
+
+
+Include user or company attributes for a dynamic URL. Just click the {...} icon when hovering over the URL field:
+
+
+ 
+
+Open a URL via a button
+This action adds a CTA (Call to action) at the end of your message via a button, where you can define:
+
+The link text.
+
+The URL to open.
+
+To open the link in a new tab, or not.
+
+To dismiss the banner once the link has been clicked, or not.
+
+
+ 
+
+You can also select a color for your button:
+
+
+ 
+
+Ask for reactions
+This action lets you collect quick feedback from customers in the form of emoji. Just choose which emoji they’ll have to choose from and whether or not to dismiss the banner after they’ve made a selection.
+
+ 
+
+
+ 
+
+Collect visitor emails
+This action will add a field at the end of your message, to easily collect email addresses from visitors to your site.
+
+ 
+
+
+ 
+
+Launch a Product Tour
+This action lets your users jump straight into the Product tour of your choice, in the same tab, or a new one:
+
+ 
+
+
+ 
+
+Note: You can only choose Product tours with a shareable URL enabled.
+
+ 
+
+Style your banner
+Finally, choose a color for your banner and whether it should be at the top or bottom of your page. You can also choose to have your banner floating or inline (read on for examples of both styles):
+
+ 
+
+
+ 
+
+Inline 
+
+ 
+
+An inline banner is full-width, and sits between your page content and the top of the window. As you scroll, the page content moves behind the banner.
+
+ 
+
+Floating
+
+ 
+
+A floating banner is centered on your page, and sits above the content, covering whatever is behind it. It does not move as you scroll.
+
+ 
+
+Text Color
+When you choose a background color for your banner, the text color is automatically adjusted for contrast and readability:
+
+
+ 
+
+It’s not possible to create Banners through HTML or CSS, if the Banner is overlaying fixed elements, check out this solution. 
+
+ 
+
+ If you’d like to test different styles of your banner message, try an A/B test. Find out more in this article.
+
+ 
+
+Now that you’ve composed and configured your message, define the filters for the people who should receive it. 
+
+ 
+
+For example, if you’re announcing a discount on your pro plan, you might target all users currently on your free plan:
+
+ 
+
+
+When targeting a URL, it's a good idea to copy and paste it from your app or site directly, as this will catch any characters hidden in your browser's address bar, like trailing slashes.
+
+ 
+
+Banner priority
+If a customer matches the audience rules for multiple banners, they'll be shown the banner that was first set live. Once the customer dismisses that banner, then they'll be shown the next one in order of when it was set live.
+
+ 
+
+To accurately measure if your banner is driving action, you should define a goal. In this example, since we’re encouraging users to upgrade their plan, a good goal is ‘Plan is Pro’:
+
+ 
+
+
+You can also test the efficacy of your banner overall with a control group test. Learn more in this article.
+
+ 
+
+Finally, you can schedule your banner to only send at certain times. 
+
+ 
+
+
+ 
+
+Once you've completed setting up your Banner, you can Preview it before setting it live. After you've clicked 'Save and Close' you will see the Preview option appear in the top right corner:
+
+
+Inline banner overlaying navbar
+If you have fixed elements on your website, it is expected that the inline banner would overlay the navbar. There is a way to resolve this by changing some HTML/CSS on your website.
+​﻿
+﻿The Inline banners add position:relative and margin-top: 48px to the body of the page (this is the height of banner). 
+
+ 
+
+If you have a navbar on your website that uses position:fixed or position:sticky, then your navbar will always be on the top. That means that when you set an inline banner live, it won’t be able to “push” the navbar down as it would normally do, which results in it overlaying the navbar.
+​﻿
+Making the following changes to your CSS will ensure the inline banner doesn’t overlay your navbar:
+
+Use position:absolute to position the navigation bar inside the body.
+
+If you currently have top: 0 after position:fixed on your site, replace this with margin-top: 0 
+
+Alternatively, you could choose to use floating banners or position the banner to the bottom of the page. 
+
+💡Tip
+Need more help? Get support from our Community Forum
+Find answers and get help from Intercom Support and Community Experts
+
+Related Articles
+Get feedback at scale using message reactions
+See how your banners are performing
+Banner message best practices — Example uses
+Creating and sending SMS
+Chats, Posts, and Banners FAQs

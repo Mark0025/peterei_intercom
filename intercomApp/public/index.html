@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Intercom Messenger App Test</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+    pre { background: #f4f4f4; padding: 16px; border-radius: 8px; }
+    .webhook-section { margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <h1>Intercom Messenger App Test</h1>
+  <p>This is a placeholder page for your Intercom Messenger app backend.</p>
+  <div class="webhook-section">
+    <h2>Current Webhook Endpoints</h2>
+    <pre id="webhook-endpoints">Loading...</pre>
+    <p>Copy these into your Intercom app settings for Canvas Kit webhooks.</p>
+  </div>
+  <script>
+    fetch('/hooks')
+      .then(res => res.text())
+      .then(html => {
+        // Extract the <pre> content from the /hooks HTML
+        const match = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/);
+        document.getElementById('webhook-endpoints').textContent = match ? match[1].trim() : 'Could not load endpoints.';
+      })
+      .catch(() => {
+        document.getElementById('webhook-endpoints').textContent = 'Could not load endpoints.';
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rules: Intercom Canvas Kit (Always Apply for Intercom Apps)
+
+## 1. Use Only Approved Canvas Kit Components
+- Only use components and objects documented in the [Canvas Kit Reference](mdc:https:/developers.intercom.com/canvas-kit-reference/reference/components).
+- Do not invent or use undocumented component types or properties.
+
+## 2. Follow the Canvas Kit Request/Response Model
+- All endpoints must accept POST requests from Intercom and respond with valid Canvas Kit JSON objects.
+- The response to an Initialize or Submit request must always include a `canvas` object with a `content` property containing an array of components.
+
+## 3. Respect Location & Context
+- Clearly define where your app will appear (Messenger Home, Inbox, etc.) and only implement logic for those locations.
+- Use the `context` and `current_canvas` objects as provided in the request payload to determine what to display.
+
+## 4. Handle Initialize and Submit Flows
+- Implement endpoints for both Initialize and Submit flows.
+- The Initialize endpoint should return the onboarding form (e.g., text, input, button components).
+- The Submit endpoint should process input values and return a confirmation or next step canvas.
+
+## 5. Use Secure Webhook Practices
+- Validate the `X-Body-Signature` header on all incoming requests using your Intercom app’s client secret (HMAC-SHA256).
+- Never process requests without signature validation.
+
+## 6. Minimal Data Storage
+- Store only what is necessary for the onboarding flow, using the `stored_data` property in the canvas response if needed.
+- Do not store sensitive user data unless absolutely required and always comply with privacy best practices.
+
+## 7. User Experience
+- Keep the onboarding flow simple: use clear text, minimal steps, and actionable buttons.
+- Use the `event: { type: "completed" }` property in the response when onboarding is finished.
+
+## 8. Accessibility & Responsiveness
+- Ensure all text is readable and all actions are accessible via keyboard and screen readers.
+- Test the UI in both Messenger and Inbox contexts if both are supported.
+
+## 9. No Custom Scripts or External Libraries
+- Do not include custom JavaScript or external libraries in the Canvas Kit responses.
+- Only use the built-in Canvas Kit components and properties.
+
+## 10. Documentation & Comments
+- Comment your code to indicate which Canvas Kit model or best practice is being followed.
+- Reference the relevant section of the [Canvas Kit documentation](mdc:https:/developers.intercom.com/docs/canvas-kit) in comments where appropriate.
+
+---
+
+**Reference:**
+- [Intercom Canvas Kit Docs](mdc:https:/developers.intercom.com/docs/canvas-kit)

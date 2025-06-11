@@ -1,0 +1,8 @@
+{
+	"dependencies": {
+		"intercom-client": "^6.3.0"
+	},
+	"scripts": {
+		"start": "sh ./start.sh"
+	}
+}
