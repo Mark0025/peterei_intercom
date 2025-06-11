@@ -470,33 +470,35 @@ app.post('/webhooks', (req, res) => {
 app.get('/api/pete-user-training-topic', async (req, res) => {
   try {
     const client = new IntercomClient({ token: process.env.INTERCOM_ACCESS_TOKEN });
-    // Use the correct model name as in Intercom
-    const response = await client.dataObjects.list({
-      model: 'PeteUserTraingTopic',
+    // Fetch all instances (may need to paginate for more than 10)
+    const response = await client.customObjectInstances.list({
+      custom_object_type_identifier: 'PeteUserTraingTopic',
       page: 1,
       per_page: 10
     });
     const topics = response.data || [];
     if (!topics.length) {
-      return res.status(404).json({ error: 'No PeteUserTraingTopic found' });
+      // No topic exists yet; return null instead of error
+      return res.json({ topic: null, external_id: null, external_created_at: null, external_updated_at: null });
     }
     // Sort by external_updated_at or external_created_at
-    topics.sort((a, b) => new Date(b.external_updated_at || b.external_created_at) - new Date(a.external_updated_at || a.external_created_at));
+    topics.sort((a, b) => (b.external_updated_at || b.external_created_at) - (a.external_updated_at || a.external_created_at));
     const latest = topics[0];
     console.log('[DEBUG] Latest PeteUserTraingTopic:', latest);
     res.json({
-      topic: latest.Title,
+      topic: latest.custom_attributes?.Title,
       external_id: latest.external_id,
       external_created_at: latest.external_created_at,
       external_updated_at: latest.external_updated_at
     });
   } catch (err) {
     console.error('[GET /api/pete-user-training-topic]', err.response?.data || err);
-    res.status(500).json({ error: 'Failed to fetch PeteUserTraingTopic', details: err.message });
+    // On error, return null topic (fail gracefully)
+    res.json({ topic: null, external_id: null, external_created_at: null, external_updated_at: null });
   }
 });
 
-// PeteUserTraingTopic: Create a new topic in Intercom custom objects
+// PeteUserTraingTopic: Always create a new topic in Intercom custom objects (audit/history pattern)
 app.post('/api/pete-user-training-topic', async (req, res) => {
   try {
     const { topic } = req.body;
@@ -504,18 +506,18 @@ app.post('/api/pete-user-training-topic', async (req, res) => {
       return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
     }
     const client = new IntercomClient({ token: process.env.INTERCOM_ACCESS_TOKEN });
-    const now = new Date().toISOString();
-    const newTopic = {
-      external_id: require('uuid').v4(),
-      Title: topic.trim(),
+    const now = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+    const external_id = require('uuid').v4();
+    const payload = {
+      custom_object_type_identifier: 'PeteUserTraingTopic',
+      external_id,
       external_created_at: now,
-      external_updated_at: now
+      external_updated_at: now,
+      custom_attributes: {
+        Title: topic.trim()
+      }
     };
-    // Use the correct model name as in Intercom
-    const response = await client.dataObjects.create({
-      model: 'PeteUserTraingTopic',
-      data: newTopic
-    });
+    const response = await client.customObjectInstances.create(payload);
     console.log('[DEBUG] Created PeteUserTraingTopic:', response.data);
     res.status(201).json({ success: true, topic: response.data });
   } catch (err) {
