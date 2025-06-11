@@ -496,6 +496,10 @@ app.get('/hooks', (req, res) => {
   `);
 });
 
+app.get('/', (req, res) => {
+  res.send('Pete Intercom App is running!');
+});
+
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
 }); 
