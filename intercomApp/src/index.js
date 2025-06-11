@@ -7,6 +7,7 @@ const path = require('path');
 const { Client } = require('intercom-client');
 const nodemailer = require('nodemailer');
 const canvasKit = require('./intercom/canvasKit');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(bodyParser.json());
@@ -299,9 +300,6 @@ app.post('/submit', (req, res) => {
             style: 'header'
           }),
           canvasKit.inputComponent({ id: 'title', label: 'Title', required: true }),
-          canvasKit.inputComponent({ id: 'external_id', label: 'External ID', required: true }),
-          canvasKit.inputComponent({ id: 'external_created_at', label: 'Created At (YYYY-MM-DD)', required: true }),
-          canvasKit.inputComponent({ id: 'external_updated_at', label: 'Updated At (YYYY-MM-DD)', required: true }),
           canvasKit.buttonComponent({ id: 'save_training_topic', label: 'Save Training Topic', style: 'primary', actionType: 'submit' })
         ]
       });
@@ -424,6 +422,60 @@ app.get('/', (req, res) => {
 app.post('/webhooks', (req, res) => {
   // Handle Intercom event notifications here
   res.status(200).send('OK');
+});
+
+// PeteUserTraingTopic: Fetch the latest topic from Intercom custom objects
+app.get('/api/pete-user-training-topic', async (req, res) => {
+  try {
+    const client = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
+    // Replace 'pete-user-training-topic' with your actual custom object type name if different
+    const response = await client.dataObjects.list({
+      model: 'pete-user-training-topic',
+      // Intercom API may require pagination; here we fetch the first page and sort client-side
+      page: 1,
+      per_page: 10
+    });
+    const topics = response.data || [];
+    if (!topics.length) {
+      return res.status(404).json({ error: 'No PeteUserTraingTopic found' });
+    }
+    // Sort by updated_at or created_at descending
+    topics.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
+    const latest = topics[0];
+    console.log('[DEBUG] Latest PeteUserTraingTopic:', latest);
+    res.json({ topic: latest.topic, id: latest.id, created_at: latest.created_at, updated_at: latest.updated_at });
+  } catch (err) {
+    console.error('[GET /api/pete-user-training-topic]', err);
+    res.status(500).json({ error: 'Failed to fetch PeteUserTraingTopic', details: err.message });
+  }
+});
+
+// PeteUserTraingTopic: Create a new topic in Intercom custom objects
+app.post('/api/pete-user-training-topic', async (req, res) => {
+  try {
+    const { topic } = req.body;
+    if (!topic || typeof topic !== 'string' || !topic.trim()) {
+      return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
+    }
+    const client = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
+    const now = new Date().toISOString();
+    const newTopic = {
+      id: uuidv4(),
+      topic: topic.trim(),
+      created_at: now,
+      updated_at: now
+    };
+    // Replace 'pete-user-training-topic' with your actual custom object type name if different
+    const response = await client.dataObjects.create({
+      model: 'pete-user-training-topic',
+      data: newTopic
+    });
+    console.log('[DEBUG] Created PeteUserTraingTopic:', response.data);
+    res.status(201).json({ success: true, topic: response.data });
+  } catch (err) {
+    console.error('[POST /api/pete-user-training-topic]', err);
+    res.status(500).json({ error: 'Failed to create PeteUserTraingTopic', details: err.message });
+  }
 });
 
 app.listen(PORT, () => {
