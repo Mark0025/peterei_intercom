@@ -236,255 +236,116 @@ app.post('/popout-submit', express.urlencoded({ extended: true }), async (req, r
   res.send('<h2>Thank you for completing onboarding!</h2><p>Your responses have been submitted.</p>');
 });
 
-// Modify /initialize endpoint to support popout mode and robust error handling
-app.post("/initialize", async (req, res) => {
-  try {
-    const fullForm = req.body.fullForm || req.query.fullForm;
-    const popout = req.body.popout || req.query.popout;
-    if (popout) {
-      // Respond with a Canvas Kit card with a button to open the popout form
-      res.json({
-        canvas: {
-          content: {
-            components: [
-              {
-                type: 'text',
-                id: 'popout_intro',
-                text: 'Prefer to fill out the full onboarding form in a separate window? Click below to open the form in a new tab.',
-                align: 'center',
-                style: 'header'
-              },
-              {
-                type: 'button',
-                label: 'Open Full Form in New Tab',
-                style: 'primary',
-                id: 'open_popout',
-                action: {
-                  type: 'open_url',
-                  url: 'https://peterei-intercom.onrender.com/popout',
-                  new_tab: true
-                }
-              }
-            ]
+// Remove onboarding logic and only show a Canvas Kit card with two buttons
+app.post('/initialize', (req, res) => {
+  res.json({
+    canvas: {
+      content: {
+        components: [
+          {
+            type: 'text',
+            id: 'welcome',
+            text: 'Welcome to Pete Intercom App! Choose an action below:',
+            align: 'center',
+            style: 'header'
+          },
+          {
+            type: 'button',
+            label: 'Open Full Onboarding Form',
+            style: 'primary',
+            id: 'open_popout',
+            action: {
+              type: 'open_url',
+              url: 'https://peterei-intercom.onrender.com/popout',
+              new_tab: true
+            }
+          },
+          {
+            type: 'button',
+            label: 'Pete User Training',
+            style: 'secondary',
+            id: 'open_training',
+            action: {
+              type: 'open_url',
+              url: 'https://peterei-intercom.onrender.com/peteTraining.html',
+              new_tab: true
+            }
           }
-        }
-      });
-      return;
+        ]
+      }
     }
-    if (fullForm) {
-      const canvas = buildFullFormCanvas();
-      res.json(canvas);
-      return;
-    }
-    // Start at first question (step-by-step)
-  const canvas = buildQuestionCanvas(0);
-  res.json(canvas);
-  } catch (err) {
-    logError('initialize', err);
-    res.status(500).json({ error: 'Failed to initialize onboarding.' });
-  }
+  });
 });
 
-// Canvas Kit submit endpoint (robust, bulletproof logic)
-app.post("/submit", async (req, res) => {
-  try {
-  const { input_values = {}, current_canvas = {} } = req.body;
-  const storedData = current_canvas.stored_data || {};
-    const isFullForm = storedData.fullForm;
-    const showPopout = req.body.component_id === 'show_popout' || req.body.input_values?.show_popout === 'show_popout';
-
-    if (showPopout) {
-      res.json({
-        canvas: {
-          content: {
-            components: [
-              {
-                type: 'text',
-                id: 'popout_intro',
-                text: 'Prefer to fill out the full onboarding form in a separate window? Click below to open the form in a new tab.',
-                align: 'center',
-                style: 'header'
-              },
-              {
-                type: 'button',
-                label: 'Open Full Form in New Tab',
-                style: 'primary',
-                id: 'open_popout',
-                action: {
-                  type: 'open_url',
-                  url: 'https://peterei-intercom.onrender.com/popout',
-                  new_tab: true
-                }
-              }
-            ]
+// /submit can just return the same card for now (or handle future actions)
+app.post('/submit', (req, res) => {
+  res.json({
+    canvas: {
+      content: {
+        components: [
+          {
+            type: 'text',
+            id: 'welcome',
+            text: 'Welcome to Pete Intercom App! Choose an action below:',
+            align: 'center',
+            style: 'header'
+          },
+          {
+            type: 'button',
+            label: 'Open Full Onboarding Form',
+            style: 'primary',
+            id: 'open_popout',
+            action: {
+              type: 'open_url',
+              url: 'https://peterei-intercom.onrender.com/popout',
+              new_tab: true
+            }
+          },
+          {
+            type: 'button',
+            label: 'Pete User Training',
+            style: 'secondary',
+            id: 'open_training',
+            action: {
+              type: 'open_url',
+              url: 'https://peterei-intercom.onrender.com/peteTraining.html',
+              new_tab: true
+            }
           }
-        }
-      });
-      return;
+        ]
+      }
     }
+  });
+});
 
-    if (isFullForm && req.body.component_id === 'submit_full_form') {
-      // Collect all answers
-      const answers = {};
-      allQuestions.forEach((q, idx) => {
-        const key = `q_${idx}`;
-        if (input_values[key] !== undefined) {
-          answers[key] = input_values[key];
-        }
-      });
-      // Send email with results
-      try {
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
+// New endpoint for Canvas Kit to open Pete User Training
+app.post('/pete-user-training', (req, res) => {
+  res.json({
+    canvas: {
+      content: {
+        components: [
+          {
+            type: 'text',
+            id: 'training_intro',
+            text: 'Pete User Training: Access the latest training topics and resources.',
+            align: 'center',
+            style: 'header'
+          },
+          {
+            type: 'button',
+            label: 'Open Pete User Training',
+            style: 'primary',
+            id: 'open_training',
+            action: {
+              type: 'open_url',
+              url: 'https://peterei-intercom.onrender.com/peteTraining.html',
+              new_tab: true
+            }
           }
-        });
-        const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: 'mark@peterei.com,jon@peterei.com',
-          subject: 'New Onboarding Form Submission',
-          text: Object.entries(answers).map(([k, v]) => `${k}: ${v}`).join('\n')
-        };
-        await transporter.sendMail(mailOptions);
-      } catch (err) {
-        logError('email full form', err);
+        ]
       }
-      // Optionally, update Intercom as before (map to company attributes)
-      try {
-        const intercom = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
-        const companyId = req.body.contact?.companies?.[0]?.id;
-        if (companyId) {
-          const customAttributes = {};
-          Object.entries(answers).forEach(([key, value]) => {
-            customAttributes[key] = value;
-          });
-          await intercom.companies.update({
-            id: companyId,
-            custom_attributes: customAttributes
-          });
-        }
-      } catch (err) {
-        logError('intercom full form', err);
-      }
-      res.json({
-        canvas: {
-          content: {
-            components: [
-              {
-                type: 'text',
-                id: 'thanks',
-                text: 'Thank you for completing onboarding!',
-                align: 'center',
-                style: 'header'
-              },
-              {
-                type: 'button',
-                label: 'Show popout (all questions)',
-                style: 'secondary',
-                id: 'show_popout',
-                action: { type: 'submit', value: 'show_popout' }
-              }
-            ]
-          }
-        },
-        event: { type: 'completed' }
-      });
-      return;
     }
-
-    // Step-by-step logic (bulletproof)
-  let questionIdx = storedData.questionIdx || 0;
-    let answers = storedData.answers || {};
-  // Save previous answer
-  const prevInputKey = `q_${questionIdx}`;
-  const prevAnswer = input_values[prevInputKey];
-  if (prevAnswer !== undefined) {
-    answers[prevInputKey] = prevAnswer;
-  }
-  // If user clicked refresh, start over
-  if (req.body.component_id === "refresh_button") {
-    questionIdx = 0;
-    res.json(buildQuestionCanvas(0, { answers: {} }));
-    return;
-  }
-  // Next question
-    questionIdx = questionIdx + 1;
-    if (questionIdx >= allQuestions.length) {
-      // All questions answered, process all answers
-      try {
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-          }
-        });
-        const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: 'mark@peterei.com,jon@peterei.com',
-          subject: 'New Onboarding Form Submission (Step-by-step)',
-          text: Object.entries(answers).map(([k, v]) => `${k}: ${v}`).join('\n')
-        };
-        await transporter.sendMail(mailOptions);
-      } catch (err) {
-        logError('email step-by-step', err);
-      }
-      try {
-  const intercom = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
-  const companyId = req.body.contact?.companies?.[0]?.id;
-  if (companyId) {
-    const customAttributes = {};
-    Object.entries(answers).forEach(([key, value]) => {
-      customAttributes[key] = value;
-    });
-      await intercom.companies.update({
-        id: companyId,
-        custom_attributes: customAttributes
-      });
-        }
-    } catch (err) {
-        logError('intercom step-by-step', err);
-      }
-      res.json({
-        canvas: {
-          content: {
-            components: [
-              {
-                type: 'text',
-                id: 'thanks',
-                text: 'Thank you for completing onboarding!',
-                align: 'center',
-                style: 'header'
-              },
-              {
-                type: 'button',
-                label: 'Submit another',
-                style: 'primary',
-                id: 'refresh_button',
-                action: { type: 'submit' }
-              },
-              {
-                type: 'button',
-                label: 'Show popout (all questions)',
-                style: 'secondary',
-                id: 'show_popout',
-                action: { type: 'submit', value: 'show_popout' }
-              }
-            ]
-          }
-        },
-        event: { type: 'completed' }
-      });
-      return;
-    }
-    // Show next question
-    res.json(buildQuestionCanvas(questionIdx, { answers, questionIdx }));
-  } catch (err) {
-    logError('submit', err);
-    res.status(500).json({ error: 'Failed to process onboarding step.' });
-  }
+  });
 });
 
 // Add /hooks endpoint to display current webhook endpoints
