@@ -278,7 +278,54 @@ app.post('/initialize', (req, res) => {
 });
 
 // /submit can just return the same card for now (or handle future actions)
-app.post('/submit', (req, res) => {
+app.post('/submit', async (req, res) => {
+  const { input_values, component_id } = req.body;
+  if (component_id === 'save_training_topic') {
+    // Call Intercom API to update PeteUserTraingTopic
+    const intercom = new Client({ token: process.env.INTERCOM_ACCESS_TOKEN });
+    try {
+      await intercom.dataObjects.createDataObject({
+        data_object: {
+          type: 'PeteUserTraingTopic',
+          title: input_values.title,
+          external_id: input_values.external_id,
+          external_created_at: input_values.external_created_at,
+          external_updated_at: input_values.external_updated_at
+        }
+      });
+      return res.json({
+        canvas: {
+          content: {
+            components: [
+              {
+                type: 'text',
+                id: 'success',
+                text: 'Pete User Training Topic updated!',
+                align: 'center',
+                style: 'header'
+              }
+            ]
+          }
+        }
+      });
+    } catch (err) {
+      return res.json({
+        canvas: {
+          content: {
+            components: [
+              {
+                type: 'text',
+                id: 'error',
+                text: 'Failed to update Pete User Training Topic.',
+                align: 'center',
+                style: 'header'
+              }
+            ]
+          }
+        }
+      });
+    }
+  }
   res.json({
     canvas: {
       content: {
@@ -327,20 +374,44 @@ app.post('/pete-user-training', (req, res) => {
           {
             type: 'text',
             id: 'training_intro',
-            text: 'Pete User Training: Access the latest training topics and resources.',
+            text: 'Update Pete User Training Topic',
             align: 'center',
             style: 'header'
           },
           {
+            type: 'input',
+            id: 'title',
+            label: 'Title',
+            input_type: 'text',
+            required: true
+          },
+          {
+            type: 'input',
+            id: 'external_id',
+            label: 'External ID',
+            input_type: 'text',
+            required: true
+          },
+          {
+            type: 'input',
+            id: 'external_created_at',
+            label: 'Created At (YYYY-MM-DD)',
+            input_type: 'text',
+            required: true
+          },
+          {
+            type: 'input',
+            id: 'external_updated_at',
+            label: 'Updated At (YYYY-MM-DD)',
+            input_type: 'text',
+            required: true
+          },
+          {
             type: 'button',
-            label: 'Open Pete User Training',
+            label: 'Save Training Topic',
             style: 'primary',
-            id: 'open_training',
-            action: {
-              type: 'open_url',
-              url: 'https://peterei-intercom.onrender.com/peteTraining.html',
-              new_tab: true
-            }
+            id: 'save_training_topic',
+            action: { type: 'submit', value: 'save_training_topic' }
           }
         ]
       }
