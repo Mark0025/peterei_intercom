@@ -1,4 +1,8 @@
-# Pete Intercom Onboarding App
+# Pete Intercom APP 
+
+FOR UPDATING PETE TRAINING
+
+
 
 ## Quick Start (Local Development)
 
