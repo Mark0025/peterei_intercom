@@ -541,10 +541,11 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
     res.status(201).json({ success: true, topic: data });
   } catch (err) {
     if (err.response) {
-      console.error('Intercom API error:', err.response.status, err.response.data);
+      // Log the full response from Intercom
+      console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, err.response.data);
       res.status(500).json({
         error: 'Failed to create PeteUserTraingTopic',
-        details: err.response.data
+        details: err.response.data // <-- This will show the real Intercom error!
       });
     } else {
       console.error('[POST /api/pete-user-training-topic] Error:', err);
