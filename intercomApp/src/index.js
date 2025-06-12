@@ -8,6 +8,7 @@ const nodemailer = require('nodemailer');
 const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
+const util = require('util');
 
 const app = express();
 app.use(bodyParser.json());
@@ -511,6 +512,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
 // PeteUserTraingTopic: Always create a new topic in Intercom custom objects (audit/history pattern)
 app.post('/api/pete-user-training-topic', async (req, res,) => {
   try {
+    console.log('[POST /api/pete-user-training-topic] Incoming body:', util.inspect(req.body, { depth: null }));
     const { topic } = req.body;
     if (!topic || typeof topic !== 'string' || !topic.trim()) {
       return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
@@ -525,7 +527,7 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
         Title: topic.trim()
       }
     };
-    console.log('Payload sent to Intercom:', payload);
+    console.log('[POST /api/pete-user-training-topic] Payload sent to Intercom:', util.inspect(payload, { depth: null }));
     const response = await axios.post('https://api.intercom.io/custom_object_instances/PeteUserTraingTopic', payload, {
       headers: {
         'Intercom-Version': '2.13',
@@ -534,21 +536,17 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
       }
     });
     const data = await response.data;
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to create PeteUserTraingTopic');
-    }
-    console.log('[DEBUG] Created PeteUserTraingTopic:', data);
+    console.log('[POST /api/pete-user-training-topic] Intercom API response:', util.inspect(data, { depth: null }));
     res.status(201).json({ success: true, topic: data });
   } catch (err) {
     if (err.response) {
-      // Log the full response from Intercom
-      console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, err.response.data);
+      console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, util.inspect(err.response.data, { depth: null }), util.inspect(err.response.headers, { depth: null }));
       res.status(500).json({
         error: 'Failed to create PeteUserTraingTopic',
-        details: err.response.data // <-- This is the real error from Intercom!
+        details: err.response.data
       });
     } else {
-      console.error('[POST /api/pete-user-training-topic] Error:', err);
+      console.error('[POST /api/pete-user-training-topic] Error:', util.inspect(err, { depth: null }));
       res.status(500).json({
         error: 'Failed to create PeteUserTraingTopic',
         details: err.message
