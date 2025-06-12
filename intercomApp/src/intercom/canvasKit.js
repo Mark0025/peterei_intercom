@@ -4,33 +4,37 @@
 // Reference: https://developers.intercom.com/canvas-kit-reference/reference/components
 
 // Helper: Build a simple text component
-function textComponent({ id, text, align = 'left', style = 'body' }) {
-  return { type: 'text', id, text, align, style };
+function textComponent(args) {
+  console.log('[CanvasKit] textComponent args:', args);
+  return { type: 'text', ...args };
 }
 
 // Helper: Build a button component
-function buttonComponent({ id, label, style = 'primary', actionType = 'submit', url, new_tab }) {
+function buttonComponent(args) {
+  console.log('[CanvasKit] buttonComponent args:', args);
   // Map 'open_url' to 'url' for backward compatibility
-  const type = actionType === 'open_url' ? 'url' : actionType;
+  const type = args.actionType === 'open_url' ? 'url' : args.actionType;
   const action = { type };
-  if (type === 'url' && url) {
-    action.url = url;
-    if (new_tab) action.new_tab = true;
+  if (type === 'url' && args.url) {
+    action.url = args.url;
+    if (args.new_tab) action.new_tab = true;
   }
-  return { type: 'button', id, label, style, action };
+  return { type: 'button', ...args, action };
 }
 
 // Helper: Build an input component
-function inputComponent({ id, label, input_type = 'text', required = false, placeholder }) {
-  const input = { type: 'input', id, label, input_type };
-  if (required) input.required = true;
-  if (placeholder) input.placeholder = placeholder;
+function inputComponent(args) {
+  console.log('[CanvasKit] inputComponent args:', args);
+  const input = { type: 'input', ...args };
+  if (args.required) input.required = true;
+  if (args.placeholder) input.placeholder = args.placeholder;
   return input;
 }
 
 // Helper: Build a Canvas Kit error response
 function errorCanvas({ message }) {
-  return {
+  console.log('[CanvasKit] errorCanvas message:', message);
+  const errorObj = {
     canvas: {
       content: {
         components: [
@@ -39,10 +43,13 @@ function errorCanvas({ message }) {
       }
     }
   };
+  console.log('[CanvasKit] errorCanvas output:', errorObj);
+  return errorObj;
 }
 
 // Helper: Build a Canvas Kit response
 function canvasResponse({ components, stored_data, event }) {
+  console.log('[CanvasKit] canvasResponse args:', { components, stored_data, event });
   const response = {
     canvas: {
       content: { components }
@@ -50,12 +57,13 @@ function canvasResponse({ components, stored_data, event }) {
   };
   if (stored_data) response.canvas.stored_data = stored_data;
   if (event) response.event = event;
+  console.log('[CanvasKit] canvasResponse output:', response);
   return response;
 }
 
 // Debug: Log outgoing Canvas Kit responses
 function debugCanvasResponse(response, context = '') {
-  console.log(`[DEBUG] CanvasKit response${context ? ' (' + context + ')' : ''}:`, JSON.stringify(response, null, 2));
+  console.log(`[CanvasKit] debugCanvasResponse${context ? ' (' + context + ')' : ''}:`, JSON.stringify(response, null, 2));
 }
 
 module.exports = {
