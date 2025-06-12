@@ -333,6 +333,7 @@ app.post('/submit', async (req, res) => {
         const payload = {
           topic: topic.trim()
         };
+        console.log('Payload sent to Intercom:', payload);
         const response = await axios.post(apiUrl, payload, {
           headers: {
             'Intercom-Version': '2.13',
@@ -524,6 +525,7 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
         Title: topic.trim()
       }
     };
+    console.log('Payload sent to Intercom:', payload);
     const response = await axios.post('https://api.intercom.io/custom_object_instances/PeteUserTraingTopic', payload, {
       headers: {
         'Intercom-Version': '2.13',
@@ -539,8 +541,7 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
     res.status(201).json({ success: true, topic: data });
   } catch (err) {
     if (err.response) {
-      // Log the full response from Intercom
-      console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, err.response.data);
+      console.error('Intercom API error:', err.response.status, err.response.data);
       res.status(500).json({
         error: 'Failed to create PeteUserTraingTopic',
         details: err.response.data
