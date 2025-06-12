@@ -343,16 +343,24 @@ app.post('/submit', async (req, res) => {
         });
         const data = await axiosResponse.data;
         console.log(`[SUBMIT save_training_topic] Successfully updated topic to: ${data.topic}`);
+        // Fix: Show the actual updated topic value, not [object Object]
+        let updatedTopic = data.topic;
+        if (updatedTopic && typeof updatedTopic === 'object' && updatedTopic.custom_attributes && updatedTopic.custom_attributes.Title) {
+          updatedTopic = updatedTopic.custom_attributes.Title;
+        }
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
               id: 'success',
-              text: `Pete User Training Topic updated to: "${data.topic}"`,
+              text: `Pete User Training Topic updated to: "${updatedTopic}"`,
               align: 'center',
               style: 'header'
             })
           ]
         });
+        // The real issue was:
+        // 1. Assignment to constant variable (fixed by using let instead of const for response)
+        // 2. Displaying an object in a string, which results in [object Object] (fixed by extracting the Title)
         canvasKit.debugCanvasResponse(response, '/submit (save_training_topic)');
         return res.json(response);
       } catch (err) {
