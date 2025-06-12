@@ -335,13 +335,13 @@ app.post('/submit', async (req, res) => {
           topic: topic.trim()
         };
         console.log('Payload sent to Intercom:', payload);
-        const response = await axios.post(apiUrl, payload, {
+        const axiosResponse = await axios.post(apiUrl, payload, {
           headers: {
             'Intercom-Version': '2.13',
             'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
           }
         });
-        const data = await response.data;
+        const data = await axiosResponse.data;
         console.log(`[SUBMIT save_training_topic] Successfully updated topic to: ${data.topic}`);
         response = canvasKit.canvasResponse({
           components: [
