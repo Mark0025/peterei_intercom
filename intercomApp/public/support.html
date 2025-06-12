@@ -48,6 +48,25 @@
   </ul>
 
   <hr>
+  <h2>PeteUserTraingTopic Debug</h2>
+  <div>
+    <button id="fetch-pete-topics">Fetch All PeteUserTraingTopic Objects</button>
+    <pre id="pete-topics-output" style="background:#f4f4f4; padding:12px; border-radius:6px; max-height:300px; overflow:auto;"></pre>
+  </div>
+  <script>
+    document.getElementById('fetch-pete-topics').onclick = async function() {
+      const output = document.getElementById('pete-topics-output');
+      output.textContent = 'Loading...';
+      try {
+        const res = await fetch('/api/pete-user-training-topic/all');
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = 'Error: ' + err;
+      }
+    };
+  </script>
+  <hr>
   <p style="font-size:0.9em;color:#888;">Pete App &copy; 2024</p>
 </body>
 </html> 

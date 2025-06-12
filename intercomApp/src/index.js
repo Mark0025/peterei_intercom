@@ -563,6 +563,30 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
   }
 });
 
+// GET all PeteUserTraingTopic custom object instances for debugging/persistence check
+app.get('/api/pete-user-training-topic/all', async (req, res) => {
+  try {
+    const url = `https://api.intercom.io/custom_object_instances/PeteUserTraingTopic?page=1&per_page=50`;
+    const resp = await axios.get(url, {
+      headers: {
+        'Intercom-Version': '2.13',
+        'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
+      }
+    });
+    const data = await resp.data;
+    console.log('[GET /api/pete-user-training-topic/all] Intercom response:', JSON.stringify(data, null, 2));
+    res.json(data);
+  } catch (err) {
+    if (err.response) {
+      console.error('[GET /api/pete-user-training-topic/all] Intercom API error:', err.response.status, err.response.data);
+      res.status(500).json({ error: 'Failed to fetch all PeteUserTraingTopic records', details: err.response.data });
+    } else {
+      console.error('[GET /api/pete-user-training-topic/all] Error:', err);
+      res.status(500).json({ error: 'Failed to fetch all PeteUserTraingTopic records', details: err.message });
+    }
+  }
+});
+
 app.get('/support', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/support.html'));
 });
