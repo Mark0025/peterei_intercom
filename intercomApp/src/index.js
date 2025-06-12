@@ -538,8 +538,20 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
     console.log('[DEBUG] Created PeteUserTraingTopic:', data);
     res.status(201).json({ success: true, topic: data });
   } catch (err) {
-    console.error('[POST /api/pete-user-training-topic]', err);
-    res.status(500).json({ error: 'Failed to create PeteUserTraingTopic', details: err.message });
+    if (err.response) {
+      // Log the full response from Intercom
+      console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, err.response.data);
+      res.status(500).json({
+        error: 'Failed to create PeteUserTraingTopic',
+        details: err.response.data
+      });
+    } else {
+      console.error('[POST /api/pete-user-training-topic] Error:', err);
+      res.status(500).json({
+        error: 'Failed to create PeteUserTraingTopic',
+        details: err.message
+      });
+    }
   }
 });
 
