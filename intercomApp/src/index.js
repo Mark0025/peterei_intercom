@@ -483,11 +483,11 @@ app.post('/webhooks', (req, res) => {
   res.status(200).send('OK');
 });
 
-// PeteUserTraingTopic: Fetch the latest topic from Intercom custom objects
+// PeteUserTrainingTopic: Fetch the latest topic from Intercom custom objects
 app.get('/api/pete-user-training-topic', async (req, res) => {
   try {
     // Fetch all instances (first page, 10 per page)
-    const url = `https://api.intercom.io/custom_object_instances/PeteUserTraingTopic?page=1&per_page=10`;
+    const url = `https://api.intercom.io/custom_object_instances/PeteUserTrainingTopic?page=1&per_page=10`;
     const resp = await axios.get(url, {
       headers: {
         'Intercom-Version': '2.13',
@@ -503,7 +503,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
     // Sort by external_updated_at or external_created_at
     topics.sort((a, b) => (b.external_updated_at || b.external_created_at) - (a.external_updated_at || a.external_created_at));
     const latest = topics[0];
-    console.log('[DEBUG] Latest PeteUserTraingTopic:', latest);
+    console.log('[DEBUG] Latest PeteUserTrainingTopic:', latest);
     res.json({
       topic: latest.custom_attributes?.Title,
       external_id: latest.external_id,
@@ -517,7 +517,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
   }
 });
 
-// PeteUserTraingTopic: Always create a new topic in Intercom custom objects (audit/history pattern)
+// PeteUserTrainingTopic: Always create a new topic in Intercom custom objects (audit/history pattern)
 app.post('/api/pete-user-training-topic', async (req, res,) => {
   try {
     console.log('[POST /api/pete-user-training-topic] Incoming body:', util.inspect(req.body, { depth: null }));
@@ -536,7 +536,7 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
       }
     };
     console.log('[POST /api/pete-user-training-topic] Payload sent to Intercom:', util.inspect(payload, { depth: null }));
-    const response = await axios.post('https://api.intercom.io/custom_object_instances/PeteUserTraingTopic', payload, {
+    const response = await axios.post('https://api.intercom.io/custom_object_instances/PeteUserTrainingTopic', payload, {
       headers: {
         'Intercom-Version': '2.13',
         'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`,
@@ -550,23 +550,23 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
     if (err.response) {
       console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, util.inspect(err.response.data, { depth: null }), util.inspect(err.response.headers, { depth: null }));
       res.status(500).json({
-        error: 'Failed to create PeteUserTraingTopic',
+        error: 'Failed to create PeteUserTrainingTopic',
         details: err.response.data
       });
     } else {
       console.error('[POST /api/pete-user-training-topic] Error:', util.inspect(err, { depth: null }));
       res.status(500).json({
-        error: 'Failed to create PeteUserTraingTopic',
+        error: 'Failed to create PeteUserTrainingTopic',
         details: err.message
       });
     }
   }
 });
 
-// GET all PeteUserTraingTopic custom object instances for debugging/persistence check
+// GET all PeteUserTrainingTopic custom object instances for debugging/persistence check
 app.get('/api/pete-user-training-topic/all', async (req, res) => {
   try {
-    const url = `https://api.intercom.io/custom_object_instances/PeteUserTraingTopic?page=1&per_page=50`;
+    const url = `https://api.intercom.io/custom_object_instances/PeteUserTrainingTopic?page=1&per_page=50`;
     const resp = await axios.get(url, {
       headers: {
         'Intercom-Version': '2.13',
@@ -579,10 +579,10 @@ app.get('/api/pete-user-training-topic/all', async (req, res) => {
   } catch (err) {
     if (err.response) {
       console.error('[GET /api/pete-user-training-topic/all] Intercom API error:', err.response.status, err.response.data);
-      res.status(500).json({ error: 'Failed to fetch all PeteUserTraingTopic records', details: err.response.data });
+      res.status(500).json({ error: 'Failed to fetch all PeteUserTrainingTopic records', details: err.response.data });
     } else {
       console.error('[GET /api/pete-user-training-topic/all] Error:', err);
-      res.status(500).json({ error: 'Failed to fetch all PeteUserTraingTopic records', details: err.message });
+      res.status(500).json({ error: 'Failed to fetch all PeteUserTrainingTopic records', details: err.message });
     }
   }
 });
