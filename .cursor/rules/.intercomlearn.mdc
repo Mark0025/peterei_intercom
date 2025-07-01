@@ -1,0 +1,157 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+description: Rules for creating a learning guide to teach Intercom API usage for custom objects with a webserverglobs: learn/*.mdalwaysApply: true
+Rules for Writing the Intercom Learning Guide
+These rules define how to create a comprehensive, concise, and structured learning guide (learnIntercom.md) for a Level 3 Intercom app developer (software engineer) proficient in JavaScript, Python, and terminal usage. The guide teaches how to use Intercom’s API with a custom webserver to pass custom objects in the UI to Intercom, covering specific sub-topics. The guide must be actionable, follow Intercom’s official documentation, and enable rapid learning for building sustainable applications.
+Objective
+Create a mini-course that takes the learner from zero to advanced in using Intercom’s API, focusing on:
+
+Integrating custom objects with Intercom via a custom webserver.
+Understanding Intercom’s backend, storage, and best practices.
+Building a sustainable framework for visualization and interaction.
+Connecting a database client to Intercom.
+Incorporating AI only after covering core concepts.
+
+Target Audience
+
+Profession: Software engineer (Level 3 Intercom app developer).
+Skills: Proficient in JavaScript, Python, and terminal usage.
+Goal: Build applications that pass custom objects from a UI to Intercom via a custom webserver.
+Knowledge Level: Intermediate to advanced, familiar with web development and APIs but seeking deep Intercom expertise.
+
+Sub-Topics to Cover
+The learning guide must include the following sub-topics, presented as sequential chapters:
+
+Custom Objects: Define custom objects in Intercom, their structure, and how to create/send them via the API.
+Intercom Backend: Explain Intercom’s backend architecture, API endpoints, and data flow.
+Storage of Custom Objects: Detail where and how Intercom stores custom objects and how to access them.
+Allowed and Restricted Packages: List compatible packages (e.g., from provided package.json) and those to avoid.
+Building a Sustainable Framework: Design a framework for visualizing and interacting with Intercom data in the UI.
+Connecting a Database Client: Integrate a database client with Intercom’s API for data persistence.
+Incorporating AI: Explore AI enhancements for Intercom applications (only after covering all other topics).
+
+Rules for Writing the Guide
+General Structure
+
+Format: Write in Markdown (.md) and store in the learn/ directory.
+Single File: All content must be in learnIntercom.md unless specified otherwise.
+Chapter-Based: Organize content into one chapter per sub-topic, presented sequentially.
+Build on Concepts: Each chapter must build on the previous one, assuming knowledge from earlier chapters.
+DRY Principle: Avoid duplicating code or explanations. Reference earlier chapters or Intercom’s official docs instead of rephrasing.
+Official Documentation: Strictly follow Intercom’s official API documentation (e.g., https://developers.intercom.com/) for accuracy. Do not ad-lib or assume functionality.
+Conciseness: Keep the guide under 500 lines where possible, splitting complex topics into clear, composable sections.
+
+Content Requirements
+
+Lego Analogy: Use a 🧱 Lego analogy to explain concepts (e.g., “Custom objects are like Lego bricks you assemble to build user data structures”).
+Diagrams:
+Include Mermaid diagrams for workflows, API interactions, and architecture (e.g., sequence diagrams for API calls, flowcharts for data storage).
+Include app diagrams to visualize the webserver, UI, and Intercom integration with detailed annotations.
+
+
+Concrete Examples: Provide real-world code examples for each concept (e.g., JavaScript or Python snippets using axios or node-fetch from the provided package.json).
+Real-World Use Cases: For each sub-topic, include a practical use case (e.g., “Use custom objects to track user preferences in a SaaS dashboard”).
+Emojis: Use emojis (e.g., 🚀, ✅, ⚠️) to highlight key points, warnings, or steps for engagement.
+Q&A for Testing: At the end of each chapter, include a JSON-formatted Q&A section (questions.json) with 3–5 questions to test understanding of the chapter’s content. Questions should cover key concepts, dos/don’ts, and practical applications.
+
+Chapter Structure
+Each chapter must include:
+
+Introduction: Briefly introduce the sub-topic and its relevance to the objective (1–2 sentences).
+Core Concepts: Explain the topic using the Lego analogy, referencing Intercom’s docs.
+Mermaid Diagram: Visualize the workflow or architecture (e.g., API call sequence, data flow).
+App Diagram: Show the system architecture (e.g., webserver, UI, Intercom) with annotations.
+Code Example: Provide a working code snippet (JavaScript or Python) using dependencies from the provided package.json (e.g., axios, express).
+Real-World Use Case: Describe a practical application (e.g., “Track user activity in a CRM”).
+Q&A Section: Include a JSON object with questions and answers to test knowledge.
+Feedback Prompt: Ask, “Did this chapter clarify [sub-topic]? Let me know if you need more details or examples!”
+Clarification Prompt: Ask, “Do you need clarification on any part of this chapter before moving forward?”
+
+Additional Requirements
+
+Dependencies: Use only the packages listed in the provided package.json (axios, body-parser, dotenv, express, node-fetch, nodemailer, uuid) unless explicitly justified and aligned with Intercom’s API compatibility.
+Sustainability: Emphasize frameworks that are scalable, maintainable, and reusable (e.g., modular Express routes for API calls).
+Database Integration: Focus on connecting a database client (e.g., using node-fetch or axios for API calls) without assuming specific database types unless clarified.
+AI Integration: Defer AI-related content until all other sub-topics are covered, focusing on practical enhancements (e.g., AI-driven user segmentation).
+Additional Topics: After completing all sub-topics, provide a list of 3–5 additional topics for further learning (e.g., “Intercom webhooks,” “Rate limiting strategies”), tailored to the learner’s level and goals.
+
+Example Chapter Outline
+# Chapter 1: Understanding Custom Objects 🧱
+
+**Introduction**  
+Custom objects let you store structured data in Intercom, like user preferences or app-specific metadata, to enhance personalization.
+
+**Core Concepts**  
+Custom objects are like Lego bricks 🧱: you define attributes (e.g., `user_plan`) and send them via Intercom’s API. Per [Intercom’s docs](https://developers.intercom.com/), use the `/contacts` endpoint to attach objects.
+
+**Mermaid Diagram**  
+```mermaid
+sequenceDiagram
+  participant UI as User Interface
+  participant WS as Webserver
+  participant IC as Intercom API
+  UI->>WS: Send custom object data
+  WS->>IC: POST /contacts with JSON payload
+  IC-->>WS: Success response
+  WS-->>UI: Confirmation
+
+App Diagram[Diagram showing UI -> Express server -> Intercom API with labeled components]
+Code Example  
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
+
+async function createCustomObject(userId, plan) {
+  const payload = {
+    id: uuidv4(),
+    type: 'contact',
+    custom_attributes: { user_plan: plan }
+  };
+  const response = await axios.post('https://api.intercom.io/contacts', payload, {
+    headers: { Authorization: `Bearer ${process.env.INTERCOM_TOKEN}` }
+  });
+  return response.data;
+}
+
+Real-World Use CaseTrack a user’s subscription plan (e.g., “Pro” or “Free”) in a SaaS app to trigger targeted Intercom messages.
+Q&A  
+{
+  "questions": [
+    {
+      "question": "What endpoint is used to create custom objects?",
+      "answer": "The /contacts endpoint."
+    },
+    {
+      "question": "What package is used for API calls in the example?",
+      "answer": "Axios."
+    }
+  ]
+}
+
+FeedbackDid this chapter clarify custom objects? Let me know if you need more details or examples! 🚀
+ClarificationDo you need clarification on any part of this chapter before moving forward? ✅
+
+### Post-Course Requirements
+- **Additional Topics**: After all chapters, include a section titled “Next Steps” with 3–5 advanced topics (e.g., “Intercom webhooks for real-time updates,” “Optimizing API calls for performance”).
+- **Comprehensive Testing**: Provide a final `questions.json` covering all sub-topics to ensure mastery of Intercom’s API, dos/don’ts, and integration patterns.
+
+## Best Practices
+- **Clarity**: Write as if explaining to a colleague, avoiding vague terms.
+- **Reusability**: Structure content so another AI can parse and execute it consistently.
+- **Precision**: Cross-reference Intercom’s API docs for every technical detail.
+- **Engagement**: Use emojis sparingly to highlight key points (e.g., ⚠️ for warnings, 🚀 for key takeaways).
+- **Modularity**: Break complex topics into smaller sections within chapters for readability.
+
+## Constraints
+- **Directory**: Store in `learn/` as `learnIntercom.md`.
+- **File Type**: Use `.md` for the guide, with JSON for Q&A sections.
+- **Dependencies**: Restrict to `axios`, `body-parser`, `dotenv`, `express`, `node-fetch`, `nodemailer`, `uuid` unless justified.
+- **No Ad-Libbing**: Follow Intercom’s official docs explicitly.
+- **AI Deferral**: Cover AI only in the final chapter.
+
+## Feedback
+Please confirm if these rules meet your expectations for the learning guide. Do you want to adjust any sub-topics, add specific examples, or clarify your database preferences? 🚀
+
+

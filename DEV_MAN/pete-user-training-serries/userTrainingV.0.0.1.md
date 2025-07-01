@@ -83,6 +83,32 @@ flowchart TD
 - **If no topic exists yet, the UI will see null and can prompt the user to create the first topic.**
 - **Update the related GitHub issue to note the migration from IntercomClient SDK to axios and confirm all endpoints are working.**
 
+## Current State: PeteUserTraingTopic Custom Object Integration (as of workingV.1)
+
+### What is Working
+
+- The UI successfully updates and displays the latest Pete User Training Topic value after each save.
+- The backend creates a new custom object instance in Intercom for every save (audit/history pattern), using the correct schema and payload.
+- All API calls use axios and the correct Intercom endpoints, with proper authentication and error handling.
+- The system logs all relevant payloads, responses, and errors for debugging.
+- The codebase is ready for production testing and has no known JavaScript or API errors.
+
+### What is Not Yet Working / Open Questions
+
+- The Intercom Custom Objects dashboard does not show the expected persisted records for PeteUserTraingTopic, even after successful UI/API updates.
+- It is unclear if the custom object instances are being persisted in Intercom as intended, or if there is a visibility/configuration issue in the Intercom dashboard.
+
+### Intended Purpose
+
+- The goal is to have a custom object called PeteUserTraingTopic in Intercom that persists every update as a new, versioned record (audit/history), visible and manageable in the Intercom Custom Objects UI.
+
+### Next Steps
+
+- Investigate why the Intercom dashboard does not show the expected custom object records.
+- Confirm via API (e.g., GET /custom_object_instances/PeteUserTraingTopic) whether records exist and are being created.
+- Review Intercom documentation and permissions to ensure custom object data is visible and queryable in the dashboard.
+- If needed, contact Intercom support or consult documentation for custom object visibility and management best practices.
+
 flowchart TD
 A["User opens Intercom UI"] --> B["Fetch current PeteUserTraingTopic from Intercom"]
 B --> C["Show topic in single input field"]

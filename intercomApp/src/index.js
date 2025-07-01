@@ -9,6 +9,7 @@ const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const util = require('util');
+const updateUserTrainingTopic = require('./utils/updateUserTrainingTopic');
 
 const app = express();
 app.use(bodyParser.json());
@@ -289,7 +290,7 @@ app.post('/initialize', (req, res) => {
 // /submit can just return the same card for now (or handle future actions)
 app.post('/submit', async (req, res) => {
   try {
-    const { component_id, input_values } = req.body;
+    const { component_id, input_values, context } = req.body;
     let response;
     if (component_id === 'pete_user_training') {
       response = canvasKit.canvasResponse({
@@ -308,13 +309,11 @@ app.post('/submit', async (req, res) => {
       return res.json(response);
     }
     if (component_id === 'save_training_topic') {
-      // Save the new topic
       const topic = input_values?.title;
       if (!topic || typeof topic !== 'string' || !topic.trim()) {
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
-              
               id: 'error',
               text: 'Topic is required and must be a non-empty string.',
               align: 'center',
@@ -325,46 +324,38 @@ app.post('/submit', async (req, res) => {
         canvasKit.debugCanvasResponse(response, '/submit (save_training_topic error)');
         return res.json(response);
       }
-      // Build the full API URL
-      const baseUrl = process.env.INTERNAL_API_URL || 'http://localhost:4000';
-      const apiUrl = baseUrl.endsWith('/') ? baseUrl + 'api/pete-user-training-topic' : baseUrl + '/api/pete-user-training-topic';
-      try {
-        console.log(`[SUBMIT save_training_topic] Saving new topic: ${topic}`);
-        const axios = require('axios');
-        const payload = {
-          topic: topic.trim()
-        };
-        console.log('Payload sent to Intercom:', payload);
-        const axiosResponse = await axios.post(apiUrl, payload, {
-          headers: {
-            'Intercom-Version': '2.13',
-            'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
-          }
+      // Extract user ID from context (Canvas Kit best practice)
+      const userId = req.body?.context?.user?.id;
+      if (!userId) {
+        response = canvasKit.canvasResponse({
+          components: [
+            canvasKit.textComponent({
+              id: 'error',
+              text: 'Could not determine user ID from context. Please contact support.',
+              align: 'center',
+              style: 'error'
+            })
+          ]
         });
-        const data = await axiosResponse.data;
-        console.log(`[SUBMIT save_training_topic] Successfully updated topic to: ${data.topic}`);
-        // Fix: Show the actual updated topic value, not [object Object]
-        let updatedTopic = data.topic;
-        if (updatedTopic && typeof updatedTopic === 'object' && updatedTopic.custom_attributes && updatedTopic.custom_attributes.Title) {
-          updatedTopic = updatedTopic.custom_attributes.Title;
-        }
+        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic missing userId)');
+        return res.json(response);
+      }
+      try {
+        await updateUserTrainingTopic(userId, topic.trim());
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
               id: 'success',
-              text: `Pete User Training Topic updated to: "${updatedTopic}"`,
+              text: `Pete User Training Topic updated to: "${topic.trim()}"`,
               align: 'center',
               style: 'header'
             })
           ]
         });
-        // The real issue was:
-        // 1. Assignment to constant variable (fixed by using let instead of const for response)
-        // 2. Displaying an object in a string, which results in [object Object] (fixed by extracting the Title)
-        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic)');
+        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic success)');
         return res.json(response);
       } catch (err) {
-        console.error('[SUBMIT save_training_topic] Failed to update or fetch topic:', err.response?.data || err);
+        console.error('[SUBMIT save_training_topic] Failed to update user_training_topic:', err);
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
