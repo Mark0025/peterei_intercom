@@ -44,7 +44,7 @@ sequenceDiagram
 **Example:**
 
 ```http
-Authorization: Bearer dG9rOjU0YWE3MGI3X2E3OTBfNGY2OF85ZTAxX2RiNzlhM2FjNzgyZDoxOjA=
+Authorization: Bearer [REDACTED - use $INTERCOM_ACCESS_TOKEN from your .env file]
 Intercom-Version: 2.13
 ```
 
