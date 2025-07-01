@@ -324,21 +324,11 @@ app.post('/submit', async (req, res) => {
         canvasKit.debugCanvasResponse(response, '/submit (save_training_topic error)');
         return res.json(response);
       }
-      // Extract user ID from context (Canvas Kit best practice)
-      const userId = req.body?.context?.user?.id;
+      // TEMP: Use .env UserId if not present in context
+      let userId = req.body?.context?.user?.id;
       if (!userId) {
-        response = canvasKit.canvasResponse({
-          components: [
-            canvasKit.textComponent({
-              id: 'error',
-              text: 'Could not determine user ID from context. Please contact support.',
-              align: 'center',
-              style: 'error'
-            })
-          ]
-        });
-        canvasKit.debugCanvasResponse(response, '/submit (save_training_topic missing userId)');
-        return res.json(response);
+        // Fallback to .env UserId if not present in context
+        userId = process.env.UserId;
       }
       try {
         await updateUserTrainingTopic(userId, topic.trim());

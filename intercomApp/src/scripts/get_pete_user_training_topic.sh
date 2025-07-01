@@ -17,6 +17,6 @@ set +a
 
 curl -i -X GET \
   "https://api.intercom.io/custom_object_instances/PeteUserTrainingTopic?external_id=$EXTERNAL_ID" \
-  -H "Authorization: Bearer $INTERCOM_ACCESS_TOKEN" \
+  -H "Authorization: Bearer $INTERCOM_TOKEN" \
   -H "Intercom-Version: 2.13" \
   -H "Accept: application/json" 

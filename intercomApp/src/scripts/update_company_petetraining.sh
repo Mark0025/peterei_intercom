@@ -26,7 +26,7 @@ JSON_PAYLOAD=$(jq -n --arg value "$NEW_VALUE" '{custom_attributes: {petetraining
 
 curl -i -X PUT \
   "https://api.intercom.io/companies/$COMPANY_ID" \
-  -H "Authorization: Bearer $INTERCOM_ACCESS_TOKEN" \
+  -H "Authorization: Bearer $INTERCOM_TOKEN" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
   -d "$JSON_PAYLOAD" \
