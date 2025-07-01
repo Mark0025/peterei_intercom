@@ -289,6 +289,7 @@ app.post('/initialize', (req, res) => {
 
 // /submit can just return the same card for now (or handle future actions)
 app.post('/submit', async (req, res) => {
+  console.log('[DEBUG] /submit endpoint hit', JSON.stringify(req.body, null, 2));
   try {
     const { component_id, input_values, context } = req.body;
     let response;
