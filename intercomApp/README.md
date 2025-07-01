@@ -129,3 +129,57 @@ See the full guide: [`DEV_MAN/banner/bannerv2.md`](../DEV_MAN/banner/bannerv2.md
 ---
 
 _For more onboarding and automation best practices, see the DEV_MAN documentation in the project root._
+
+---
+
+## Recent Changes and Additions (Post-Last Git Push)
+
+### New Scripts for Intercom API Operations
+
+- **src/scripts/update_user_training_topic.sh**: Bash script to update the `user_training_topic` custom attribute for a user/contact in Intercom. Accepts either a user ID or email, looks up the contact if needed, and logs the API response.
+- **src/scripts/get_contact_id_by_email.sh**: Bash script to look up an Intercom contact ID by email using the Search API. Useful for finding the correct user ID for updates.
+- **src/scripts/update_company_petetraining.sh**: Bash script to update the `petetraining` custom attribute for a company in Intercom. Accepts company ID and new value, logs the API response.
+- **src/scripts/get_company_id_by_name.sh**: Bash script to look up an Intercom company ID by company name using the Search API.
+- **src/scripts/get_all_pete_user_training_topics.sh**: Bash script to fetch all Pete User Training Topic custom object instances from Intercom for debugging or auditing.
+
+### New Utilities for Node.js Backend
+
+- **src/utils/updateUserTrainingTopic.js**: Node.js utility function to update the `user_training_topic` attribute for a user/contact in Intercom via the REST API. Accepts user ID and topic, returns the API response, and throws on error. Used for backend integration and testing.
+- **src/utils/test_updateUserTrainingTopic.js**: Node.js test script to call the above utility with a sample user ID and topic. Prints the result or error to the console. Used to verify the utility in isolation before backend integration.
+
+### Backend Integration
+
+- **src/index.js**: The `/submit` handler now imports and uses the `updateUserTrainingTopic` utility. When the `save_training_topic` action is triggered in the Canvas Kit UI, the backend extracts the user ID from the request context and updates the `user_training_topic` attribute for that user in Intercom. Success and error messages are shown in the UI.
+
+### Why These Changes Were Made
+
+- To enable admins to update the Pete User Training Topic for users directly from the Intercom Canvas Kit app UI, not just via scripts.
+- To provide robust, testable, and reusable utilities for updating user and company attributes in Intercom.
+- To allow for isolated testing of attribute updates before deploying to production (Render).
+- To follow Intercom Canvas Kit best practices for backend logic and UI feedback.
+
+### What We Have
+
+- Fully tested shell scripts for updating user and company attributes and for looking up IDs.
+- Node.js utility and test script for updating user training topics.
+- Backend logic in the Canvas Kit app to update user training topics from the UI.
+
+### What We Do Not Have
+
+- Bulk update scripts for multiple users/companies at once (can be added if needed).
+- Automated tests for all edge cases (manual and isolated tests have been performed).
+- UI for updating company attributes (current focus is on user attributes).
+
+---
+
+**For more details on usage, see the comments in each script or utility.**
+
+---
+
+## For the Latest Status and Improvements
+
+A detailed, versioned log of what the app does, what works, what doesn't, and how it can be improved is now maintained in:
+
+- `DEV_MAN/whatworkin.md`
+
+Please reference that file for the most up-to-date summary of app capabilities, limitations, and roadmap.
