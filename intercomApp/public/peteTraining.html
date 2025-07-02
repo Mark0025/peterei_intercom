@@ -14,6 +14,15 @@
 <body>
   <h1>Pete User Training</h1>
   <div class="section">
+    <h2>Update Pete User Training Topic</h2>
+    <form id="update-topic-form">
+      <label for="topic">New Topic:</label>
+      <input type="text" id="topic" name="topic" required style="width:70%;padding:6px;margin:0 8px 0 0;">
+      <button type="submit">Update</button>
+    </form>
+    <div id="update-result" style="margin-top:12px;font-weight:bold;"></div>
+  </div>
+  <div class="section">
     <h2>Training Topics</h2>
     <ul>
       <li>Topic 1: Getting Started with Pete</li>
@@ -25,5 +34,28 @@
   </div>
   <hr>
   <p style="font-size:0.9em;color:#888;">&copy; Pete Intercom App &mdash; User Training</p>
+  <script>
+    document.getElementById('update-topic-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const topic = document.getElementById('topic').value.trim();
+      const resultDiv = document.getElementById('update-result');
+      resultDiv.textContent = 'Updating...';
+      try {
+        const resp = await fetch('/api/pete-user-training-topic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.success) {
+          resultDiv.textContent = '✅ Topic updated!';
+        } else {
+          resultDiv.textContent = '❌ Failed: ' + (data.error || 'Unknown error');
+        }
+      } catch (err) {
+        resultDiv.textContent = '❌ Error: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html> 

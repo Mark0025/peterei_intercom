@@ -574,6 +574,18 @@ app.get('/support', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/support.html'));
 });
 
+app.get('/logs', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const logPath = path.join(__dirname, 'logs', 'app.log');
+  fs.readFile(logPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.type('text').send('(No logs yet or log file not found)');
+    }
+    res.type('text').send(data);
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
 });
