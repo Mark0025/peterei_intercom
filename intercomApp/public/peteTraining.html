@@ -20,6 +20,10 @@
   </script>
   <h1>Pete User Training</h1>
   <div class="section">
+    <h2>Current Pete User Training Topic</h2>
+    <div id="current-topic" style="font-size:1.1em;color:#2d72d2;margin-bottom:12px;">Loading...</div>
+  </div>
+  <div class="section">
     <h2>Update Pete User Training Topic</h2>
     <form id="update-topic-form">
       <label for="topic">New Topic:</label>
@@ -41,6 +45,23 @@
   <hr>
   <p style="font-size:0.9em;color:#888;">&copy; Pete Intercom App &mdash; User Training</p>
   <script>
+    // Fetch and display the current topic for the fallback user
+    async function fetchCurrentTopic() {
+      const topicDiv = document.getElementById('current-topic');
+      try {
+        const resp = await fetch('/get-user-training-topic');
+        const data = await resp.json();
+        if (data && data.user_training_topic) {
+          topicDiv.textContent = data.user_training_topic;
+        } else {
+          topicDiv.textContent = '(No topic set)';
+        }
+      } catch (err) {
+        topicDiv.textContent = 'Error fetching topic: ' + err.message;
+      }
+    }
+    fetchCurrentTopic();
+
     document.getElementById('update-topic-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const topic = document.getElementById('topic').value.trim();
@@ -64,6 +85,7 @@
           } else {
             resultDiv.textContent = '✅ Updated (no message)';
           }
+          fetchCurrentTopic(); // Refresh topic after update
         } else {
           resultDiv.textContent = '❌ Failed: ' + (data.error || 'Unknown error');
         }

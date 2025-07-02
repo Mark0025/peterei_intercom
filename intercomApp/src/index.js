@@ -487,6 +487,24 @@ app.get('/training', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/peteTraining.html'));
 });
 
+app.get('/get-user-training-topic', async (req, res) => {
+  const userId = '682f3c773fe6c381658c6b64'; // fallback userId
+  try {
+    const url = `https://api.intercom.io/contacts/${userId}`;
+    const resp = await axios.get(url, {
+      headers: {
+        'Intercom-Version': '2.13',
+        'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`
+      }
+    });
+    const data = resp.data;
+    res.json({ user_training_topic: data.custom_attributes?.user_training_topic || null });
+  } catch (err) {
+    logger.logError(`[GET /get-user-training-topic] ${err && err.stack ? err.stack : err}`);
+    res.json({ user_training_topic: null, error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
 });
