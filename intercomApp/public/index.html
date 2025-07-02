@@ -14,6 +14,12 @@
   </style>
 </head>
 <body>
+  <div id="nav-menu"></div>
+  <script>
+    fetch('/menu.html').then(r => r.text()).then(html => {
+      document.getElementById('nav-menu').innerHTML = html;
+    });
+  </script>
   <h1>Pete Intercom App Status</h1>
   <p>✅ <b>Status:</b> Pete Intercom App is running!</p>
   <p><b>Render Public URL:</b> <span class="endpoint">https://peterei-intercom.onrender.com</span></p>

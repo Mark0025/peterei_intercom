@@ -12,6 +12,12 @@
   </style>
 </head>
 <body>
+  <div id="nav-menu"></div>
+  <script>
+    fetch('/menu.html').then(r => r.text()).then(html => {
+      document.getElementById('nav-menu').innerHTML = html;
+    });
+  </script>
   <h1>Pete User Training</h1>
   <div class="section">
     <h2>Update Pete User Training Topic</h2>

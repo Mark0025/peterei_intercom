@@ -14,6 +14,7 @@
   </style>
 </head>
 <body>
+  <div id="nav-menu"></div>
   <div class="container">
     <h1>PeteApp Logs Viewer</h1>
     <button onclick="fetchLogs()">Refresh Logs</button>
@@ -34,6 +35,9 @@
       }
     }
     fetchLogs();
+    fetch('/menu.html').then(r => r.text()).then(html => {
+      document.getElementById('nav-menu').innerHTML = html;
+    });
   </script>
 </body>
 </html> 
