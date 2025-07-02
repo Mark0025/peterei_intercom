@@ -312,6 +312,13 @@ app.post('/submit', async (req, res) => {
     }
     if (component_id === 'save_training_topic') {
       const topic = input_values?.title;
+      let userId = req.body?.context?.user?.id;
+      if (!userId) {
+        userId = '682f3c773fe6c381658c6b64'; // Hardcoded fallback
+        logger.logDebug(`[SUBMIT save_training_topic] No userId in context, using hardcoded fallback: ${userId}`);
+      } else {
+        logger.logDebug(`[SUBMIT save_training_topic] Using userId from context: ${userId}`);
+      }
       if (!topic || typeof topic !== 'string' || !topic.trim()) {
         response = canvasKit.canvasResponse({
           components: [
@@ -325,12 +332,6 @@ app.post('/submit', async (req, res) => {
         });
         canvasKit.debugCanvasResponse(response, '/submit (save_training_topic error)');
         return res.json(response);
-      }
-      // TEMP: Use .env UserId if not present in context
-      let userId = req.body?.context?.user?.id;
-      if (!userId) {
-        // Fallback to .env UserId if not present in context
-        userId = process.env.UserId;
       }
       try {
         await updateUserTrainingTopic(userId, topic.trim());
