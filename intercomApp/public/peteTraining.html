@@ -33,6 +33,22 @@
     <div id="update-result" style="margin-top:12px;font-weight:bold;"></div>
   </div>
   <div class="section">
+    <h2>Bulk Update Pete User Training Topic</h2>
+    <form id="bulk-update-form">
+      <label for="audience">Audience:</label>
+      <select id="audience" name="audience" required>
+        <option value="everyone">Everyone</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+        <option value="lead">Lead</option>
+      </select>
+      <label for="bulk-topic" style="margin-left:12px;">New Topic:</label>
+      <input type="text" id="bulk-topic" name="topic" required style="width:40%;padding:6px;margin:0 8px 0 0;">
+      <button type="submit">Bulk Update</button>
+    </form>
+    <div id="bulk-update-result" style="margin-top:12px;font-weight:bold;"></div>
+  </div>
+  <div class="section">
     <h2>Training Topics</h2>
     <ul>
       <li>Topic 1: Getting Started with Pete</li>
@@ -86,6 +102,32 @@
             resultDiv.textContent = '✅ Updated (no message)';
           }
           fetchCurrentTopic(); // Refresh topic after update
+        } else {
+          resultDiv.textContent = '❌ Failed: ' + (data.error || 'Unknown error');
+        }
+      } catch (err) {
+        resultDiv.textContent = '❌ Error: ' + err.message;
+      }
+    });
+
+    document.getElementById('bulk-update-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const audience = document.getElementById('audience').value;
+      const topic = document.getElementById('bulk-topic').value.trim();
+      const resultDiv = document.getElementById('bulk-update-result');
+      resultDiv.textContent = 'Bulk updating...';
+      try {
+        const resp = await fetch('/bulk-update-training-topic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audience, topic })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.successes !== undefined && data.failures !== undefined) {
+          resultDiv.innerHTML = `✅ Success: ${data.successes.length} <br>❌ Failed: ${data.failures.length}`;
+          if (data.failures.length > 0) {
+            resultDiv.innerHTML += '<br><details><summary>Show errors</summary><pre style="color:#b00;font-size:0.95em;">' + data.failures.map(f => `User: ${f.userId}\n${f.error}`).join('\n---\n') + '</pre></details>';
+          }
         } else {
           resultDiv.textContent = '❌ Failed: ' + (data.error || 'Unknown error');
         }

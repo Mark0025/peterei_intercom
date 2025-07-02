@@ -31,7 +31,7 @@ allways: /src/canvaskit.js
 - The Submit endpoint should process input values and return a confirmation or next step canvas.
 
 ## 5. Use Secure Webhook Practices
-- Validate the `X-Body-Signature` header on all incoming requests using your Intercom app’s client secret (HMAC-SHA256).
+- Validate the `X-Body-Signature` header on all incoming requests using your Intercom app's client secret (HMAC-SHA256).
 - Never process requests without signature validation.
 
 ## 6. Minimal Data Storage
@@ -53,6 +53,16 @@ allways: /src/canvaskit.js
 ## 10. Documentation & Comments
 - Comment your code to indicate which Canvas Kit model or best practice is being followed.
 - Reference the relevant section of the [Canvas Kit documentation](mdc:https:/developers.intercom.com/docs/canvas-kit) in comments where appropriate.
+
+## 11. Extensibility & Safe UI Changes
+- All new Canvas Kit UI features must:
+  - Use only approved Canvas Kit components and properties.
+  - Follow accessibility and request/response best practices.
+  - Log all outgoing Canvas Kit responses for traceability.
+  - Be documented in the README and DEV_MAN, including usage and example payloads.
+  - Include manual or automated tests for new UI flows.
+  - Not break existing UI flows; breaking changes must be versioned and documented.
+- Review and update these rules after each major UI feature or refactor.
 
 ---
 

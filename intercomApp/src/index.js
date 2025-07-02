@@ -9,7 +9,7 @@ const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const util = require('util');
-const updateUserTrainingTopic = require('./utils/updateUserTrainingTopic');
+const { updateUserTrainingTopic, bulkUpdateUserTrainingTopic } = require('./utils/updateUserTrainingTopic');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -502,6 +502,73 @@ app.get('/get-user-training-topic', async (req, res) => {
   } catch (err) {
     logger.logError(`[GET /get-user-training-topic] ${err && err.stack ? err.stack : err}`);
     res.json({ user_training_topic: null, error: err.message });
+  }
+});
+
+/**
+ * Helper to fetch user IDs by audience from Intercom.
+ * @param {string} audience - 'admin', 'user', 'lead', 'everyone'
+ * @returns {Promise<string[]>}
+ */
+async function getUserIdsByAudience(audience) {
+  // Map audience to Intercom search filters
+  let filter;
+  switch ((audience || '').toLowerCase()) {
+    case 'admin':
+      filter = { role: 'admin' };
+      break;
+    case 'lead':
+      filter = { role: 'lead' };
+      break;
+    case 'user':
+      filter = { role: 'user' };
+      break;
+    case 'everyone':
+    default:
+      filter = {}; // No filter, get all
+  }
+  try {
+    const url = 'https://api.intercom.io/contacts/search';
+    const payload = filter && Object.keys(filter).length > 0 ? {
+      query: {
+        operator: 'AND',
+        value: Object.entries(filter).map(([k, v]) => ({ field: k, operator: '=', value: v }))
+      }
+    } : { query: { operator: 'AND', value: [] } };
+    const resp = await axios.post(url, payload, {
+      headers: {
+        'Intercom-Version': '2.13',
+        'Authorization': `Bearer ${process.env.INTERCOM_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    const userIds = (resp.data.data || []).map(u => u.id).filter(Boolean);
+    logger.logInfo(`[getUserIdsByAudience] Found ${userIds.length} users for audience=${audience}`);
+    return userIds;
+  } catch (err) {
+    logger.logError(`[getUserIdsByAudience] Error for audience=${audience}: ${err && err.stack ? err.stack : err}`);
+    throw err;
+  }
+}
+
+app.post('/bulk-update-training-topic', async (req, res) => {
+  const { audience, topic } = req.body;
+  if (!audience || !topic) {
+    logger.logError('[POST /bulk-update-training-topic] Missing audience or topic');
+    return res.status(400).json({ error: 'audience and topic are required' });
+  }
+  try {
+    const userIds = await getUserIdsByAudience(audience);
+    if (!userIds.length) {
+      logger.logError(`[POST /bulk-update-training-topic] No users found for audience=${audience}`);
+      return res.status(404).json({ error: 'No users found for audience' });
+    }
+    const results = await bulkUpdateUserTrainingTopic(userIds, topic);
+    logger.logInfo(`[POST /bulk-update-training-topic] Bulk update complete. Successes: ${results.successes.length}, Failures: ${results.failures.length}`);
+    res.json(results);
+  } catch (err) {
+    logger.logError(`[POST /bulk-update-training-topic] ${err && err.stack ? err.stack : err}`);
+    res.status(500).json({ error: err.message || 'Internal server error' });
   }
 });
 

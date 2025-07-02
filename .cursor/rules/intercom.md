@@ -58,3 +58,15 @@
 - Keep all Intercom integration logic modular and well-commented.
 - Prefer explicit, readable code over clever or "magic" solutions.
 - Review and update these rules as Intercom or your app evolves.
+
+## 11. Extensibility & Safe Feature Addition
+
+- All new features (attributes, workflows, series, endpoints) must:
+  - Use a modular utility for all Intercom API calls (do not duplicate API logic).
+  - Log all actions and errors using the logger utility.
+  - Include a test script or manual test instructions for new endpoints/features.
+  - Be documented in the README and DEV_MAN (usage, input/output, example logs).
+  - Not break existing attribute update flows or logging. Breaking changes must be versioned and documented.
+- All new Canvas Kit UI must use only approved components and follow accessibility and request/response best practices.
+- All new dependencies must be added to the correct package.json and documented in the commit message.
+- Review and update these rules after each major feature or refactor to reflect new best practices.

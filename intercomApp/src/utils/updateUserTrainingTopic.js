@@ -41,7 +41,33 @@ async function updateUserTrainingTopic(userId, topic) {
   }
 }
 
-module.exports = updateUserTrainingTopic;
+/**
+ * Bulk update the 'user_training_topic' attribute for multiple users in Intercom.
+ * @param {string[]} userIds - Array of Intercom Contact IDs to update.
+ * @param {string} topic - The new value for the user_training_topic attribute.
+ * @returns {Promise<{successes: object[], failures: object[]}>} - Summary of results.
+ */
+async function bulkUpdateUserTrainingTopic(userIds, topic) {
+  const results = { successes: [], failures: [] };
+  for (const userId of userIds) {
+    try {
+      const data = await updateUserTrainingTopic(userId, topic);
+      results.successes.push({ userId, data });
+      logger.logInfo(`[bulkUpdateUserTrainingTopic] Success for userId=${userId}`);
+    } catch (err) {
+      let errorDetails = err && err.stack ? err.stack : err;
+      if (err.response) {
+        errorDetails += ` | API response: ${JSON.stringify(err.response.data)}`;
+      }
+      logger.logError(`[bulkUpdateUserTrainingTopic] Failure for userId=${userId}: ${errorDetails}`);
+      results.failures.push({ userId, error: errorDetails });
+    }
+  }
+  logger.logInfo(`[bulkUpdateUserTrainingTopic] Finished. Successes: ${results.successes.length}, Failures: ${results.failures.length}`);
+  return results;
+}
+
+module.exports = { updateUserTrainingTopic, bulkUpdateUserTrainingTopic };
 
 (async () => {
   try {

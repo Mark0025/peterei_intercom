@@ -21,3 +21,11 @@ Ensure all dependencies are added, updated, or removed in the correct `package.j
 
 ## Enforcement
 - Always follow this rule before running any dependency management commands or making related code changes.
+
+## Extensibility & Safe Dependency Changes
+- All new dependencies must:
+  - Be justified and required for a new or improved feature.
+  - Be added to the correct package.json (see above rules).
+  - Be documented in the commit message and, if needed, in the relevant app's README.
+  - Be reviewed for impact on existing features and backward compatibility.
+- Review and update these rules after each major dependency or infrastructure change.
