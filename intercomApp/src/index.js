@@ -586,6 +586,10 @@ app.get('/logs', (req, res) => {
   });
 });
 
+app.get('/training', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/peteTraining.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
 });
