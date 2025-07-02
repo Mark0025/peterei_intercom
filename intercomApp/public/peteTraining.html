@@ -47,14 +47,23 @@
       const resultDiv = document.getElementById('update-result');
       resultDiv.textContent = 'Updating...';
       try {
-        const resp = await fetch('/api/pete-user-training-topic', {
+        const resp = await fetch('/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic })
+          body: JSON.stringify({
+            component_id: 'save_training_topic',
+            input_values: { title: topic },
+            context: {} // context is required by backend, can be empty for now
+          })
         });
         const data = await resp.json();
-        if (resp.ok && data.success) {
-          resultDiv.textContent = '✅ Topic updated!';
+        if (resp.ok && data.canvas && data.canvas.content && data.canvas.content.components) {
+          const comp = data.canvas.content.components.find(c => c.id === 'success' || c.id === 'error');
+          if (comp && comp.text) {
+            resultDiv.textContent = comp.text;
+          } else {
+            resultDiv.textContent = '✅ Updated (no message)';
+          }
         } else {
           resultDiv.textContent = '❌ Failed: ' + (data.error || 'Unknown error');
         }

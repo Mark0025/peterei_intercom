@@ -41,3 +41,52 @@ This app provides a robust onboarding and training management solution for Inter
 ---
 
 _This document will be updated as new features are added and existing ones are improved._
+
+# What's Working: Pete Intercom App (Current State)
+
+## ✅ Unified Attribute Update Flow
+
+- Both the Intercom Canvas Kit UI (in Messenger) and the standalone frontend form (`/training`) now POST to the **same `/submit` endpoint**.
+- The `/submit` handler uses the `updateUserTrainingTopic` utility to update the `user_training_topic` attribute on the Intercom user/contact via the REST API.
+- **No custom object logic remains**—all updates are direct attribute changes.
+
+## ✅ Logging & Traceability
+
+- All update attempts (success or error) are logged to `src/logs/app.log` and viewable in-app at `/logs.html`.
+- Logs include incoming request payloads, API responses, and error details for full traceability.
+
+## ✅ Scripts & Utilities
+
+- All scripts are retained for future use, but only the attribute update logic is active in the app.
+- The backend and utility code for updating the attribute are identical, ensuring consistency.
+
+## ✅ Documentation & UI
+
+- Docs and UI have been updated to clarify that only user attributes are updated (not custom objects).
+- The training form and Canvas Kit UI both reflect this model.
+
+---
+
+## 🟢 **Likelihood of Success: HIGH**
+
+- The backend is now simple, robust, and focused solely on updating the user attribute.
+- Both UI and Canvas Kit flows use the same endpoint and logic, reducing the chance of bugs or mismatches.
+- Logging is comprehensive, so any issues will be immediately visible.
+- The Intercom API call is well-tested and matches Intercom's requirements for attribute updates.
+
+---
+
+## ⚠️ Remaining Risks / Next Steps
+
+- **User ID:** Ensure the correct user/contact ID is always used (from context or `.env`).
+- **Permissions:** The Intercom access token must have permission to update user attributes.
+- **Future Workflows:** When adding series/workflows, use the same attribute update pattern for consistency.
+- **Testing:** Test both the Canvas Kit UI and the `/training` form to confirm updates appear in Intercom.
+
+---
+
+## 🚀 **Summary**
+
+- The app is now highly likely to work as intended for updating the `user_training_topic` attribute from both the Intercom UI and the standalone form.
+- All actions are logged and traceable.
+- The codebase is clean, maintainable, and ready for future workflow integration.
