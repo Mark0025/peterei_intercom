@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const util = require('util');
 const updateUserTrainingTopic = require('./utils/updateUserTrainingTopic');
+const logger = require('./utils/logger');
 
 const app = express();
 app.use(bodyParser.json());
@@ -46,7 +47,7 @@ function validateSignature(req, res, next) {
 
 // Helper to log errors
 function logError(context, err) {
-  console.error(`[${new Date().toISOString()}] [${context}]`, err);
+  logger.logError(`[${context}] ${err && err.stack ? err.stack : err}`);
 }
 
 // Helper to build a Canvas Kit question component (step-by-step)
@@ -289,7 +290,7 @@ app.post('/initialize', (req, res) => {
 
 // /submit can just return the same card for now (or handle future actions)
 app.post('/submit', async (req, res) => {
-  console.log('[DEBUG] /submit endpoint hit', JSON.stringify(req.body, null, 2));
+  logger.logDebug(`[DEBUG] /submit endpoint hit ${JSON.stringify(req.body, null, 2)}`);
   try {
     const { component_id, input_values, context } = req.body;
     let response;
@@ -346,7 +347,7 @@ app.post('/submit', async (req, res) => {
         canvasKit.debugCanvasResponse(response, '/submit (save_training_topic success)');
         return res.json(response);
       } catch (err) {
-        console.error('[SUBMIT save_training_topic] Failed to update user_training_topic:', err);
+        logger.logError(`[SUBMIT save_training_topic] Failed to update user_training_topic: ${err && err.stack ? err.stack : err}`);
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
@@ -389,7 +390,7 @@ app.post('/submit', async (req, res) => {
     canvasKit.debugCanvasResponse(response, '/submit (default)');
     res.json(response);
   } catch (err) {
-    console.error('[POST /submit]', err);
+    logger.logError(`[POST /submit] ${err && err.stack ? err.stack : err}`);
     const errorResponse = canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) });
     canvasKit.debugCanvasResponse(errorResponse, '/submit (error)');
     res.json(errorResponse);
@@ -428,7 +429,7 @@ app.post('/pete-user-training', (req, res) => {
     canvasKit.debugCanvasResponse(response, '/pete-user-training');
     res.json(response);
   } catch (err) {
-    console.error('[POST /pete-user-training]', err);
+    logger.logError(`[POST /pete-user-training] ${err && err.stack ? err.stack : err}`);
     const errorResponse = canvasKit.errorCanvas({ message: 'Something went wrong: ' + (err.message || err) });
     canvasKit.debugCanvasResponse(errorResponse, '/pete-user-training (error)');
     res.json(errorResponse);
@@ -485,7 +486,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
     // Sort by external_updated_at or external_created_at
     topics.sort((a, b) => (b.external_updated_at || b.external_created_at) - (a.external_updated_at || a.external_created_at));
     const latest = topics[0];
-    console.log('[DEBUG] Latest PeteUserTrainingTopic:', latest);
+    logger.logDebug(`[DEBUG] Latest PeteUserTrainingTopic: ${JSON.stringify(latest)}`);
     res.json({
       topic: latest.custom_attributes?.Title,
       external_id: latest.external_id,
@@ -493,7 +494,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
       external_updated_at: latest.external_updated_at
     });
   } catch (err) {
-    console.error('[GET /api/pete-user-training-topic]', err);
+    logger.logError(`[GET /api/pete-user-training-topic] ${err && err.stack ? err.stack : err}`);
     // On error, return null topic (fail gracefully)
     res.json({ topic: null, external_id: null, external_created_at: null, external_updated_at: null });
   }
@@ -502,7 +503,7 @@ app.get('/api/pete-user-training-topic', async (req, res) => {
 // PeteUserTrainingTopic: Always create a new topic in Intercom custom objects (audit/history pattern)
 app.post('/api/pete-user-training-topic', async (req, res,) => {
   try {
-    console.log('[POST /api/pete-user-training-topic] Incoming body:', util.inspect(req.body, { depth: null }));
+    logger.logDebug(`[POST /api/pete-user-training-topic] Incoming body: ${util.inspect(req.body, { depth: null })}`);
     const { topic } = req.body;
     if (!topic || typeof topic !== 'string' || !topic.trim()) {
       return res.status(400).json({ error: 'Topic is required and must be a non-empty string.' });
@@ -517,7 +518,7 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
         Title: topic.trim()
       }
     };
-    console.log('[POST /api/pete-user-training-topic] Payload sent to Intercom:', util.inspect(payload, { depth: null }));
+    logger.logDebug(`[POST /api/pete-user-training-topic] Payload sent to Intercom: ${util.inspect(payload, { depth: null })}`);
     const response = await axios.post('https://api.intercom.io/custom_object_instances/PeteUserTrainingTopic', payload, {
       headers: {
         'Intercom-Version': '2.13',
@@ -526,17 +527,17 @@ app.post('/api/pete-user-training-topic', async (req, res,) => {
       }
     });
     const data = await response.data;
-    console.log('[POST /api/pete-user-training-topic] Intercom API response:', util.inspect(data, { depth: null }));
+    logger.logDebug(`[POST /api/pete-user-training-topic] Intercom API response: ${util.inspect(data, { depth: null })}`);
     res.status(201).json({ success: true, topic: data });
   } catch (err) {
     if (err.response) {
-      console.error('[POST /api/pete-user-training-topic] Intercom API error:', err.response.status, util.inspect(err.response.data, { depth: null }), util.inspect(err.response.headers, { depth: null }));
+      logger.logError(`[POST /api/pete-user-training-topic] Intercom API error: ${err.response.status} ${util.inspect(err.response.data, { depth: null })} ${util.inspect(err.response.headers, { depth: null })}`);
       res.status(500).json({
         error: 'Failed to create PeteUserTrainingTopic',
         details: err.response.data
       });
     } else {
-      console.error('[POST /api/pete-user-training-topic] Error:', util.inspect(err, { depth: null }));
+      logger.logError(`[POST /api/pete-user-training-topic] Error: ${util.inspect(err, { depth: null })}`);
       res.status(500).json({
         error: 'Failed to create PeteUserTrainingTopic',
         details: err.message
@@ -556,14 +557,14 @@ app.get('/api/pete-user-training-topic/all', async (req, res) => {
       }
     });
     const data = await resp.data;
-    console.log('[GET /api/pete-user-training-topic/all] Intercom response:', JSON.stringify(data, null, 2));
+    logger.logDebug(`[GET /api/pete-user-training-topic/all] Intercom response: ${JSON.stringify(data, null, 2)}`);
     res.json(data);
   } catch (err) {
     if (err.response) {
-      console.error('[GET /api/pete-user-training-topic/all] Intercom API error:', err.response.status, err.response.data);
+      logger.logError(`[GET /api/pete-user-training-topic/all] Intercom API error: ${err.response.status} ${JSON.stringify(err.response.data)}`);
       res.status(500).json({ error: 'Failed to fetch all PeteUserTrainingTopic records', details: err.response.data });
     } else {
-      console.error('[GET /api/pete-user-training-topic/all] Error:', err);
+      logger.logError(`[GET /api/pete-user-training-topic/all] Error: ${err && err.stack ? err.stack : err}`);
       res.status(500).json({ error: 'Failed to fetch all PeteUserTrainingTopic records', details: err.message });
     }
   }

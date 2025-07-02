@@ -1,5 +1,6 @@
 const axios = require('axios');
 require('dotenv').config({ path: '../../.env' }); // Ensure env vars are loaded
+const logger = require('./logger');
 
 /**
  * Update the 'user_training_topic' attribute for a user in Intercom.
@@ -26,14 +27,15 @@ async function updateUserTrainingTopic(userId, topic) {
         'Content-Type': 'application/json'
       }
     });
+    logger.logInfo(`Update successful: ${JSON.stringify(response.data)}`);
     return response.data;
   } catch (err) {
     // Log error details for debugging
     if (err.response) {
-      console.error('[updateUserTrainingTopic] API error:', err.response.status, err.response.data);
+      logger.logError(`[updateUserTrainingTopic] API error: ${err.response.status} ${JSON.stringify(err.response.data)}`);
       throw new Error(`Intercom API error: ${err.response.status} ${JSON.stringify(err.response.data)}`);
     } else {
-      console.error('[updateUserTrainingTopic] Error:', err.message);
+      logger.logError(`[updateUserTrainingTopic] Error: ${err.message}`);
       throw err;
     }
   }
@@ -46,8 +48,8 @@ module.exports = updateUserTrainingTopic;
     const userId = '682f3c773fe6c381658c6b64'; // Replace with your actual user/contact ID
     const topic = 'Dominate Automation (Test)';
     const result = await updateUserTrainingTopic(userId, topic);
-    console.log('Update successful:', result);
+    logger.logInfo(`Update successful: ${JSON.stringify(result)}`);
   } catch (err) {
-    console.error('Update failed:', err.message);
+    logger.logError(`Update failed: ${err.message}`);
   }
 })(); 
