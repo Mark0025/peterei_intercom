@@ -1,0 +1,38 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Intercom API Cursor Rule
+
+@cursorrules-declarations
+
+## Always Validate Intercom Resources Before Update/Create
+
+- **Rule:** Before performing any PUT or POST to the Intercom API (e.g., updating a user, company, segment, tag, or custom object), always first validate that the resource exists and is valid by making a GET request to the relevant endpoint.
+- **Scope:** This rule is always active for any code in `src/` (all JS routes and utils). All Intercom-related updates in `src/` must follow this rule.
+- **Purpose:** Prevents errors and ensures all updates/creations are made only to valid, existing Intercom resources.
+- **How to Apply:**
+  - For any update (PUT) or create (POST) operation, first perform a GET to the resource (e.g., `/contacts/{id}`, `/companies/{id}`, `/segments/{id}`, `/tags/{id}`) and check for a valid response.
+  - Only proceed with the update or creation if the GET is successful and the resource is valid.
+  - If the resource does not exist, handle gracefully (e.g., show error, prompt for correction, or create if appropriate).
+- **Reference:** This rule must be followed in all Intercom-related backend flows, utilities, and UI logic.
+- **Example:**
+  - Before updating a user's custom attribute, GET `/contacts/{id}` to ensure the user exists.
+  - Before bulk updating by segment or tag, GET `/segments` or `/tags` to ensure the segment/tag is valid.
+
+---
+
+## Frontend-First and Logging Rule
+
+- **Rule:** Any new backend feature must be testable from the frontend UI before being added to the Canvas Kit UI. All new UI and backend features must be fully logged. Logs must be accessible in the app.
+- **Scope:** Applies to all code in `src/` and all UI/UX flows.
+- **Purpose:** Ensures robust, testable, and traceable features. Guarantees that all user-facing features are verifiable and that logs are always available for debugging and auditing.
+- **How to Apply:**
+  - Implement and test all new backend features via the frontend UI first.
+  - Only after frontend validation, add the feature to the Canvas Kit UI.
+  - All actions, errors, and API calls must be logged and viewable in the app (e.g., `/logs.html`).
+
+---
+
+@Cursor Rules: Always validate Intercom resources with GET before PUT/POST. All backend features must be testable from the frontend and fully logged.

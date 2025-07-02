@@ -590,6 +590,7 @@ app.get('/whatsworking', (req, res) => {
     res.send(`
       <html><head><title>What&#39;s Working: Pete Intercom App</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="/globals.css">
       <style>body{font-family:sans-serif;max-width:900px;margin:40px auto;background:#f9f9f9;color:#222;} pre{background:#f4f4f4;padding:16px;border-radius:8px;} h1,h2,h3{color:#2d72d2;} code{background:#eee;padding:2px 4px;border-radius:4px;}</style>
       <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
       </head><body>

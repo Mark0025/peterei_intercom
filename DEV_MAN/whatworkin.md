@@ -218,3 +218,20 @@ flowchart TD
   B4 --|"Logs Viewable at /logs.html"| A2
   B4 --|"Logs Viewable at /logs.html"| A1
 ```
+
+## Enforced Intercom Rules
+
+- All Intercom-related updates in `src/` must validate resources with GET before PUT/POST. This is enforced via `.cursor/rules/intercom.mdc`.
+- Any new backend feature must be testable from the frontend UI before being added to the Canvas Kit UI. All new UI and backend features must be fully logged, and logs must be accessible in the app.
+
+## Global CSS for Consistent Styling
+
+A `globals.css` file is included in `public/` to ensure consistent, modern, and accessible styling across the app, including all pages and Mermaid diagrams.
+
+## Troubleshooting: Mermaid Diagrams
+
+If Mermaid diagrams are not visible in `/whatsworking`, ensure:
+
+- Your browser supports client-side Mermaid.js (the page loads Mermaid from CDN and auto-renders diagrams).
+- The code blocks in the Markdown are formatted as ```mermaid (each node/edge on its own line).
+- If you still see plain text, try refreshing or using a different browser.
