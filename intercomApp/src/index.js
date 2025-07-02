@@ -572,6 +572,56 @@ app.post('/bulk-update-training-topic', async (req, res) => {
   }
 });
 
+// Add /whatsworking endpoint to serve the architecture and working state doc
+app.get('/whatsworking', (req, res) => {
+  const mdPath = path.join(__dirname, '../../DEV_MAN/whatworkin.md');
+  fs.readFile(mdPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('<h2>Error loading documentation</h2><pre>' + err.message + '</pre>');
+    }
+    // Try to use marked or markdown-it if available
+    let html;
+    try {
+      const marked = require('marked');
+      html = marked.parse(data);
+    } catch (e) {
+      html = '<pre style="white-space:pre-wrap;">' + data + '</pre>';
+    }
+    res.send(`
+      <html><head><title>What&#39;s Working: Pete Intercom App</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>body{font-family:sans-serif;max-width:900px;margin:40px auto;background:#f9f9f9;color:#222;} pre{background:#f4f4f4;padding:16px;border-radius:8px;} h1,h2,h3{color:#2d72d2;} code{background:#eee;padding:2px 4px;border-radius:4px;}</style>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      </head><body>
+      <div id="nav-menu"></div>
+      <script>fetch('/menu.html').then(r=>r.text()).then(html=>{document.getElementById('nav-menu').innerHTML=html;});</script>
+      <h1>What&#39;s Working: Pete Intercom App</h1>
+      <div id="md-content">${html}</div>
+      <script>
+        // Find all code blocks with mermaid diagrams and render them
+        document.addEventListener('DOMContentLoaded', function() {
+          mermaid.initialize({ startOnLoad: false });
+          // Find all <code class="language-mermaid"> or <pre><code class="language-mermaid">
+          const mermaidBlocks = document.querySelectorAll('code.language-mermaid, pre > code.language-mermaid');
+          let i = 0;
+          mermaidBlocks.forEach(function(block) {
+            const parent = block.parentElement.tagName === 'PRE' ? block.parentElement : block;
+            const code = block.textContent;
+            const id = 'mermaid-diagram-' + (i++);
+            const div = document.createElement('div');
+            div.className = 'mermaid';
+            div.id = id;
+            div.textContent = code;
+            parent.replaceWith(div);
+            try { mermaid.init(undefined, '#' + id); } catch(e) { div.innerHTML = '<pre style="color:red">Mermaid error: ' + e.message + '</pre>'; }
+          });
+        });
+      </script>
+      </body></html>
+    `);
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
 });

@@ -3,6 +3,7 @@
   <a href="/training" class="nav-training" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Training</a>
   <a href="/logs.html" class="nav-logs" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Logs</a>
   <a href="/support" class="nav-support" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Support</a>
+  <a href="/whatsworking" class="nav-whatsworking" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">What's Working</a>
 </nav>
 <script>
   // Highlight the current page link
@@ -15,5 +16,7 @@
     document.querySelector('.nav-logs').style.textDecoration = 'underline';
   } else if (path.startsWith('/support')) {
     document.querySelector('.nav-support').style.textDecoration = 'underline';
+  } else if (path.startsWith('/whatsworking')) {
+    document.querySelector('.nav-whatsworking').style.textDecoration = 'underline';
   }
 </script> 
