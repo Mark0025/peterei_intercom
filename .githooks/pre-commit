@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Pre-commit hook: Update diagram rules date and append a timeline entry to DEV_MAN/whatworkin.md
+
+# Get current CST date/time, rounded to the nearest minute, in AM/PM format
+CST_DATETIME=$(TZ=America/Chicago date '+%Y-%m-%d %I:%M %p CST')
+
+# Update the version date in the diagram rules at the top of the file
+awk -v dt="$CST_DATETIME" '
+  NR==1 {print $0; next}
+  NR==2 {sub(/\[CURRENT_CST_DATETIME\]/, dt); print $0; next}
+  {print $0}
+' DEV_MAN/whatworkin.md > DEV_MAN/whatworkin.md.tmp && mv DEV_MAN/whatworkin.md.tmp DEV_MAN/whatworkin.md
+
+# Prompt for summary
+printf '\n[pre-commit] Enter a summary for the timeline (single line): '
+read SUMMARY
+
+# Prompt for optional code/diagram
+printf '[pre-commit] Paste a code/diagram snippet (or leave blank, end with Ctrl-D):\n'
+SNIPPET=$(cat)
+
+# Prepare the timeline entry
+TIMESTAMP=$(TZ=America/Chicago date '+%Y-%m-%d %I:%M %p CST')
+ENTRY="\n---\n### [$TIMESTAMP] $SUMMARY\n\n"
+if [ -n "$SNIPPET" ]; then
+  ENTRY="$ENTRY\n\
+\
+$SNIPPET\n"
+fi
+ENTRY="$ENTRY---\n"
+
+# Append to the end of DEV_MAN/whatworkin.md
+printf "%s" "$ENTRY" >> DEV_MAN/whatworkin.md
+
+git add DEV_MAN/whatworkin.md
+
+exit 0 

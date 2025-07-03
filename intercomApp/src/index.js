@@ -11,6 +11,7 @@ const axios = require('axios');
 const util = require('util');
 const { updateUserTrainingTopic, bulkUpdateUserTrainingTopic } = require('./utils/updateUserTrainingTopic');
 const logger = require('./utils/logger');
+const peteaRouter = require('./peteai');
 
 const app = express();
 app.use(bodyParser.json());
@@ -628,6 +629,9 @@ app.get('/whatsworking', async (req, res) => {
     `);
   });
 });
+
+// Mount the PeteAI router
+app.use('/PeteAI', peteaRouter);
 
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
