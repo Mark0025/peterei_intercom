@@ -8,12 +8,12 @@ importers:
 
   .:
     dependencies:
+      marked:
+        specifier: ^16.0.0
+        version: 16.0.0
       mermaid:
         specifier: ^11.6.0
         version: 11.6.0
-      uuid:
-        specifier: ^11.1.0
-        version: 11.1.0
 
 packages:
 
@@ -407,6 +407,11 @@ packages:
   marked@15.0.12:
     resolution: {integrity: sha512-8dD6FusOQSrpv9Z1rdNMdlSgQOIP880DHqnohobOmYLElGEqAL/JvxvuxZO16r4HtjTlfPRDC1hbvxC9dPN2nA==}
     engines: {node: '>= 18'}
+    hasBin: true
+
+  marked@16.0.0:
+    resolution: {integrity: sha512-MUKMXDjsD/eptB7GPzxo4xcnLS6oo7/RHimUMHEDRhUooPwmN9BEpMl7AEOJv3bmso169wHI2wUF9VQgL7zfmA==}
+    engines: {node: '>= 20'}
     hasBin: true
 
   mermaid@11.6.0:
@@ -933,6 +938,8 @@ snapshots:
   lodash-es@4.17.21: {}
 
   marked@15.0.12: {}
+
+  marked@16.0.0: {}
 
   mermaid@11.6.0:
     dependencies:
