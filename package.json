@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "marked": "^16.0.0",
-    "mermaid": "^11.6.0"
-  }
-}
