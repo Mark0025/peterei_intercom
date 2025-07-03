@@ -1,6 +1,7 @@
 <nav style="background:#2d72d2;padding:12px 0 8px 0;text-align:center;margin-bottom:32px;">
   <a href="/" class="nav-home" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Home</a>
   <a href="/training" class="nav-training" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Training</a>
+  <a href="/peteAI.html" class="nav-peteai" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">PeteAI</a>
   <a href="/logs.html" class="nav-logs" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Logs</a>
   <a href="/support" class="nav-support" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Support</a>
   <a href="/whatsworking" class="nav-whatsworking" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">What's Working</a>
@@ -12,6 +13,8 @@
     document.querySelector('.nav-home').style.textDecoration = 'underline';
   } else if (path.startsWith('/training') || path === '/peteTraining.html') {
     document.querySelector('.nav-training').style.textDecoration = 'underline';
+  } else if (path.startsWith('/peteAI')) {
+    document.querySelector('.nav-peteai').style.textDecoration = 'underline';
   } else if (path.startsWith('/logs')) {
     document.querySelector('.nav-logs').style.textDecoration = 'underline';
   } else if (path.startsWith('/support')) {
