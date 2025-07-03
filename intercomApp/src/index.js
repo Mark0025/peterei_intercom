@@ -11,6 +11,7 @@ const axios = require('axios');
 const util = require('util');
 const { updateUserTrainingTopic, bulkUpdateUserTrainingTopic } = require('./utils/updateUserTrainingTopic');
 const logger = require('./utils/logger');
+const marked = require('marked');
 
 const app = express();
 app.use(bodyParser.json());
@@ -579,14 +580,8 @@ app.get('/whatsworking', (req, res) => {
     if (err) {
       return res.status(500).send('<h2>Error loading documentation</h2><pre>' + err.message + '</pre>');
     }
-    // Try to use marked or markdown-it if available
-    let html;
-    try {
-      const marked = require('marked');
-      html = marked.parse(data);
-    } catch (e) {
-      html = '<pre style="white-space:pre-wrap;">' + data + '</pre>';
-    }
+    // Always use marked to render Markdown to HTML
+    let html = marked.parse(data);
     res.send(`
       <html><head><title>What&#39;s Working: Pete Intercom App</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
