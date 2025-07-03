@@ -52,28 +52,28 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  FE1["Standalone Web Form (peteTraining.html)"]
-  BE1["Express Server (index.js)"]
-  BE2["/bulk-update-training-topic"]
-  BE3["/submit"]
-  LOG["Logger (logs/app.log)"]
-  UTILS["updateUserTrainingTopic.js & bulkUpdateUserTrainingTopic"]
-  API["Intercom REST API"]
-  ATTR["User/Contact Attributes"]
-  FE1 -- "POST /submit" --> BE3
-  FE1 -- "POST /bulk-update-training-topic" --> BE2
-  BE3 -- "Calls" --> UTILS
-  BE2 -- "Calls" --> UTILS
-  UTILS -- "PUT /contacts/{id}" --> API
-  API -- "Updates" --> ATTR
-  BE3 -- "Logs" --> LOG
-  BE2 -- "Logs" --> LOG
-  UTILS -- "Logs" --> LOG
-  FE1 -- "GET /get-user-training-topic" --> BE1
-  BE1 -- "GET /contacts/{id}" --> API
-  API -- "Returns" --> BE1
-  BE1 -- "Returns" --> FE1
-  LOG -- "Logs Viewable at /logs.html" --> FE1
+  FE1_2["Standalone Web Form (peteTraining.html)"]
+  BE1_2["Express Server (index.js)"]
+  BE2_2["/bulk-update-training-topic"]
+  BE3_2["/submit"]
+  LOG_2["Logger (logs/app.log)"]
+  UTILS_2["updateUserTrainingTopic.js & bulkUpdateUserTrainingTopic"]
+  API_2["Intercom REST API"]
+  ATTR_2["User/Contact Attributes"]
+  FE1_2 -- "POST /submit" --> BE3_2
+  FE1_2 -- "POST /bulk-update-training-topic" --> BE2_2
+  BE3_2 -- "Calls" --> UTILS_2
+  BE2_2 -- "Calls" --> UTILS_2
+  UTILS_2 -- "PUT /contacts/{id}" --> API_2
+  API_2 -- "Updates" --> ATTR_2
+  BE3_2 -- "Logs" --> LOG_2
+  BE2_2 -- "Logs" --> LOG_2
+  UTILS_2 -- "Logs" --> LOG_2
+  FE1_2 -- "GET /get-user-training-topic" --> BE1_2
+  BE1_2 -- "GET /contacts/{id}" --> API_2
+  API_2 -- "Returns" --> BE1_2
+  BE1_2 -- "Returns" --> FE1_2
+  LOG_2 -- "Logs Viewable at /logs.html" --> FE1_2
 ```
 
 ## Function/Endpoint Mapping

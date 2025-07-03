@@ -11,7 +11,6 @@ const axios = require('axios');
 const util = require('util');
 const { updateUserTrainingTopic, bulkUpdateUserTrainingTopic } = require('./utils/updateUserTrainingTopic');
 const logger = require('./utils/logger');
-const marked = require('marked');
 
 const app = express();
 app.use(bodyParser.json());
@@ -574,13 +573,13 @@ app.post('/bulk-update-training-topic', async (req, res) => {
 });
 
 // Add /whatsworking endpoint to serve the architecture and working state doc
-app.get('/whatsworking', (req, res) => {
+app.get('/whatsworking', async (req, res) => {
   const mdPath = path.join(__dirname, '../../DEV_MAN/whatworkin.md');
-  fs.readFile(mdPath, 'utf8', (err, data) => {
+  fs.readFile(mdPath, 'utf8', async (err, data) => {
     if (err) {
       return res.status(500).send('<h2>Error loading documentation</h2><pre>' + err.message + '</pre>');
     }
-    // Always use marked to render Markdown to HTML
+    const { marked } = await import('marked');
     let html = marked.parse(data);
     res.send(`
       <html><head><title>What&#39;s Working: Pete Intercom App</title>
