@@ -591,12 +591,24 @@ app.get('/whatsworking', (req, res) => {
       <html><head><title>What&#39;s Working: Pete Intercom App</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" href="/globals.css">
-      <style>body{font-family:sans-serif;max-width:900px;margin:40px auto;background:#f9f9f9;color:#222;} pre{background:#f4f4f4;padding:16px;border-radius:8px;} h1,h2,h3{color:#2d72d2;} code{background:#eee;padding:2px 4px;border-radius:4px;}</style>
+      <style>
+        body { font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif; background: #f9f9f9; color: #222; margin: 0; padding: 0; }
+        #md-content { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(44,114,210,0.07); padding: 32px 24px; }
+        h1, h2, h3, h4, h5 { color: #2d72d2; margin-top: 2em; margin-bottom: 0.5em; }
+        h1 { font-size: 2.2em; }
+        h2 { font-size: 1.5em; }
+        h3 { font-size: 1.2em; }
+        ul, ol { margin-left: 2em; margin-bottom: 1.2em; }
+        li { margin-bottom: 0.4em; }
+        pre, code { background: #f4f4f4; color: #222; border-radius: 6px; padding: 8px 12px; font-size: 1em; overflow-x: auto; }
+        pre { margin: 1.2em 0; }
+        .mermaid { background: #fff; border-radius: 8px; padding: 16px; margin: 1.5em 0; box-shadow: 0 2px 8px rgba(44,114,210,0.07); overflow-x: auto; }
+        @media (max-width: 700px) { #md-content { padding: 8px; } }
+      </style>
       <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
       </head><body>
       <div id="nav-menu"></div>
       <script>fetch('/menu.html').then(r=>r.text()).then(html=>{document.getElementById('nav-menu').innerHTML=html;});</script>
-      <h1>What&#39;s Working: Pete Intercom App</h1>
       <div id="md-content">${html}</div>
       <script>
         // Find all code blocks with mermaid diagrams and render them
