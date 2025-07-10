@@ -183,3 +183,61 @@ A detailed, versioned log of what the app does, what works, what doesn't, and ho
 - `DEV_MAN/whatworkin.md`
 
 Please reference that file for the most up-to-date summary of app capabilities, limitations, and roadmap.
+
+---
+
+## Development Workflow: Auto-Reload with nodemon
+
+- For development, you can use [nodemon](https://nodemon.io/) to automatically restart the server when you make code changes.
+- To enable this, install nodemon (already in dependencies):
+  ```bash
+  pnpm install nodemon --save-dev
+  # or
+  npm install nodemon --save-dev
+  ```
+- Add this to your `package.json` scripts:
+  ```json
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  }
+  ```
+- Start the app in development mode with:
+  ```bash
+  pnpm dev
+  # or
+  npm run dev
+  ```
+- The `start.sh` script is intended for production or cloud deployment and uses `node src/index.js` (no auto-reload).
+- For local development with auto-reload, use the `dev` script above instead of `./start.sh`.
+
+---
+
+## PeteAI Helper Endpoint
+
+The app includes an AI-powered helper endpoint using OpenRouter and the Llama 3.2 3B (free) model.
+
+- **Endpoint:** `POST /PeteAI/`
+- **How it works:**
+  - Accepts a JSON body with a `message` field (the user's question or prompt).
+  - Forwards the message to OpenRouter's Llama 3.2 3B (free) model.
+  - Returns the AI's reply as JSON.
+- **Example request:**
+  ```bash
+  curl -X POST http://localhost:4000/PeteAI/ \
+    -H "Content-Type: application/json" \
+    -d '{"message": "How do I update a user training topic?"}'
+  ```
+- **Example response:**
+  ```json
+  {
+    "reply": {
+      "role": "assistant",
+      "content": "To update a user training topic, ..."
+    }
+  }
+  ```
+- **Model:** Uses `meta-llama/llama-3.2-3b-instruct:free` via OpenRouter (see [OpenRouter models](https://openrouter.ai/docs/overview/models)).
+- **Configuration:** Requires a valid `OPENROUTER_API_KEY` in your `.env` file.
+
+---
