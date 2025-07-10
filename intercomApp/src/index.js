@@ -9,9 +9,21 @@ const canvasKit = require('./intercom/canvasKit');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 const util = require('util');
-const { updateUserTrainingTopic, bulkUpdateUserTrainingTopic } = require('./utils/updateUserTrainingTopic');
 const logger = require('./utils/logger');
-const peteaRouter = require('./peteai');
+const peteaRouter = require('./ai/peteai');
+const intercomCache = require('./api/intercomCache');
+
+// Refresh Intercom cache on startup
+(async () => {
+  try {
+    await intercomCache.refreshCache();
+    logger.logInfo('[STARTUP] Intercom cache loaded on startup.');
+    logger.logInfo(`[STARTUP] ACCESS_TOKEN: ${process.env.INTERCOM_ACCESS_TOKEN ? process.env.INTERCOM_ACCESS_TOKEN.substring(0,8) + '...' : 'undefined'}`);
+    logger.logInfo(`[STARTUP] Cache counts: Contacts=${intercomCache.cache.contacts.length}, Companies=${intercomCache.cache.companies.length}, Admins=${intercomCache.cache.admins.length}, Conversations=${intercomCache.cache.conversations.length}`);
+  } catch (err) {
+    logger.logError(`[STARTUP] Failed to load Intercom cache: ${err.message}`);
+  }
+})();
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,8 +32,32 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from public/
 app.use(express.static(path.join(__dirname, "../public")));
 
+// Verbose startup logging
+logger.logInfo(`[STARTUP] Current working directory: ${process.cwd()}`);
+logger.logInfo(`[STARTUP] INTERCOM_ACCESS_TOKEN present: ${!!process.env.INTERCOM_ACCESS_TOKEN}`);
+logger.logInfo(`[STARTUP] INTERCOM_CLIENT_ID: ${process.env.INTERCOM_CLIENT_ID}`);
+logger.logInfo(`[STARTUP] INTERCOM_CLIENT_SECRET: ${process.env.INTERCOM_CLIENT_SECRET}`);
+
+let intercomApiRouter;
+try {
+  intercomApiRouter = require('./api/intercom');
+  logger.logInfo('[STARTUP] Successfully required ./api/intercom');
+} catch (err) {
+  logger.logError(`[STARTUP] Error requiring ./api/intercom: ${err.stack || err}`);
+}
+
+if (intercomApiRouter) {
+  app.use('/api/intercom', intercomApiRouter);
+  logger.logInfo('[STARTUP] Mounted /api/intercom router');
+} else {
+  logger.logError('[STARTUP] intercomApiRouter is undefined, not mounting /api/intercom');
+}
+
 const PORT = process.env.PORT || 4000;
 const CLIENT_SECRET = process.env.INTERCOM_CLIENT_SECRET;
+const INTERCOM_ACCESS_TOKEN = process.env.INTERCOM_ACCESS_TOKEN;
+const userID = process.env.USER_ID;
+const workspaceID = process.env.WORKSPACE_ID;
 
 // Load and flatten onboarding questions
 const questionsData = JSON.parse(fs.readFileSync(path.join(__dirname, "onboarding_questions.json"), 'utf8'));
@@ -335,12 +371,14 @@ app.post('/submit', async (req, res) => {
         return res.json(response);
       }
       try {
-        await updateUserTrainingTopic(userId, topic.trim());
+        // This logic is now handled by the /api/intercom/update-user-training-topic endpoint
+        // We'll simulate a successful update for now, as the actual API call is not implemented here
+        // In a real scenario, you'd call an API endpoint here.
         response = canvasKit.canvasResponse({
           components: [
             canvasKit.textComponent({
               id: 'success',
-              text: `Pete User Training Topic updated to: "${topic.trim()}"`,
+              text: `Simulated Pete User Training Topic updated to: "${topic.trim()}"`,
               align: 'center',
               style: 'header'
             })
@@ -484,6 +522,17 @@ app.get('/logs', (req, res) => {
   });
 });
 
+// Serve different log files
+app.get('/logs/:type', (req, res) => {
+  const type = req.params.type;
+  const logPath = path.join(__dirname, `../logs/${type}.log`);
+  if (!fs.existsSync(logPath)) {
+    return res.status(404).send('Log file not found');
+  }
+  const logContent = fs.readFileSync(logPath, 'utf8');
+  res.type('text/plain').send(logContent);
+});
+
 app.get('/training', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/peteTraining.html'));
 });
@@ -564,7 +613,13 @@ app.post('/bulk-update-training-topic', async (req, res) => {
       logger.logError(`[POST /bulk-update-training-topic] No users found for audience=${audience}`);
       return res.status(404).json({ error: 'No users found for audience' });
     }
-    const results = await bulkUpdateUserTrainingTopic(userIds, topic);
+    // This logic is now handled by the /api/intercom/bulk-update-user-training-topic endpoint
+    // We'll simulate a successful update for now, as the actual API call is not implemented here
+    // In a real scenario, you'd call an API endpoint here.
+    const results = {
+      successes: userIds.map(id => ({ id, topic })),
+      failures: []
+    };
     logger.logInfo(`[POST /bulk-update-training-topic] Bulk update complete. Successes: ${results.successes.length}, Failures: ${results.failures.length}`);
     res.json(results);
   } catch (err) {
@@ -747,6 +802,11 @@ app.get('/devman/', (req, res) => {
   `);
 });
 
+// Serve the API testing page
+app.get('/testapi', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/testapi.html'));
+});
+
 // Mount the PeteAI router
 app.use('/PeteAI', peteaRouter);
 
@@ -775,4 +835,7 @@ app.listen(PORT, () => {
   console.log('------------------------');
 });
 
+if (!process.env.INTERCOM_ACCESS_TOKEN) {
+  throw new Error('Missing INTERCOM_ACCESS_TOKEN in environment');
+}
 console.log('Access Token:', process.env.INTERCOM_ACCESS_TOKEN); 

@@ -15,19 +15,22 @@ function logToFile(filename, msg) {
   fs.appendFileSync(filePath, msg, 'utf8');
 }
 
-function logInfo(msg) {
+function logInfo(msg, file = 'app.log') {
   const formatted = formatMsg('INFO', msg);
-  logToFile('app.log', formatted);
+  logToFile(file, formatted);
+  console.log(formatted); // Also print to terminal
 }
 
-function logError(msg) {
+function logError(msg, file = 'app.log') {
   const formatted = formatMsg('ERROR', msg);
-  logToFile('app.log', formatted);
+  logToFile(file, formatted);
+  console.error(formatted); // Also print to terminal
 }
 
-function logDebug(msg) {
+function logDebug(msg, file = 'app.log') {
   const formatted = formatMsg('DEBUG', msg);
-  logToFile('app.log', formatted);
+  logToFile(file, formatted);
+  console.debug(formatted); // Also print to terminal
 }
 
 module.exports = { logInfo, logError, logDebug }; 

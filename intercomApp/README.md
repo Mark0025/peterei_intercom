@@ -241,3 +241,14 @@ The app includes an AI-powered helper endpoint using OpenRouter and the Llama 3.
 - **Configuration:** Requires a valid `OPENROUTER_API_KEY` in your `.env` file.
 
 ---
+
+## Recent Fixes & Improvements (July 2025)
+
+- Improved markdown rendering for inline code in lists and paragraphs. No more overlapping or unreadable code samples in documentation.
+- Added a generic markdown viewer route: `/docs/*` for any file in DEV_MAN, and a `/devman/` index for easy browsing of all internal docs.
+- Terminal now prints clickable local links for all available routes after server start, making development and testing easier.
+- Enhanced CSS for code and pre/code blocks to ensure copy-paste friendliness and robust wrapping.
+
+For more details, see `DEV_MAN/whatworkin.md` and `/devman/` in your running app.
+
+---

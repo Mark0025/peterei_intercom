@@ -271,3 +271,25 @@ If Mermaid diagrams are not visible in `/whatsworking`, ensure:
 >    - Above each diagram, add a short comment or heading describing what it shows.
 > 8. **Versioning**
 >    - If you update a diagram, keep the old version in the timeline at the bottom of the file for historical reference.
+
+---
+
+## July 2024 Fixes & Improvements
+
+- Fixed overlapping/overflow of inline code in markdown lists and paragraphs by improving CSS and line height handling.
+- Added a generic markdown viewer route (`/docs/*`) and a `/devman/` index for all internal documentation.
+- Terminal now prints clickable local links for all available routes after server start.
+- All code and documentation is now more readable, copy-paste friendly, and robust for all users and developers.
+
+---
+
+## July 2025: Intercom API Integration v1
+
+- Added a new Express router in `src/api/intercom.js` for Intercom AI Content endpoints.
+- Implemented GET endpoints for `/ai/content_import_sources` and `/ai/external_pages` as per the official Intercom API docs.
+- Router is ready to be mounted at `/api/intercom` in the main app.
+- This is the foundation for future Intercom API integrations (Contacts, Companies, Conversations, etc.).
+
+See `DEV_MAN/plans/v1.md` for the full plan and next steps.
+
+---

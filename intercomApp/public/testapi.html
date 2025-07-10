@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pete Intercom API Tester</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f7f9fb; margin: 0; padding: 0; }
+    .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0001; padding: 32px; }
+    h1 { color: #2d72d2; font-size: 2.2em; margin-bottom: 0.2em; }
+    .desc { color: #444; margin-bottom: 1.5em; }
+    label { font-weight: 600; margin-top: 1em; display: block; }
+    select, input, button { font-size: 1em; padding: 8px 12px; border-radius: 6px; border: 1px solid #bbb; margin-top: 0.5em; }
+    select, input { width: 100%; box-sizing: border-box; }
+    button { background: #2d72d2; color: #fff; border: none; cursor: pointer; margin-top: 1em; }
+    button:hover { background: #1a4e8a; }
+    .result { margin-top: 2em; }
+    .json-viewer { background: #f4f4f4; border-radius: 8px; padding: 18px; font-family: 'Fira Mono', 'Consolas', monospace; font-size: 1em; overflow-x: auto; }
+    .error { color: #c00; font-weight: 600; margin-top: 1em; }
+    .collapsible { cursor: pointer; background: #e9eef6; border: none; outline: none; padding: 8px 0; width: 100%; text-align: left; font-size: 1em; font-weight: 600; border-radius: 4px; margin-top: 1em; }
+    .content { display: none; padding-left: 18px; }
+    .active + .content { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pete Intercom API Tester</h1>
+    <div class="desc">
+      Try any Intercom GET endpoint below. Enter IDs or query params as needed. Results are formatted for easy reading and exploration.
+    </div>
+    <form id="api-form">
+      <label for="endpoint">Endpoint</label>
+      <select id="endpoint" required>
+        <option value="admins">/admins</option>
+        <option value="admins/:id">/admins/:id</option>
+        <option value="me">/me</option>
+        <option value="conversations">/conversations</option>
+        <option value="conversations/:id">/conversations/:id</option>
+        <option value="contacts">/contacts</option>
+        <option value="contacts/:id">/contacts/:id</option>
+        <option value="companies">/companies</option>
+        <option value="companies/:id">/companies/:id</option>
+        <option value="search/contacts">Search Contacts</option>
+        <option value="search/companies">Search Companies</option>
+      </select>
+      <div id="id-input" style="display:none;">
+        <label for="resource-id">Resource ID</label>
+        <input type="text" id="resource-id" placeholder="Enter ID (required for :id endpoints)">
+      </div>
+      <div id="search-contacts-inputs" style="display:none;">
+        <label for="search-email">Email</label>
+        <input type="text" id="search-email" placeholder="Search by email">
+        <label for="search-name">Name</label>
+        <input type="text" id="search-name" placeholder="Search by name">
+      </div>
+      <div id="search-companies-inputs" style="display:none;">
+        <label for="search-company-name">Company Name</label>
+        <input type="text" id="search-company-name" placeholder="Search by company name">
+      </div>
+      <label for="query">Query Parameters (optional, e.g. per_page=10&order=desc)</label>
+      <input type="text" id="query" placeholder="key1=value1&key2=value2">
+      <button type="submit">Send Request</button>
+    </form>
+    <div class="result" id="result"></div>
+    <button id="toggle-chart" style="display:none; margin-bottom:1em;">Show Chart</button>
+    <div style="display:none;" id="chart-container">
+      <canvas id="apiChart" height="220"></canvas>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const endpointSelect = document.getElementById('endpoint');
+    const idInputDiv = document.getElementById('id-input');
+    const resourceIdInput = document.getElementById('resource-id');
+    const form = document.getElementById('api-form');
+    const resultDiv = document.getElementById('result');
+
+    endpointSelect.addEventListener('change', () => {
+      if (endpointSelect.value.includes(':id')) {
+        idInputDiv.style.display = 'block';
+      } else {
+        idInputDiv.style.display = 'none';
+        resourceIdInput.value = '';
+      }
+      // Show/hide search input fields
+      if (endpointSelect.value === 'search/contacts') {
+        document.getElementById('search-contacts-inputs').style.display = 'block';
+        document.getElementById('search-companies-inputs').style.display = 'none';
+      } else if (endpointSelect.value === 'search/companies') {
+        document.getElementById('search-contacts-inputs').style.display = 'none';
+        document.getElementById('search-companies-inputs').style.display = 'block';
+      } else {
+        document.getElementById('search-contacts-inputs').style.display = 'none';
+        document.getElementById('search-companies-inputs').style.display = 'none';
+      }
+    });
+
+    function prettyPrintJSON(obj) {
+      return JSON.stringify(obj, null, 2);
+    }
+
+    function createCollapsible(key, value) {
+      if (typeof value === 'object' && value !== null) {
+        const btn = document.createElement('button');
+        btn.className = 'collapsible';
+        btn.textContent = key;
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.innerHTML = `<pre class="json-viewer">${prettyPrintJSON(value)}</pre>`;
+        btn.addEventListener('click', function() {
+          btn.classList.toggle('active');
+          content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+        return [btn, content];
+      } else {
+        const pre = document.createElement('pre');
+        pre.className = 'json-viewer';
+        pre.textContent = `${key}: ${value}`;
+        return [pre];
+      }
+    }
+
+    let chartInstance = null;
+    const chartContainer = document.getElementById('chart-container');
+    const chartCanvas = document.getElementById('apiChart');
+    const toggleChartBtn = document.getElementById('toggle-chart');
+
+    function renderChart(labels, data, label) {
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(chartCanvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: label || 'Count',
+            data,
+            backgroundColor: 'rgba(45, 114, 210, 0.7)',
+            borderColor: 'rgba(45, 114, 210, 1)',
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+            title: { display: false },
+          },
+        },
+      });
+    }
+
+    toggleChartBtn.addEventListener('click', () => {
+      if (chartContainer.style.display === 'none') {
+        chartContainer.style.display = 'block';
+        toggleChartBtn.textContent = 'Hide Chart';
+      } else {
+        chartContainer.style.display = 'none';
+        toggleChartBtn.textContent = 'Show Chart';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.innerHTML = '';
+      let endpoint = endpointSelect.value;
+      let id = resourceIdInput.value.trim();
+      let query = document.getElementById('query').value.trim();
+      let url = '/api/intercom/';
+      if (endpoint.includes(':id')) {
+        if (!id) {
+          resultDiv.innerHTML = '<div class="error">ID is required for this endpoint.</div>';
+          return;
+        }
+        endpoint = endpoint.replace(':id', id);
+      }
+      // Handle search endpoints
+      if (endpoint === 'search/contacts') {
+        url += 'search/contacts';
+        const email = document.getElementById('search-email').value.trim();
+        const name = document.getElementById('search-name').value.trim();
+        const params = [];
+        if (email) params.push(`email=${encodeURIComponent(email)}`);
+        if (name) params.push(`name=${encodeURIComponent(name)}`);
+        if (params.length) url += '?' + params.join('&');
+      } else if (endpoint === 'search/companies') {
+        url += 'search/companies';
+        const name = document.getElementById('search-company-name').value.trim();
+        if (name) url += `?name=${encodeURIComponent(name)}`;
+      } else {
+        url += endpoint;
+        if (query) {
+          url += '?' + query;
+        }
+      }
+      try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (!resp.ok) {
+          resultDiv.innerHTML = `<div class="error">Error: ${data.error ? (typeof data.error === 'string' ? data.error : JSON.stringify(data.error)) : resp.statusText}</div>`;
+          return;
+        }
+        // Categorize and display top-level keys as collapsible sections
+        if (typeof data === 'object' && data !== null) {
+          Object.entries(data).forEach(([key, value]) => {
+            const elements = createCollapsible(key, value);
+            elements.forEach(el => resultDiv.appendChild(el));
+          });
+        } else {
+          resultDiv.innerHTML = `<pre class="json-viewer">${prettyPrintJSON(data)}</pre>`;
+        }
+        // Try to show a chart for list endpoints
+        let listKey = null;
+        if (Array.isArray(data.admins)) listKey = 'admins';
+        else if (Array.isArray(data.conversations)) listKey = 'conversations';
+        else if (Array.isArray(data.contacts)) listKey = 'contacts';
+        else if (Array.isArray(data.companies)) listKey = 'companies';
+        if (listKey) {
+          const items = data[listKey];
+          const labels = items.map((item, i) => item.name || item.id || `#${i+1}`);
+          const values = items.map(() => 1); // Just count for now
+          renderChart(labels, values, listKey.charAt(0).toUpperCase() + listKey.slice(1));
+          toggleChartBtn.style.display = 'inline-block';
+          chartContainer.style.display = 'none';
+          toggleChartBtn.textContent = 'Show Chart';
+        } else {
+          if (chartInstance) chartInstance.destroy();
+          chartContainer.style.display = 'none';
+          toggleChartBtn.style.display = 'none';
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="error">Request failed: ${err.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html> 

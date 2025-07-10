@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# @cursorrules-declarations
+# @cursor-changelog
+
+---
+
+# Cursor Rule: GitHub Best Practices & Tooling
+
+## ALWAYS
+- Always commit early and often with clear, descriptive messages.
+- Always use atomic commits: one logical change per commit.
+- Always push to feature branches, not directly to main/protected branches.
+- Always protect main and release branches with branch protection rules (require PR review, status checks, no force-push).
+- Always use pull requests for merging code into protected branches.
+- Always enable required status checks (CI, linter, tests) before merging.
+- Always automate code review and quality checks where possible (e.g., with GitHub Actions, BugBot, or similar tools).
+- Always document major changes and reference related plans or issues in commit messages and PRs.
+
+## NEVER
+- Never commit large, unrelated changes in a single commit.
+- Never force-push to main or protected branches.
+- Never merge failing or unreviewed code into protected branches.
+- Never bypass code review or required status checks.
+- Never leave branches stale or unmerged for long periods.
+
+---
+
+# See also: @/DEV_MAN, @/DEV_MAN/plans, @/rules/cursor-agent-protocol.mdc
