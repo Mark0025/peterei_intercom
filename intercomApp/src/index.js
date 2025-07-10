@@ -575,7 +575,7 @@ app.post('/bulk-update-training-topic', async (req, res) => {
 
 // Add /whatsworking endpoint to serve the architecture and working state doc
 app.get('/whatsworking', async (req, res) => {
-  const mdPath = path.join(__dirname, '../../DEV_MAN/whatworkin.md');
+  const mdPath = path.join(__dirname, '../DEV_MAN/whatworkin.md');
   fs.readFile(mdPath, 'utf8', async (err, data) => {
     if (err) {
       return res.status(500).send('<h2>Error loading documentation</h2><pre>' + err.message + '</pre>');
@@ -631,7 +631,7 @@ app.get('/whatsworking', async (req, res) => {
 });
 
 // Generic markdown viewer: /docs/:docname
-const DEV_MAN_ROOT = path.join(__dirname, '../../DEV_MAN');
+const DEV_MAN_ROOT = path.join(__dirname, '../DEV_MAN');
 const isValidMdPath = (requested) => {
   // Prevent path traversal and only allow .md files in DEV_MAN
   const resolved = path.resolve(DEV_MAN_ROOT, requested);
@@ -700,11 +700,79 @@ app.get('/docs/*', async (req, res) => {
   });
 });
 
+// Route to list all markdown files in DEV_MAN as links to /docs/<path>
+const walkDevMan = (dir, base = '') => {
+  // Recursively walk the DEV_MAN directory and return all .md file paths
+  let results = [];
+  const list = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of list) {
+    if (entry.isDirectory()) {
+      results = results.concat(walkDevMan(path.join(dir, entry.name), path.join(base, entry.name)));
+    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      results.push(path.join(base, entry.name));
+    }
+  }
+  return results;
+};
+
+app.get('/devman/', (req, res) => {
+  let files = [];
+  try {
+    files = walkDevMan(DEV_MAN_ROOT);
+  } catch (err) {
+    return res.status(500).send('<h2>Error reading DEV_MAN directory</h2><pre>' + err.message + '</pre>');
+  }
+  files.sort();
+  const links = files.map(f => `<li><a href="/docs/${f}">${f}</a></li>`).join('\n');
+  res.send(`
+    <html><head><title>DEV_MAN Documentation Index</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/globals.css">
+    <style>
+      body { font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif; background: #f9f9f9; color: #222; margin: 0; padding: 0; }
+      #devman-list { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(44,114,210,0.07); padding: 32px 24px; }
+      h1 { color: #2d72d2; font-size: 2em; }
+      ul { margin-left: 2em; }
+      li { margin-bottom: 0.5em; }
+      a { color: #2d72d2; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      @media (max-width: 700px) { #devman-list { padding: 8px; } }
+    </style>
+    </head><body>
+    <div id="devman-list">
+      <h1>DEV_MAN Documentation Index</h1>
+      <ul>${links}</ul>
+    </div>
+    </body></html>
+  `);
+});
+
 // Mount the PeteAI router
 app.use('/PeteAI', peteaRouter);
 
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);
+  // Print all available routes for developer convenience
+  const routes = [];
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) { // routes registered directly on the app
+      const methods = Object.keys(middleware.route.methods).map(m => m.toUpperCase()).join(', ');
+      routes.push({ path: middleware.route.path, methods });
+    } else if (middleware.name === 'router' && middleware.handle.stack) { // router middleware
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          const methods = Object.keys(handler.route.methods).map(m => m.toUpperCase()).join(', ');
+          routes.push({ path: handler.route.path, methods });
+        }
+      });
+    }
+  });
+  console.log('--- Available Routes ---');
+  routes.forEach(r => {
+    const url = `http://localhost:${PORT}${r.path}`;
+    console.log(`[${r.methods}] ${url}`);
+  });
+  console.log('------------------------');
 });
 
 console.log('Access Token:', process.env.INTERCOM_ACCESS_TOKEN); 
