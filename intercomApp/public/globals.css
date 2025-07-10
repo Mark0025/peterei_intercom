@@ -60,13 +60,37 @@ form {
   margin-bottom: 1.5em;
 }
 
-pre, code {
+/* --- Improved code and pre/code styling for markdown and docs --- */
+/* Inline code: always wrap and break long words */
+code {
+  background: #f4f4f4;
+  color: #222;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 1em;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+  white-space: pre-wrap !important;      /* Force wrapping for inline code */
+  word-break: break-word !important;     /* Break long words if needed */
+  overflow-wrap: anywhere !important;    /* Break anywhere if needed */
+  box-sizing: border-box;
+  max-width: 100%;
+  display: inline;
+}
+
+/* Code blocks: wrap and allow horizontal scroll if needed */
+pre, pre code {
   background: #f4f4f4;
   color: #222;
   border-radius: 6px;
   padding: 8px 12px;
   font-size: 1em;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+  white-space: pre-wrap !important;      /* Wrap long code lines */
+  word-break: break-word !important;     /* Break long words if needed */
   overflow-x: auto;
+  box-sizing: border-box;
+  max-width: 100%;
+  display: block;
 }
 
 pre {
@@ -80,6 +104,14 @@ pre {
   margin: 1.5em 0;
   box-shadow: 0 2px 8px rgba(44,114,210,0.07);
   overflow-x: auto;
+}
+
+li code, p code {
+  line-height: 1.6;         /* Match or slightly exceed the parent line height */
+  vertical-align: middle;   /* Align code nicely with text */
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 700px) {
