@@ -20,7 +20,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Missing message in request body' });
     }
     const completion = await openai.chat.completions.create({
-      model: 'openai/gpt-4o',
+      model: 'meta-llama/llama-3.2-3b-instruct:free',
       messages: [{ role: 'user', content: userMessage }],
     });
     res.json({ reply: completion.choices[0].message });

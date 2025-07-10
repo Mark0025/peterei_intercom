@@ -59,6 +59,12 @@
     <a href="/index.html" style="display:inline-block;"><img src="/pete.png" alt="PETE Logo" style="height:48px;vertical-align:middle;"></a>
     <span style="font-size:2.1em;color:#2d72d2;font-weight:600;letter-spacing:0.1em;">PETE</span>
   </header>
+  <div id="nav-menu"></div>
+  <script>
+    fetch('/menu.html').then(r => r.text()).then(html => {
+      document.getElementById('nav-menu').innerHTML = html;
+    });
+  </script>
   <div id="chat-container">
     <h1 style="color:#2d72d2;">PeteAI Chat Agent 🤖</h1>
     <p>Ask anything! Powered by OpenRouter and GPT-4o.</p>
