@@ -497,6 +497,42 @@ app.get('/hooks', (req, res) => {
   `);
 });
 
+// Modular static route registration: scan public/ for public pages, public/admin/ for admin pages
+function registerStaticRoutes(baseDir, baseRoute = '', isAdmin = false) {
+  const dirPath = path.join(__dirname, '../', baseDir);
+  if (!fs.existsSync(dirPath)) return;
+  fs.readdirSync(dirPath, { withFileTypes: true }).forEach(entry => {
+    if (entry.isDirectory()) {
+      // Only recurse into admin if isAdmin is true
+      if (isAdmin && entry.name === 'admin') {
+        registerStaticRoutes(path.join(baseDir, entry.name), path.join(baseRoute, entry.name), true);
+      }
+    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      const fileName = entry.name;
+      const route = path.join(baseRoute, fileName.replace(/\.html$/, ''));
+      // Only register /admin/* for admin pages
+      if (isAdmin) {
+        app.get(route, (req, res) => {
+          res.sendFile(path.join(dirPath, fileName));
+        });
+        app.get(path.join(baseRoute, fileName), (req, res) => {
+          res.redirect(301, route);
+        });
+      } else if (!baseRoute.includes('admin')) {
+        // Only register root-level public pages
+        app.get(route === '/index' ? '/' : route, (req, res) => {
+          res.sendFile(path.join(dirPath, fileName));
+        });
+        app.get(path.join(baseRoute, fileName), (req, res) => {
+          res.redirect(301, route === '/index' ? '/' : route);
+        });
+      }
+    }
+  });
+}
+registerStaticRoutes('public');
+registerStaticRoutes('public/admin', '/admin', true);
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
@@ -807,8 +843,88 @@ app.get('/testapi', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/testapi.html'));
 });
 
+// Endpoint: List all registered routes and static .html files
+app.get('/api/endpoints', (req, res) => {
+  const routes = [];
+  // Express routes
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      const methods = Object.keys(middleware.route.methods).map(m => m.toUpperCase()).join(', ');
+      routes.push({ path: middleware.route.path, methods });
+    } else if (middleware.name === 'router' && middleware.handle.stack) {
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          const methods = Object.keys(handler.route.methods).map(m => m.toUpperCase()).join(', ');
+          routes.push({ path: handler.route.path, methods });
+        }
+      });
+    }
+  });
+  // Static .html files in public/
+  const publicDir = path.join(__dirname, '../public');
+  try {
+    fs.readdirSync(publicDir).forEach(file => {
+      if (file.endsWith('.html')) {
+        routes.push({ path: '/' + file, methods: 'GET' });
+      }
+    });
+  } catch {}
+  // Remove duplicates
+  const seen = new Set();
+  const uniqueRoutes = routes.filter(r => {
+    const key = r.path + '|' + r.methods;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+  res.json(uniqueRoutes);
+});
+
 // Mount the PeteAI router
 app.use('/PeteAI', peteaRouter);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    version: require('../package.json').version,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Cache status endpoint
+app.get('/api/intercom/cache/status', (req, res) => {
+  try {
+    const cache = intercomCache.cache;
+    res.json({
+      lastRefreshed: cache.lastRefreshed,
+      counts: {
+        contacts: cache.contacts.length,
+        companies: cache.companies.length,
+        admins: cache.admins.length,
+        conversations: cache.conversations.length,
+      }
+    });
+  } catch (err) {
+    logger.logError(`[CACHE STATUS] ${err && err.stack ? err.stack : err}`);
+    res.status(500).json({ error: 'Cache status unavailable' });
+  }
+});
+
+// Contacts test endpoint
+app.get('/api/intercom/contacts/test', (req, res) => {
+  try {
+    const contacts = intercomCache.cache.contacts;
+    if (contacts && contacts.length > 0) {
+      res.json({ testContact: contacts[0], count: contacts.length });
+    } else {
+      res.json({ message: 'No contacts in cache.' });
+    }
+  } catch (err) {
+    logger.logError(`[CONTACTS TEST] ${err && err.stack ? err.stack : err}`);
+    res.status(500).json({ error: 'Contacts test unavailable' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Intercom Canvas Kit onboarding app listening on port ${PORT}`);

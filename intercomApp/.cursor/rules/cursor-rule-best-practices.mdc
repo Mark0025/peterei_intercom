@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+alwaysApply: true
+---
+
+# Cursor Rule: Best Practices for Project Rules
+
+## ALWAYS
+- Always review every rule for clarity, scope, and relevance before adoption.
+- Always version and update rules as the project evolves; document all changes in /DEV_MAN/plans/ and commit messages.
+- Always double-check all rule changes using terminal tools (ls -la, cat, tree, bat) to verify file structure and rule application before and after edits.
+- Always ensure rules are actionable, concise, and reference concrete project files or templates.
+- Always resolve any contradictions between rules immediately; rules must not conflict.
+- Always require all contributors (including AI) to read and understand the rules before making changes.
+- Always reference this meta-rule in all new rule files.
+
+## NEVER
+- Never add or update rules without verifying their impact on the rest of the stack.
+- Never allow rules to contradict each other; resolve conflicts immediately.
+- Never leave rules outdated, vague, or irrelevant to the current tech stack.
+
+---
+
+# See also: @/rules/github-best-practices.mdc, @/rules/cursor-agent-protocol.mdc, @/rules/endpoint-health-best-practices.mdc

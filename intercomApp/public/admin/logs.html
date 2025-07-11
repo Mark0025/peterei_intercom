@@ -39,7 +39,7 @@
       }
     }
     fetchLogs();
-    fetch('/menu.html').then(r => r.text()).then(html => {
+    fetch('/admin/admin_menu.html').then(r => r.text()).then(html => {
       document.getElementById('nav-menu').innerHTML = html;
     });
   </script>

@@ -3,19 +3,26 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+name: Intercom API Integration
+---
+
 # Cursor Rule: Intercom API Integration
 
-## Always Rules
+## ALWAYS
 - Always use the correct Intercom API version header: `Intercom-Version: 2.13`.
 - Always authenticate requests with the Bearer token from environment variables.
 - Always log all Intercom API requests and responses to `logs/api.log` using the logger utility.
 - Always handle pagination for list/search endpoints as described in the [Intercom API docs](mdc:https:/developers.intercom.com/docs/build-an-integration/learn-more/rest-apis/pagination-cursor).
 - Always use unified helpers for all GET/PUT/POST/DELETE requests to Intercom (error handling, logging, headers).
 - Always validate and sanitize all input parameters before making Intercom API calls.
+- Always double-check all changes using terminal tools (ls -la, cat, tree, bat) to verify file structure and API registration before and after edits.
+- Always verify that changes to Intercom API integration do not break other features; test full-stack flows after updates.
 
-## Never Rules
+## NEVER
 - Never hardcode tokens or sensitive data in code or logs.
 - Never ignore errors from Intercom API responses; always log and return meaningful errors.
+- Never make changes without verifying impact on the rest of the stack.
 
 ## Example
 ```js

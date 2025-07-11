@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rule: Endpoint Health, Dashboard, and Route Best Practices
+
+## ALWAYS
+- Always provide a health/status endpoint for every major feature or API group.
+- Always expose a machine-readable endpoint (e.g., /api/endpoints) that lists all registered routes and static endpoints, including their HTTP methods.
+- Always build health dashboards that:
+  - Show endpoint path, type (route/static), allowed methods, and live status.
+  - Distinguish between GET/POST/parameterized endpoints and mark POST-only or parameterized routes clearly.
+  - Use consistent, modern UI matching the app’s design system.
+- Always migrate static .html endpoints to clean, RESTful routes (e.g., /logs instead of /logs.html).
+- Always use the project’s tech stack idioms (Node.js/Express, REST, static/public, etc.) for all new endpoints and dashboards.
+- Always log and document endpoint health and dashboard status in /DEV_MAN/whatworkin.md or equivalent.
+- Always double-check all changes using terminal tools (ls -la, cat, tree, bat) to verify file structure and endpoint registration before and after edits.
+- Always verify that changes to endpoints or dashboards do not break other features; test full-stack flows after updates.
+
+## NEVER
+- Never leave endpoints unmonitored or undocumented in the dashboard.
+- Never expose .html static endpoints as primary app routes—migrate to clean routes.
+- Never check POST-only or parameterized endpoints with GET without marking them as such in the dashboard.
+- Never make changes to endpoints or dashboards without verifying impact on the rest of the stack.
+
+---
+
+# See also: @/rules/cursor-agent-protocol.mdc, @/rules/github-best-practices.mdc, @/rules/intercom-api.mdc

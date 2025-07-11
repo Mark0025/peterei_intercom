@@ -274,7 +274,7 @@ If Mermaid diagrams are not visible in `/whatsworking`, ensure:
 
 ---
 
-## July 2024 Fixes & Improvements
+## July 2025 Fixes & Improvements
 
 - Fixed overlapping/overflow of inline code in markdown lists and paragraphs by improving CSS and line height handling.
 - Added a generic markdown viewer route (`/docs/*`) and a `/devman/` index for all internal documentation.

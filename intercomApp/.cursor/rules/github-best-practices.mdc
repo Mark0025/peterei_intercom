@@ -3,22 +3,19 @@ description:
 globs: 
 alwaysApply: true
 ---
-# @cursorrules-declarations
-# @cursor-changelog
-
----
-
 # Cursor Rule: GitHub Best Practices & Tooling
 
 ## ALWAYS
 - Always commit early and often with clear, descriptive messages.
-- Always use atomic commits: one logical change per commit.
+- Always use atomic commits: one logical change per commit, covering all affected files (full-stack awareness).
 - Always push to feature branches, not directly to main/protected branches.
 - Always protect main and release branches with branch protection rules (require PR review, status checks, no force-push).
 - Always use pull requests for merging code into protected branches.
 - Always enable required status checks (CI, linter, tests) before merging.
 - Always automate code review and quality checks where possible (e.g., with GitHub Actions, BugBot, or similar tools).
 - Always document major changes and reference related plans or issues in commit messages and PRs.
+- Always double-check all changes using terminal tools (ls -la, cat, tree, bat) to verify file structure and code integrity before and after commits/PRs.
+- Always verify that changes do not break other features; test full-stack flows after updates.
 
 ## NEVER
 - Never commit large, unrelated changes in a single commit.
@@ -26,6 +23,7 @@ alwaysApply: true
 - Never merge failing or unreviewed code into protected branches.
 - Never bypass code review or required status checks.
 - Never leave branches stale or unmerged for long periods.
+- Never make changes without verifying impact on the rest of the stack.
 
 ---
 

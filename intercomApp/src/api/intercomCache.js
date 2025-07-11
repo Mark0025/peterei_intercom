@@ -104,8 +104,21 @@ function getCache() {
   return cache;
 }
 
+function getCacheStatus() {
+  return {
+    lastRefreshed: cache.lastRefreshed,
+    counts: {
+      contacts: cache.contacts.length,
+      companies: cache.companies.length,
+      admins: cache.admins.length,
+      conversations: cache.conversations.length,
+    }
+  };
+}
+
 module.exports = {
   cache,
   refreshCache,
   getCache,
+  getCacheStatus,
 }; 

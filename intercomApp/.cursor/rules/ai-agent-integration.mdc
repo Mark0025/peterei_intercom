@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+alwaysApply: true
+---
+
+# Cursor Rule: AI Agent Integration Best Practices
+
+## ALWAYS
+- Always use function calling and modular tool definitions for AI agent features.
+- Always design prompts to be clear, actionable, and context-aware.
+- Always inject relevant project context (plans, rules, API docs) into AI agent workflows.
+- Always log all AI agent actions and errors for traceability.
+- Always double-check all AI agent changes using terminal tools (ls -la, cat, tree, bat) to verify file structure and tool registration before and after edits.
+- Always verify that AI agent changes do not break other features; test full-stack flows after updates.
+
+## NEVER
+- Never make changes to AI agent features without verifying impact on the rest of the stack.
+- Never leave AI agent tools undocumented or untested.
+
+---
+
+# See also: @/rules/cursor-rule-best-practices.mdc, @/rules/express-api-best-practices.mdc

@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+alwaysApply: true
+---
+
+# Cursor Rule: Caching Strategies Best Practices
+
+## ALWAYS
+- Always use a unified caching strategy (in-memory, Redis) for all API and agent data.
+- Always implement cache invalidation and refresh mechanisms for all cache layers.
+- Always log all cache operations (set, get, invalidate) to a project log file (e.g., src/logs/api.log).
+- Always double-check all cache changes using terminal tools (ls -la, cat, tree, bat) to verify file structure and cache registration before and after edits.
+- Always verify that cache changes do not break other features; test full-stack flows after updates.
+
+## NEVER
+- Never hardcode sensitive data or cache keys in code or logs.
+- Never make changes to caching without verifying impact on the rest of the stack.
+- Never leave cache logic undocumented or untested.
+
+---
+
+# See also: @/rules/cursor-rule-best-practices.mdc, @/rules/express-api-best-practices.mdc
