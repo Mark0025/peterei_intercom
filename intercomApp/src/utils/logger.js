@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const LOG_DIR = path.join(__dirname, '../logs');
+const LOG_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), '../logs');
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR);
 }
@@ -10,27 +10,24 @@ function formatMsg(level, msg) {
   return `[${new Date().toISOString()}] [${level}] ${msg}\n`;
 }
 
-function logToFile(filename, msg) {
-  const filePath = path.join(LOG_DIR, filename);
-  fs.appendFileSync(filePath, msg, 'utf8');
-}
-
 function logInfo(msg, file = 'app.log') {
   const formatted = formatMsg('INFO', msg);
-  logToFile(file, formatted);
-  console.log(formatted); // Also print to terminal
+  fs.appendFileSync(path.join(LOG_DIR, file), formatted);
+  if (process.env.NODE_ENV !== 'test') console.log(formatted.trim());
 }
 
 function logError(msg, file = 'app.log') {
   const formatted = formatMsg('ERROR', msg);
-  logToFile(file, formatted);
-  console.error(formatted); // Also print to terminal
+  fs.appendFileSync(path.join(LOG_DIR, file), formatted);
+  if (process.env.NODE_ENV !== 'test') console.error(formatted.trim());
 }
 
 function logDebug(msg, file = 'app.log') {
+  if (process.env.NODE_ENV === 'development') {
   const formatted = formatMsg('DEBUG', msg);
-  logToFile(file, formatted);
-  console.debug(formatted); // Also print to terminal
+    fs.appendFileSync(path.join(LOG_DIR, file), formatted);
+    console.debug(formatted.trim());
+  }
 }
 
-module.exports = { logInfo, logError, logDebug }; 
+export default { logInfo, logError, logDebug }; 

@@ -36,3 +36,69 @@ This plan covers the addition of health/status endpoints, automated endpoint tes
 ---
 
 _Status: In Progress_
+
+---
+
+## Test-Driven System & Endpoint Health (July 2025 Update)
+
+A new Cursor rule (`test-driven-system.mdc`) now enforces:
+
+- Automated tests for every endpoint and feature
+- CI health checks before merge/deploy
+- Logging of all test results
+- Failing the build/PR if any endpoint is broken or untested
+- Documentation and plan updates for all new/changed endpoints and tests
+
+### Modularized, Test-Driven System Architecture
+
+```mermaid
+flowchart TD
+  subgraph Public
+    A1["/ (index.html)"]
+    A2["/popout (Onboarding)"]
+    A3["/PeteAI (Basic)"]
+    A4["/whatsworking"]
+  end
+  subgraph Admin
+    B1["/admin/training (peteTraining.html)"]
+    B2["/admin/support (support.html)"]
+    B3["/admin/peteAI (Advanced)"]
+    B4["/admin/logs"]
+    B5["/admin/health"]
+  end
+  subgraph Backend
+    C1["Express Server (index.js)"]
+    C2["Endpoint Health Test Script"]
+    C3["Logger (logs/app.log)"]
+  end
+  A1 -- "GET" --> C1
+  A2 -- "GET/POST" --> C1
+  A3 -- "POST" --> C1
+  A4 -- "GET" --> C1
+  B1 -- "GET" --> C1
+  B2 -- "GET" --> C1
+  B3 -- "POST" --> C1
+  B4 -- "GET" --> C1
+  B5 -- "GET" --> C1
+  C1 -- "Logs" --> C3
+  C2 -- "Tests all endpoints" --> C1
+  C2 -- "Logs results" --> C3
+```
+
+### Next Steps: Endpoint Test Coverage & Backlog
+
+1. **Write/Update Automated Endpoint Tests**
+   - Ensure every route (public/admin) is covered by a test.
+   - Use a Node.js script to check all endpoints for 200 OK and log results.
+2. **Integrate with CI**
+   - Add a GitHub Actions workflow to run the endpoint health script on every push/PR.
+   - Fail the build if any endpoint is broken.
+3. **Backlog for <90% Coverage**
+   - If test coverage is below 90%, create GitHub issues for each missing/broken endpoint or feature.
+   - Prioritize backlog fixes before moving to `/Pending` plans.
+4. **Update Documentation**
+   - Reflect new endpoints, tests, and admin/public split in `/DEV_MAN/whatworkin.md` and related docs.
+
+---
+
+_Status: In Progress — Test-driven system and endpoint health enforcement now required for all future work._

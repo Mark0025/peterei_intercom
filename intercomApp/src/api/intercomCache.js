@@ -1,8 +1,8 @@
 // @intercom-api.mdc
 // Always use the correct Intercom API version header, Bearer token from env, log all requests/responses, handle pagination, use unified helpers, and validate input. Never hardcode tokens or ignore errors.
 
-const axios = require('axios');
-const logger = require('../utils/logger');
+import axios from 'axios';
+import logger from '../utils/logger.js';
 
 const INTERCOM_API_BASE = 'https://api.intercom.io';
 const AUTH_HEADER = token => ({
@@ -116,7 +116,7 @@ function getCacheStatus() {
   };
 }
 
-module.exports = {
+export default {
   cache,
   refreshCache,
   getCache,

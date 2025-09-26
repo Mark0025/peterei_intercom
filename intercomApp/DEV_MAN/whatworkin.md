@@ -293,3 +293,15 @@ If Mermaid diagrams are not visible in `/whatsworking`, ensure:
 See `DEV_MAN/plans/v1.md` for the full plan and next steps.
 
 ---
+
+## July 2025: Test-Driven System & Endpoint Health Enforcement
+
+- A new Cursor rule (`test-driven-system.mdc`) now requires automated tests for every endpoint and feature, with CI health checks before merge/deploy.
+- All endpoints (public and admin) must be tested and pass automated health checks before any code is merged or deployed.
+- A Node.js script will check all endpoints for 200 OK and log results to `src/logs/api.log`.
+- If test coverage is below 90%, GitHub issues will be created for each missing/broken endpoint or feature, and backlog fixes will be prioritized.
+- The admin/public split is now enforced: all admin tools are under `/admin/`, and the public UI is minimal and focused on onboarding and PeteAI.
+- See `plan.health-checks-and-ci.in-progress.001.md` for the full plan and next steps.
+- See `.cursor/rules/test-driven-system.mdc` for the enforced rule.
+
+---

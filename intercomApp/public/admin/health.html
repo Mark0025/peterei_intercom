@@ -18,17 +18,19 @@
   </style>
 </head>
 <body>
-  <header style="display:flex;align-items:center;gap:18px;padding:18px 0 8px 0;">
-    <a href="/index.html" style="display:inline-block;"><img src="/pete.png" alt="PETE Logo" style="height:48px;vertical-align:middle;"></a>
-    <span style="font-size:2.1em;color:#2d72d2;font-weight:600;letter-spacing:0.1em;">PETE</span>
-  </header>
-  <h1>App Health & Endpoint Status</h1>
-  <div id="nav-menu"></div>
+  <div id="public-header"></div>
   <script>
-    fetch('/admin/admin_menu.html').then(r => r.text()).then(html => {
-      document.getElementById('nav-menu').innerHTML = html;
+    fetch('/header.html').then(r => r.text()).then(html => {
+      document.getElementById('public-header').innerHTML = html;
     });
   </script>
+  <div id="admin-menu"></div>
+  <script>
+    fetch('/admin/admin_menu.html').then(r => r.text()).then(html => {
+      document.getElementById('admin-menu').innerHTML = html;
+    });
+  </script>
+  <h1>App Health & Endpoint Status</h1>
   <table class="endpoint-table" id="endpoints-table">
     <thead>
       <tr><th>Endpoint</th><th>Type</th><th>Status</th></tr>

@@ -16,18 +16,14 @@
 // @intercom-api.mdc
 // Always use the correct Intercom API version header, Bearer token from env, log all requests/responses, handle pagination, use unified helpers, and validate input. Never hardcode tokens or ignore errors.
 
-const express = require('express');
-const axios = require('axios');
+import express from 'express';
+import axios from 'axios';
 const router = express.Router();
-const INTERCOM_API_BASE = 'https://api.intercom.io';
-const AUTH_HEADER = token => ({
-  Authorization: `Bearer ${token}`,
-  'Intercom-Version': '2.13',
-  'Accept': 'application/json',
-});
-const ACCESS_TOKEN = process.env.INTERCOM_ACCESS_TOKEN?.replace(/^"|"$/g, '');
-const logger = require('../utils/logger');
-const intercomCache = require('./intercomCache');
+import { INTERCOM_API_BASE } from './intercomConfig';
+import { AUTH_HEADER } from './intercomUtils';
+import { ACCESS_TOKEN } from './intercomConfig';
+import logger from '../utils/logger.js';
+import intercomCache from './intercomCache.js';
 
 function extractArrayFromResponse(data, preferredKeys = []) {
   for (const key of preferredKeys) {
@@ -88,9 +84,11 @@ async function proxyGet(req, res, path) {
 
 /**
  * @route GET /admins
- * @desc List all admins
+ * @desc List all admins (from cache)
  */
-router.get('/admins', (req, res) => proxyGet(req, res, '/admins'));
+router.get('/admins', (req, res) => {
+  res.json({ admins: intercomCache.cache.admins });
+});
 
 /**
  * @route GET /admins/:id
@@ -362,4 +360,4 @@ function shouldUseLive(req) {
   return req.query.live === 'true' || req.query.live === true;
 }
 
-module.exports = router;
+export default router;

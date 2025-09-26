@@ -1,17 +1,22 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
-const nodemailer = require('nodemailer');
-const canvasKit = require('./intercom/canvasKit');
-const { v4: uuidv4 } = require('uuid');
-const axios = require('axios');
-const util = require('util');
-const logger = require('./utils/logger');
-const peteaRouter = require('./ai/peteai');
-const intercomCache = require('./api/intercomCache');
+import 'dotenv/config';
+import express from 'express';
+import bodyParser from 'body-parser';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import nodemailer from 'nodemailer';
+import canvasKit from './intercom/canvasKit.js';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+import util from 'util';
+import logger from './utils/logger.js';
+import peteaRouter from './ai/peteai.js';
+import intercomCache from './api/intercomCache.js';
+import { fileURLToPath } from 'url';
+import pkg from '../package.json' assert { type: 'json' };
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Refresh Intercom cache on startup
 (async () => {
@@ -40,10 +45,10 @@ logger.logInfo(`[STARTUP] INTERCOM_CLIENT_SECRET: ${process.env.INTERCOM_CLIENT_
 
 let intercomApiRouter;
 try {
-  intercomApiRouter = require('./api/intercom');
-  logger.logInfo('[STARTUP] Successfully required ./api/intercom');
+  intercomApiRouter = (await import('./api/intercom.js')).default;
+  logger.logInfo('[STARTUP] Successfully imported ./api/intercom');
 } catch (err) {
-  logger.logError(`[STARTUP] Error requiring ./api/intercom: ${err.stack || err}`);
+  logger.logError(`[STARTUP] Error importing ./api/intercom: ${err.stack || err}`);
 }
 
 if (intercomApiRouter) {
@@ -478,8 +483,6 @@ app.post('/pete-user-training', (req, res) => {
 
 // Add /hooks endpoint to display current webhook endpoints
 app.get('/hooks', (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
   const webhookFile = path.join(__dirname, '../webhook.txt');
   let content = '';
   try {
@@ -542,13 +545,26 @@ app.post('/webhooks', (req, res) => {
   res.status(200).send('OK');
 });
 
+// Following .cursor/rules/endpoint-health-best-practices.mdc and test-driven-system.mdc:
+// Serve admin-only training and support pages from /admin/* and remove public access
+app.get('/admin/training', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/peteTraining.html'));
+});
+
+app.get('/admin/support', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/support.html'));
+});
+
+// Optionally, redirect old public routes to admin or return 404
+app.get('/training', (req, res) => {
+  res.redirect(301, '/admin/training');
+});
+
 app.get('/support', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/support.html'));
+  res.redirect(301, '/admin/support');
 });
 
 app.get('/logs', (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
   const logPath = path.join(__dirname, 'logs', 'app.log');
   fs.readFile(logPath, 'utf8', (err, data) => {
     if (err) {
@@ -567,10 +583,6 @@ app.get('/logs/:type', (req, res) => {
   }
   const logContent = fs.readFileSync(logPath, 'utf8');
   res.type('text/plain').send(logContent);
-});
-
-app.get('/training', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/peteTraining.html'));
 });
 
 app.get('/get-user-training-topic', async (req, res) => {
@@ -887,7 +899,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     uptime: process.uptime(),
-    version: require('../package.json').version,
+    version: pkg.version,
     timestamp: new Date().toISOString(),
   });
 });
@@ -955,3 +967,26 @@ if (!process.env.INTERCOM_ACCESS_TOKEN) {
   throw new Error('Missing INTERCOM_ACCESS_TOKEN in environment');
 }
 console.log('Access Token:', process.env.INTERCOM_ACCESS_TOKEN); 
+
+// Clean admin routes for static dashboards
+app.get('/admin/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/admin_menu.html'));
+});
+app.get('/admin/health', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/health.html'));
+});
+app.get('/admin/logs', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/logs.html'));
+});
+app.get('/admin/peteAI', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/peteAI.html'));
+});
+app.get('/admin/peteTraining', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/peteTraining.html'));
+});
+app.get('/admin/support', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/support.html'));
+});
+app.get('/admin/testapi', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/testapi.html'));
+}); 

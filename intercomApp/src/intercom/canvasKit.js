@@ -66,7 +66,7 @@ function debugCanvasResponse(response, context = '') {
   console.log(`[CanvasKit] debugCanvasResponse${context ? ' (' + context + ')' : ''}:`, JSON.stringify(response, null, 2));
 }
 
-module.exports = {
+export default {
   textComponent,
   buttonComponent,
   inputComponent,

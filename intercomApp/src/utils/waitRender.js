@@ -1,4 +1,4 @@
-const { textComponent, buttonComponent, canvasResponse } = require('../intercom/canvasKit');
+import { textComponent, buttonComponent, canvasResponse } from '../intercom/canvasKit.js';
 
 function waitForRenderResponse() {
   return canvasResponse({
@@ -19,4 +19,4 @@ function waitForRenderResponse() {
   });
 }
 
-module.exports = { waitForRenderResponse }; 
+export default { waitForRenderResponse }; 

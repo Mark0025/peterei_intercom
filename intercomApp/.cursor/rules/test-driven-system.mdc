@@ -1,0 +1,22 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Cursor Rule: Test-Driven System & Endpoint Health
+
+## ALWAYS
+- Always write or update automated tests for every new or changed endpoint, route, or feature.
+- Always run endpoint health checks (via script or CI) before merging or deploying.
+- Always log all test results and errors to a project log file (e.g., src/logs/api.log).
+- Always fail the build/PR if any endpoint is broken or untested.
+- Always update documentation and plans to reflect new/changed endpoints and tests.
+
+## NEVER
+- Never merge or deploy code with failing or missing endpoint tests.
+- Never leave endpoints undocumented or unmonitored.
+- Never bypass test-driven rules for any feature or route.
+
+---
+
+# See also: @/rules/endpoint-health-best-practices.mdc, @/rules/github-best-practices.mdc

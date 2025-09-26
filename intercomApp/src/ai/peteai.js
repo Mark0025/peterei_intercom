@@ -1,5 +1,5 @@
-const express = require('express');
-const OpenAI = require('openai');
+import express from 'express';
+import OpenAI from 'openai';
 
 const router = express.Router();
 
@@ -29,4 +29,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 

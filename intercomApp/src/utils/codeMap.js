@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Recursively find all .js and .html files in a directory
 function findFiles(dir, exts = ['.js', '.html'], fileList = []) {
@@ -24,7 +24,7 @@ function parseFileStructure(filePath) {
   if (ext === '.js') {
     // Find exported functions and Express endpoints
     const exportMatches = [...content.matchAll(/exports?\.(\w+)\s*=|module\.exports\s*=\s*{([^}]*)}/g)];
-    const endpointMatches = [...content.matchAll(/app\.(get|post|put|delete)\(['"](.*?)['"]/g)];
+    const endpointMatches = [...content.matchAll(/app\.(get|post|put|delete)\(['\"](.*?)['\"]/g)];
     exportMatches.forEach(m => {
       if (m[1]) nodes.push(`function ${m[1]}()`);
       if (m[2]) m[2].split(',').map(s => s.trim()).forEach(fn => nodes.push(`function ${fn.replace(/:.*$/, '')}()`));
@@ -39,22 +39,4 @@ function parseFileStructure(filePath) {
   return nodes;
 }
 
-// Generate Mermaid diagram from code structure
-function generateCodeMap(rootDir = path.join(__dirname, '../')) {
-  const files = findFiles(rootDir);
-  let diagram = 'graph TD\n';
-  files.forEach(file => {
-    const rel = path.relative(rootDir, file);
-    const nodes = parseFileStructure(file);
-    if (nodes.length) {
-      diagram += `  "${rel}":::file\n`;
-      nodes.forEach(n => {
-        diagram += `  "${rel}"-->|"${n}"|"${n}"\n`;
-      });
-    }
-  });
-  diagram += 'classDef file fill:#f9f,stroke:#333,stroke-width:1px;\n';
-  return diagram;
-}
-
-module.exports = { generateCodeMap }; 
+export default { generateCodeMap }; 

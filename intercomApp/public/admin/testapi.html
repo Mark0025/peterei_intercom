@@ -24,7 +24,18 @@
   </style>
 </head>
 <body>
-  <div id="nav-menu"></div>
+  <div id="public-header"></div>
+  <script>
+    fetch('/header.html').then(r => r.text()).then(html => {
+      document.getElementById('public-header').innerHTML = html;
+    });
+  </script>
+  <div id="admin-menu"></div>
+  <script>
+    fetch('/admin/admin_menu.html').then(r => r.text()).then(html => {
+      document.getElementById('admin-menu').innerHTML = html;
+    });
+  </script>
   <div class="container">
     <h1>Pete Intercom API Tester</h1>
     <div class="desc">
@@ -71,10 +82,6 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    fetch('/admin/admin_menu.html').then(r => r.text()).then(html => {
-      document.getElementById('nav-menu').innerHTML = html;
-    });
-
     const endpointSelect = document.getElementById('endpoint');
     const idInputDiv = document.getElementById('id-input');
     const resourceIdInput = document.getElementById('resource-id');

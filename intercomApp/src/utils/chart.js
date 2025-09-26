@@ -40,6 +40,6 @@ function createBarChart(ctx, labels, data, options = {}) {
   });
 }
 
-module.exports = {
-  createBarChart,
+export default {
+  createBarChart
 }; 
