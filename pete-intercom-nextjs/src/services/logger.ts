@@ -48,4 +48,5 @@ export function logDebug(msg: string, file: string = 'app.log'): void {
   }
 }
 
-export default { logInfo, logError, logDebug };
+const logger = { logInfo, logError, logDebug };
+export default logger;

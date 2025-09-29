@@ -85,7 +85,7 @@ export default function Home() {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
-              ✅ What's Working
+              ✅ What&apos;s Working
             </CardTitle>
             <CardDescription className="text-base">
               View successful features and system status

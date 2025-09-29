@@ -215,7 +215,7 @@ export default function AdminSettingsPage() {
       <div className="text-center space-y-3 pb-4">
         <h1 className="text-4xl font-bold tracking-tight">Intercom Data Settings</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Configure which fields we fetch from Intercom and see where they're used
+          Configure which fields we fetch from Intercom and see where they&apos;re used
         </p>
       </div>
 
@@ -285,7 +285,7 @@ export default function AdminSettingsPage() {
       <div>
         <h2 className="text-2xl font-bold mb-4">📧 Contact Fields</h2>
         <p className="text-muted-foreground mb-6">
-          Fields available from Intercom's Contact API
+          Fields available from Intercom&apos;s Contact API
         </p>
         {contactFields.map(field => renderFieldCard(field, 'contacts'))}
       </div>
@@ -294,7 +294,7 @@ export default function AdminSettingsPage() {
       <div>
         <h2 className="text-2xl font-bold mb-4">🏢 Company Fields</h2>
         <p className="text-muted-foreground mb-6">
-          Fields available from Intercom's Company API (not currently implemented)
+          Fields available from Intercom&apos;s Company API (not currently implemented)
         </p>
         {companyFields.map(field => renderFieldCard(field, 'companies'))}
       </div>
@@ -305,9 +305,9 @@ export default function AdminSettingsPage() {
           <h3 className="font-bold mb-2">💡 How This Works</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• <strong>Active fields</strong> are currently fetched from Intercom API</li>
-            <li>• <strong>"Used in"</strong> shows which pages/features use this data</li>
+            <li>• <strong>&quot;Used in&quot;</strong> shows which pages/features use this data</li>
             <li>• Disabling unused fields reduces API payload size and improves performance</li>
-            <li>• <strong>Toggle fields then click "Save Changes"</strong> to apply updates</li>
+            <li>• <strong>Toggle fields then click &quot;Save Changes&quot;</strong> to apply updates</li>
             <li>• Changes take effect on next data fetch from Intercom</li>
           </ul>
         </CardContent>

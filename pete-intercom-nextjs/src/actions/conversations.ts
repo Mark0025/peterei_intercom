@@ -42,8 +42,7 @@ export async function getAllConversations(forceRefresh: boolean = false): Promis
 
     return {
       success: true,
-      data: conversations,
-      message: `Fetched ${conversations.length} conversations from ${forceRefresh ? 'live API' : 'cache'}`,
+      data: conversations
     };
   } catch (error) {
     console.error('Error fetching conversations:', error);

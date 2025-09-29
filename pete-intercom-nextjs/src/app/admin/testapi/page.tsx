@@ -6,7 +6,7 @@ export default function AdminTestAPIPage() {
   const [testResults, setTestResults] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const testEndpoint = async (endpoint: string, method: string = 'POST', body?: any) => {
+  const testEndpoint = async (endpoint: string, method: string = 'POST', body?: Record<string, unknown>) => {
     setIsLoading(true);
     try {
       const response = await fetch(endpoint, {

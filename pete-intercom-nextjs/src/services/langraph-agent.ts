@@ -137,7 +137,7 @@ const getCacheInfoTool = tool(
 );
 
 const analyzeConversationsTool = tool(
-  async ({ status, timeframe = "all" }) => {
+  async ({ status, timeframe = "all" }: { status?: string; timeframe?: string }) => {
     try {
       const cache = getSmartCache();
       let conversations = cache.conversations;

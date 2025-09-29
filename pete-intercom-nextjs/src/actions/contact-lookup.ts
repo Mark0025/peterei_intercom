@@ -20,7 +20,7 @@ interface Contact {
   phone?: string;
   created_at?: number;
   updated_at?: number;
-  custom_attributes?: Record<string, any>;
+  custom_attributes?: Record<string, string | number | boolean | null>;
 }
 
 /**
@@ -72,7 +72,18 @@ export async function searchContactByEmail(
       };
     }
 
-    const contacts: Contact[] = data.data.map((contact: any) => ({
+    interface IntercomContactResponse {
+      id: string;
+      email: string;
+      name?: string;
+      role?: string;
+      phone?: string;
+      created_at?: number;
+      updated_at?: number;
+      custom_attributes?: Record<string, string | number | boolean | null>;
+    }
+
+    const contacts: Contact[] = data.data.map((contact: IntercomContactResponse) => ({
       id: contact.id,
       email: contact.email,
       name: contact.name,
@@ -185,7 +196,18 @@ export async function searchContactByName(
 
     const data = await response.json();
 
-    const contacts: Contact[] = (data.data || []).map((contact: any) => ({
+    interface IntercomContactResponse {
+      id: string;
+      email: string;
+      name?: string;
+      role?: string;
+      phone?: string;
+      created_at?: number;
+      updated_at?: number;
+      custom_attributes?: Record<string, string | number | boolean | null>;
+    }
+
+    const contacts: Contact[] = (data.data || []).map((contact: IntercomContactResponse) => ({
       id: contact.id,
       email: contact.email,
       name: contact.name,

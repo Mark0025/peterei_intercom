@@ -59,7 +59,18 @@ export async function listAdmins(): Promise<{
 
     const data = await response.json();
 
-    const admins: Admin[] = (data.admins || []).map((admin: any) => ({
+    interface IntercomAdminResponse {
+      id: string;
+      name: string;
+      email: string;
+      avatar?: { type: string; image_url: string };
+      away_mode_enabled?: boolean;
+      away_mode_reassign?: boolean;
+      has_inbox_seat?: boolean;
+      team_ids?: number[];
+    }
+
+    const admins: Admin[] = (data.admins || []).map((admin: IntercomAdminResponse) => ({
       id: admin.id,
       name: admin.name,
       email: admin.email,

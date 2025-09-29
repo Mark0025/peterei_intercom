@@ -338,9 +338,9 @@ async function runAllTests() {
 // Check if server is running before tests
 async function checkServerRunning() {
   try {
-    const response = await fetch(BASE_URL, { method: 'HEAD' });
+    const _response = await fetch(BASE_URL, { method: 'HEAD' });
     return true;
-  } catch (error) {
+  } catch (_error) {
     console.error('\n❌ Error: Dev server is not running!');
     console.error(`   Cannot connect to ${BASE_URL}`);
     console.error('\n   Please start the server first:');

@@ -107,7 +107,7 @@ async function loadCache() {
   }
 }
 
-async function fetchFromIntercom(url: string): Promise<any> {
+async function fetchFromIntercom(url: string): Promise<Record<string, unknown>> {
   if (!ACCESS_TOKEN) {
     throw new Error('INTERCOM_ACCESS_TOKEN is not configured');
   }
@@ -123,8 +123,14 @@ async function fetchFromIntercom(url: string): Promise<any> {
   return await response.json();
 }
 
+interface ActivityCounts {
+  contacts: number;
+  companies: number;
+  conversations: number;
+}
+
 // Check for new activity in Intercom
-async function checkForNewActivity(): Promise<{ hasNewActivity: boolean; activityCounts: any }> {
+async function checkForNewActivity(): Promise<{ hasNewActivity: boolean; activityCounts: ActivityCounts }> {
   try {
     logInfo('[SMART_CACHE] Checking for new activity...', 'cache.log');
     
@@ -159,8 +165,8 @@ async function checkForNewActivity(): Promise<{ hasNewActivity: boolean; activit
 }
 
 // Fetch all data from a paginated endpoint
-async function getAllFromIntercom(path: string, preferredKeys: string[] = []): Promise<any[]> {
-  let results: any[] = [];
+async function getAllFromIntercom(path: string, preferredKeys: string[] = []): Promise<unknown[]> {
+  let results: unknown[] = [];
   let nextUrl: string | null = `${INTERCOM_API_BASE}${path}`;
   const originalPath = path;
   const originalBase = INTERCOM_API_BASE;
@@ -169,9 +175,9 @@ async function getAllFromIntercom(path: string, preferredKeys: string[] = []): P
     logDebug(`[SMART_CACHE] Fetching: ${nextUrl}`, 'cache.log');
     
     const data = await fetchFromIntercom(nextUrl);
-    
+
     // Extract array from response
-    let arr: any[] = [];
+    let arr: unknown[] = [];
     for (const key of preferredKeys) {
       if (Array.isArray(data[key])) {
         arr = data[key];
@@ -207,7 +213,7 @@ async function getAllFromIntercom(path: string, preferredKeys: string[] = []): P
 }
 
 // Perform incremental update - only fetch new/updated items
-async function performIncrementalUpdate(activityCounts: any) {
+async function performIncrementalUpdate(activityCounts: ActivityCounts) {
   try {
     logInfo('[SMART_CACHE] Performing incremental update...', 'cache.log');
     

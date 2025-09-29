@@ -22,7 +22,7 @@ interface Company {
   industry?: string;
   created_at?: number;
   updated_at?: number;
-  custom_attributes?: Record<string, any>;
+  custom_attributes?: Record<string, string | number | boolean | null>;
 }
 
 /**
@@ -74,7 +74,20 @@ export async function searchCompanyByName(
       };
     }
 
-    const companies: Company[] = data.data.map((company: any) => ({
+    interface IntercomCompanyResponse {
+      id: string;
+      name: string;
+      company_id?: string;
+      plan?: string;
+      size?: number;
+      website?: string;
+      industry?: string;
+      created_at?: number;
+      updated_at?: number;
+      custom_attributes?: Record<string, string | number | boolean | null>;
+    }
+
+    const companies: Company[] = data.data.map((company: IntercomCompanyResponse) => ({
       id: company.id,
       name: company.name,
       company_id: company.company_id,
@@ -166,10 +179,10 @@ export async function getCompanyById(
  */
 export async function updateCompanyAttributes(
   companyId: string,
-  customAttributes: Record<string, any>
+  customAttributes: Record<string, string | number | boolean | null>
 ): Promise<{ success: boolean; company?: Company; error?: string }> {
   try {
-    logInfo(`[Company Lookup] Updating company ${companyId} attributes:`, customAttributes);
+    logInfo(`[Company Lookup] Updating company ${companyId} attributes: ${JSON.stringify(customAttributes)}`);
 
     const response = await fetch(`https://api.intercom.io/companies/${companyId}`, {
       method: 'PUT',
@@ -248,7 +261,20 @@ export async function listCompanies(
 
     const data = await response.json();
 
-    const companies: Company[] = (data.data || []).map((company: any) => ({
+    interface IntercomCompanyResponse {
+      id: string;
+      name: string;
+      company_id?: string;
+      plan?: string;
+      size?: number;
+      website?: string;
+      industry?: string;
+      created_at?: number;
+      updated_at?: number;
+      custom_attributes?: Record<string, string | number | boolean | null>;
+    }
+
+    const companies: Company[] = (data.data || []).map((company: IntercomCompanyResponse) => ({
       id: company.id,
       name: company.name,
       company_id: company.company_id,

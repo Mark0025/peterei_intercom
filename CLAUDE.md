@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 CRITICAL: Git Safety Rules
+
+**NEVER use `git checkout -- <file>` or `git restore <file>` to discard uncommitted changes without explicit user confirmation.**
+
+Uncommitted work represents real human effort. Before discarding any changes:
+1. Show the user what will be lost with `git diff`
+2. Ask explicitly: "Do you want to stash, commit, or discard these changes?"
+3. Prefer `git stash` for safety - it can be recovered
+
+See `DEV_MAN/git-safety-rules.md` for full details and recovery procedures.
+
 ## Development Commands
 
 ### Start the Application

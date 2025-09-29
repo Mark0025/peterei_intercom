@@ -386,7 +386,7 @@ export default function TrainingManagementPage() {
         <CardHeader>
           <CardTitle className="text-2xl">📦 Bulk Update All Active Users</CardTitle>
           <CardDescription className="text-base">
-            Set training topic for ALL active users (role: "user") at once
+            Set training topic for ALL active users (role: &quot;user&quot;) at once
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -397,7 +397,7 @@ export default function TrainingManagementPage() {
                   📊 This will update <strong>{allTopicsData.filter(u => u.role === 'user').length} active users</strong>
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
-                  (Users with role = "user", excluding leads and visitors)
+                  (Users with role = &quot;user&quot;, excluding leads and visitors)
                 </p>
               </div>
             )}

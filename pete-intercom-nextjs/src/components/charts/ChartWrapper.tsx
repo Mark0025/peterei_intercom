@@ -47,7 +47,7 @@ const CHART_COLORS = {
 };
 
 // Default chart options with theme
-const getDefaultOptions = (title?: string): ChartOptions<any> => ({
+const getDefaultOptions = (title?: string): ChartOptions<'line' | 'bar' | 'pie' | 'doughnut'> => ({
   responsive: true,
   maintainAspectRatio: true,
   plugins: {
@@ -105,7 +105,7 @@ const getDefaultOptions = (title?: string): ChartOptions<any> => ({
 });
 
 interface LineChartProps {
-  data: any;
+  data: ChartData<'line'>;
   title?: string;
   options?: ChartOptions<'line'>;
 }
@@ -120,7 +120,7 @@ export function LineChart({ data, title, options }: LineChartProps) {
 }
 
 interface BarChartProps {
-  data: any;
+  data: ChartData<'bar'>;
   title?: string;
   options?: ChartOptions<'bar'>;
 }
@@ -135,7 +135,7 @@ export function BarChart({ data, title, options }: BarChartProps) {
 }
 
 interface DoughnutChartProps {
-  data: any;
+  data: ChartData<'doughnut'>;
   title?: string;
   options?: ChartOptions<'doughnut'>;
 }

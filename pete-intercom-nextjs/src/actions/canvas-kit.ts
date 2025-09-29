@@ -1,24 +1,25 @@
 'use server';
 
 // Canvas Kit Server Actions - React 19 compatible
-import type { 
-  CanvasKitResponse, 
-  CanvasKitFormData, 
+import type {
+  CanvasKitResponse,
+  CanvasKitFormData,
   ActionResult,
   CanvasKitComponent
 } from '@/types';
-import { getOnboardingData, getQuestionByIndex } from '@/services/onboarding-data';
-import { logInfo, logError, logDebug } from '@/services/logger';
+import { getQuestionByIndex } from '@/services/onboarding-data';
+import { logInfo, logError } from '@/services/logger';
 
 // Helper to build Canvas Kit components
 function createTextComponent(id: string, text: string, style?: 'header' | 'error' | 'muted'): CanvasKitComponent {
-  return {
+  const component: CanvasKitComponent = {
     type: 'text',
     id,
     text,
-    style,
-    align: 'center'
+    align: 'center',
+    ...(style && { style })
   };
+  return component;
 }
 
 function createInputComponent(id: string, label: string, required = false): CanvasKitComponent {
@@ -110,17 +111,28 @@ export async function handleCanvasKitSubmit(formData: CanvasKitFormData): Promis
         const answer = inputValues.answer;
 
         if (!answer?.trim()) {
-          const response: CanvasKitResponse = {
-            canvas: {
-              content: {
-                components: [
-                  createTextComponent('error', 'Please provide an answer before continuing.', 'error'),
-                  createButtonComponent('try_again', 'Try Again')
-                ]
-              },
-              stored_data: storedData
-            }
-          };
+          const response: CanvasKitResponse = storedData
+            ? {
+                canvas: {
+                  content: {
+                    components: [
+                      createTextComponent('error', 'Please provide an answer before continuing.', 'error'),
+                      createButtonComponent('try_again', 'Try Again')
+                    ]
+                  },
+                  stored_data: storedData
+                }
+              }
+            : {
+                canvas: {
+                  content: {
+                    components: [
+                      createTextComponent('error', 'Please provide an answer before continuing.', 'error'),
+                      createButtonComponent('try_again', 'Try Again')
+                    ]
+                  }
+                }
+              };
           return { success: false, data: response, error: 'Answer required' };
         }
 
@@ -198,17 +210,28 @@ export async function handleCanvasKitSubmit(formData: CanvasKitFormData): Promis
       case 'save_training': {
         const topic = inputValues.training_topic;
         if (!topic?.trim()) {
-          const response: CanvasKitResponse = {
-            canvas: {
-              content: {
-                components: [
-                  createTextComponent('error', 'Training topic is required.', 'error'),
-                  createButtonComponent('try_again', 'Try Again')
-                ]
-              },
-              stored_data: storedData
-            }
-          };
+          const response: CanvasKitResponse = storedData
+            ? {
+                canvas: {
+                  content: {
+                    components: [
+                      createTextComponent('error', 'Training topic is required.', 'error'),
+                      createButtonComponent('try_again', 'Try Again')
+                    ]
+                  },
+                  stored_data: storedData
+                }
+              }
+            : {
+                canvas: {
+                  content: {
+                    components: [
+                      createTextComponent('error', 'Training topic is required.', 'error'),
+                      createButtonComponent('try_again', 'Try Again')
+                    ]
+                  }
+                }
+              };
           return { success: false, data: response, error: 'Training topic required' };
         }
 

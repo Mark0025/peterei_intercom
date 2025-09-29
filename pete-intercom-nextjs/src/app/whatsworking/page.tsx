@@ -1,6 +1,15 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { marked } from 'marked';
+import MarkdownRenderer from '@/components/markdown-renderer';
+
+// Configure marked for better rendering
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  headerIds: true,
+  mangle: false,
+});
 
 async function getWhatsWorkingContent() {
   try {
@@ -69,7 +78,5 @@ export default async function WhatsWorkingPage() {
   const content = await getWhatsWorkingContent();
   const htmlContent = await marked.parse(content);
 
-  return (
-    <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-  );
+  return <MarkdownRenderer htmlContent={htmlContent} />;
 }

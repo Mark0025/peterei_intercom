@@ -1,10 +1,10 @@
 'use server';
 
-import { forceFullRefresh, getSmartCacheStatus, smartSearchContacts, smartSearchCompanies, smartRefreshIntercomCache } from '@/services/smart-cache';
+import { forceFullRefresh, getSmartCacheStatus, smartSearchContacts, smartSearchCompanies } from '@/services/smart-cache';
 import { logInfo, logError } from '@/services/logger';
-import type { ActionResult } from '@/types';
+import type { ActionResult, CacheStatusData, ContactSearchData, CompanySearchData } from '@/types';
 
-export async function refreshCacheAction(): Promise<ActionResult<any>> {
+export async function refreshCacheAction(): Promise<ActionResult<CacheStatusData>> {
   try {
     logInfo('[INTERCOM_ACTION] Manual cache refresh requested');
     await forceFullRefresh(); // Force full refresh for manual requests
@@ -28,7 +28,7 @@ export async function refreshCacheAction(): Promise<ActionResult<any>> {
   }
 }
 
-export async function getCacheStatusAction(): Promise<ActionResult<any>> {
+export async function getCacheStatusAction(): Promise<ActionResult<CacheStatusData>> {
   try {
     const status = getSmartCacheStatus();
     return {
@@ -47,10 +47,10 @@ export async function getCacheStatusAction(): Promise<ActionResult<any>> {
 }
 
 export async function searchContactsAction(
-  email?: string, 
-  name?: string, 
+  email?: string,
+  name?: string,
   live: boolean = false
-): Promise<ActionResult<any>> {
+): Promise<ActionResult<ContactSearchData>> {
   try {
     logInfo(`[INTERCOM_ACTION] Search contacts: email=${email || ''}, name=${name || ''}, live=${live}`);
     
@@ -75,9 +75,9 @@ export async function searchContactsAction(
 }
 
 export async function searchCompaniesAction(
-  name?: string, 
+  name?: string,
   live: boolean = false
-): Promise<ActionResult<any>> {
+): Promise<ActionResult<CompanySearchData>> {
   try {
     logInfo(`[INTERCOM_ACTION] Search companies: name=${name || ''}, live=${live}`);
     

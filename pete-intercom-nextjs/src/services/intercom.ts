@@ -28,7 +28,7 @@ const cache: IntercomCache = {
 let isInitializing = false;
 let initializationPromise: Promise<void> | null = null;
 
-function extractArrayFromResponse(data: any, preferredKeys: string[] = []): any[] {
+function extractArrayFromResponse(data: Record<string, unknown>, preferredKeys: string[] = []): unknown[] {
   // Try preferred keys first
   for (const key of preferredKeys) {
     if (Array.isArray(data[key])) return data[key];
@@ -43,12 +43,12 @@ function extractArrayFromResponse(data: any, preferredKeys: string[] = []): any[
   return [];
 }
 
-async function getAllFromIntercom(path: string, preferredKeys: string[] = []): Promise<any[]> {
+async function getAllFromIntercom(path: string, preferredKeys: string[] = []): Promise<unknown[]> {
   if (!ACCESS_TOKEN) {
     throw new Error('INTERCOM_ACCESS_TOKEN is not configured');
   }
 
-  let results: any[] = [];
+  let results: unknown[] = [];
   let nextUrl: string | null = `${INTERCOM_API_BASE}${path}`;
   const originalPath = path;
   const originalBase = INTERCOM_API_BASE;
@@ -160,7 +160,7 @@ export function getCacheStatus() {
   };
 }
 
-export async function proxyIntercomGet(path: string, params?: Record<string, string>): Promise<any> {
+export async function proxyIntercomGet(path: string, params?: Record<string, string>): Promise<unknown> {
   if (!ACCESS_TOKEN) {
     throw new Error('INTERCOM_ACCESS_TOKEN is not configured');
   }

@@ -2,7 +2,6 @@
 
 import type { ActionResult } from '@/types';
 import { logInfo, logError } from '@/services/logger';
-import { processWithLangGraph } from '@/services/langraph-agent';
 import OpenAI from 'openai';
 import { getSmartCacheStatus, getSmartCache, smartSearchContacts, smartSearchCompanies } from '@/services/smart-cache';
 
@@ -155,10 +154,26 @@ If users ask specific questions about contacts or companies (like "find contact 
       const toolCall = responseMessage.tool_calls[0];
       const functionName = toolCall.function.name;
       const args = JSON.parse(toolCall.function.arguments);
-      
+
       logInfo(`PeteAI function call: ${functionName} with args: ${JSON.stringify(args)}`);
-      
-      let functionResult: any;
+
+      interface FunctionResult {
+        count: number;
+        contacts?: Array<{
+          name: string;
+          email: string;
+          id: string;
+          companies: string[];
+        }>;
+        companies?: Array<{
+          name: string;
+          id: string;
+          user_count: number;
+          website?: string;
+        }>;
+      }
+
+      let functionResult: FunctionResult;
       
       try {
         if (functionName === 'search_contacts') {

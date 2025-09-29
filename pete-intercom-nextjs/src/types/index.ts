@@ -3,7 +3,7 @@ export interface CanvasComponent {
   id: string;
   type: string;
   content: string;
-  styles?: Record<string, any>;
+  styles?: Record<string, string | number | boolean>;
   children?: CanvasComponent[];
 }
 
@@ -132,7 +132,7 @@ export interface IntercomContact {
   ios_os_version?: string;
   ios_sdk_version?: string;
   ios_last_seen_at?: number;
-  custom_attributes?: Record<string, any>;
+  custom_attributes?: Record<string, string | number | boolean | null>;
   tags?: {
     type: string;
     tags: {
@@ -177,7 +177,7 @@ export interface IntercomCompany {
   website?: string;
   industry?: string;
   remote_created_at?: number;
-  custom_attributes?: Record<string, any>;
+  custom_attributes?: Record<string, string | number | boolean | null>;
   tags?: {
     type: string;
     tags: {
@@ -260,7 +260,7 @@ export interface IntercomConversation {
       name?: string;
       email?: string;
     };
-    attachments?: any[];
+    attachments?: Array<Record<string, unknown>>;
     url?: string;
     redacted?: boolean;
   };
@@ -275,7 +275,7 @@ export interface IntercomConversation {
       id: string;
     }[];
   };
-  custom_attributes?: Record<string, any>;
+  custom_attributes?: Record<string, string | number | boolean | null>;
   first_contact_reply?: {
     created_at: number;
     type: string;
@@ -322,7 +322,7 @@ export interface IntercomCache {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -330,7 +330,7 @@ export interface ApiResponse<T = any> {
 }
 
 // Server Action Result Types
-export interface ActionResult<T = any> {
+export interface ActionResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -352,4 +352,28 @@ export interface EnvironmentConfig {
   OPENROUTER_API_KEY?: string;
   INTERCOM_ACCESS_TOKEN?: string;
   DATABASE_URL?: string;
+}
+
+// Cache Status Types
+export interface CacheStatusData {
+  lastRefreshed: Date | null;
+  counts: {
+    contacts: number;
+    companies: number;
+    admins: number;
+    conversations: number;
+  };
+  isInitializing: boolean;
+  message?: string;
+}
+
+// Search Result Types
+export interface ContactSearchData {
+  contacts: IntercomContact[];
+  count: number;
+}
+
+export interface CompanySearchData {
+  companies: IntercomCompany[];
+  count: number;
 }

@@ -29,7 +29,7 @@ import { env } from '@/lib/env';
 export async function updateUserTrainingTopic(
   identifier: string,
   newTopic: string
-): Promise<{ success: boolean; userId?: string; error?: string; data?: any }> {
+): Promise<{ success: boolean; userId?: string; error?: string; data?: Record<string, unknown> }> {
   try {
     logInfo(`[Training] Updating training topic for ${identifier} to: ${newTopic}`);
 
@@ -118,7 +118,7 @@ export async function updateUserTrainingTopic(
  */
 export async function getUserTrainingTopic(
   identifier: string
-): Promise<{ success: boolean; topic?: string; error?: string; user?: any }> {
+): Promise<{ success: boolean; topic?: string; error?: string; user?: Record<string, unknown> }> {
   try {
     logInfo(`[Training] Getting training topic for ${identifier}`);
 
@@ -250,7 +250,18 @@ export async function getAllUserTrainingTopics(): Promise<{
 
       logInfo(`[Training] Retrieved ${contacts.length} contacts from page ${page}`);
 
-      contacts.forEach((user: any) => {
+      interface IntercomUserResponse {
+        id: string;
+        email?: string;
+        name?: string;
+        custom_attributes?: { user_training_topic?: string };
+        role?: string;
+        unsubscribed_from_emails?: boolean;
+        marked_email_as_spam?: boolean;
+        has_hard_bounced?: boolean;
+      }
+
+      contacts.forEach((user: IntercomUserResponse) => {
         allUsers.push({
           id: user.id,
           email: user.email || 'No email',

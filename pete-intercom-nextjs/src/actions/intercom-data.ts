@@ -18,7 +18,7 @@ import { getEnabledContactFields, extractFieldValue, type IntercomFieldConfig } 
  */
 export async function getAllIntercomContacts(): Promise<{
   success: boolean;
-  contacts?: Record<string, any>[];
+  contacts?: Record<string, string | number | boolean | null>[];
   error?: string;
   totalCount?: number;
   fieldsReturned?: string[];
@@ -27,7 +27,7 @@ export async function getAllIntercomContacts(): Promise<{
     const enabledFields = getEnabledContactFields();
     logInfo(`[Intercom Data] Fetching all contacts with ${enabledFields.length} enabled fields`);
 
-    const allContacts: Record<string, any>[] = [];
+    const allContacts: Record<string, string | number | boolean | null>[] = [];
     let nextUrl: string | null = 'https://api.intercom.io/contacts';
     let page = 1;
 
@@ -53,8 +53,12 @@ export async function getAllIntercomContacts(): Promise<{
       logInfo(`[Intercom Data] Retrieved ${contacts.length} contacts from page ${page}`);
 
       // Extract only enabled fields from each contact
-      contacts.forEach((contact: any) => {
-        const filteredContact: Record<string, any> = {};
+      interface IntercomContactRaw {
+        [key: string]: unknown;
+      }
+
+      contacts.forEach((contact: IntercomContactRaw) => {
+        const filteredContact: Record<string, string | number | boolean | null> = {};
 
         enabledFields.forEach((field: IntercomFieldConfig) => {
           const value = extractFieldValue(contact, field);

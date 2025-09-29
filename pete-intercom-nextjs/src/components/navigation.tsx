@@ -49,7 +49,7 @@ export default function Navigation() {
         href="/whatsworking" 
         style={pathname.startsWith('/whatsworking') ? activeLinkStyle : linkStyle}
       >
-        What's Working
+        What&apos;s Working
       </Link>
       <Link 
         href="/admin" 
