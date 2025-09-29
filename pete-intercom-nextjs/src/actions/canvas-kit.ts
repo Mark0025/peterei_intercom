@@ -1,0 +1,258 @@
+'use server';
+
+// Canvas Kit Server Actions - React 19 compatible
+import type { 
+  CanvasKitResponse, 
+  CanvasKitFormData, 
+  ActionResult,
+  CanvasKitComponent
+} from '@/types';
+import { getOnboardingData, getQuestionByIndex } from '@/services/onboarding-data';
+import { logInfo, logError, logDebug } from '@/services/logger';
+
+// Helper to build Canvas Kit components
+function createTextComponent(id: string, text: string, style?: 'header' | 'error' | 'muted'): CanvasKitComponent {
+  return {
+    type: 'text',
+    id,
+    text,
+    style,
+    align: 'center'
+  };
+}
+
+function createInputComponent(id: string, label: string, required = false): CanvasKitComponent {
+  return {
+    type: 'input',
+    id,
+    label,
+    input_type: 'text',
+    required
+  };
+}
+
+function createButtonComponent(id: string, label: string, style: 'primary' | 'secondary' = 'primary'): CanvasKitComponent {
+  return {
+    type: 'button',
+    id,
+    label,
+    style,
+    action: { type: 'submit' }
+  };
+}
+
+// Server Action: Initialize Canvas Kit
+export async function initializeCanvasKit(): Promise<ActionResult<CanvasKitResponse>> {
+  try {
+    logInfo('Canvas Kit initialization requested');
+    
+    const response: CanvasKitResponse = {
+      canvas: {
+        content: {
+          components: [
+            createTextComponent('welcome', 'Welcome to Pete Intercom App! Choose an action below:', 'header'),
+            createButtonComponent('start_onboarding', 'Start Onboarding Questionnaire'),
+            createButtonComponent('pete_user_training', 'Pete User Training', 'secondary')
+          ]
+        }
+      }
+    };
+
+    logInfo('Canvas Kit initialized successfully');
+    return { success: true, data: response };
+  } catch (error) {
+    logError(`Canvas Kit Initialize error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return { 
+      success: false, 
+      error: 'Failed to initialize Canvas Kit' 
+    };
+  }
+}
+
+// Server Action: Handle Canvas Kit form submissions
+export async function handleCanvasKitSubmit(formData: CanvasKitFormData): Promise<ActionResult<CanvasKitResponse>> {
+  try {
+    const { componentId, inputValues, storedData, userId } = formData;
+
+    switch (componentId) {
+      case 'start_onboarding': {
+        // Start the onboarding questionnaire
+        const firstQuestion = getQuestionByIndex(0, 0);
+        if (!firstQuestion) {
+          throw new Error('No onboarding questions available');
+        }
+
+        const response: CanvasKitResponse = {
+          canvas: {
+            content: {
+              components: [
+                createTextComponent('section_header', `Section: ${firstQuestion.section}`, 'header'),
+                createTextComponent('question_text', firstQuestion.detailed),
+                createInputComponent('answer', firstQuestion.shorthand, true),
+                createButtonComponent('submit_answer', 'Next Question')
+              ]
+            },
+            stored_data: {
+              ...storedData,
+              sectionIndex: 0,
+              questionIndex: 0,
+              userId
+            }
+          }
+        };
+
+        return { success: true, data: response };
+      }
+
+      case 'submit_answer': {
+        const sectionIndex = Number(storedData?.sectionIndex ?? 0);
+        const questionIndex = Number(storedData?.questionIndex ?? 0);
+        const answer = inputValues.answer;
+
+        if (!answer?.trim()) {
+          const response: CanvasKitResponse = {
+            canvas: {
+              content: {
+                components: [
+                  createTextComponent('error', 'Please provide an answer before continuing.', 'error'),
+                  createButtonComponent('try_again', 'Try Again')
+                ]
+              },
+              stored_data: storedData
+            }
+          };
+          return { success: false, data: response, error: 'Answer required' };
+        }
+
+        // TODO: Store answer in Intercom or database
+        console.log(`Answer stored: Section ${sectionIndex}, Question ${questionIndex}: ${answer}`);
+
+        // Get next question
+        let nextSectionIndex = sectionIndex;
+        let nextQuestionIndex = questionIndex + 1;
+
+        let nextQuestion = getQuestionByIndex(nextSectionIndex, nextQuestionIndex);
+        
+        // If no more questions in current section, move to next section
+        if (!nextQuestion) {
+          nextSectionIndex = sectionIndex + 1;
+          nextQuestionIndex = 0;
+          nextQuestion = getQuestionByIndex(nextSectionIndex, nextQuestionIndex);
+        }
+
+        // If no more questions at all, show completion
+        if (!nextQuestion) {
+          const response: CanvasKitResponse = {
+            canvas: {
+              content: {
+                components: [
+                  createTextComponent('completion', 'Thank you for completing the onboarding!', 'header'),
+                  createButtonComponent('start_over', 'Start Another Session', 'secondary')
+                ]
+              }
+            }
+          };
+          return { success: true, data: response };
+        }
+
+        // Show next question
+        const response: CanvasKitResponse = {
+          canvas: {
+            content: {
+              components: [
+                createTextComponent('section_header', `Section: ${nextQuestion.section}`, 'header'),
+                createTextComponent('question_text', nextQuestion.detailed),
+                createInputComponent('answer', nextQuestion.shorthand, true),
+                createButtonComponent('submit_answer', 'Next Question')
+              ]
+            },
+            stored_data: {
+              ...storedData,
+              sectionIndex: nextSectionIndex,
+              questionIndex: nextQuestionIndex,
+              userId
+            }
+          }
+        };
+
+        return { success: true, data: response };
+      }
+
+      case 'pete_user_training': {
+        const response: CanvasKitResponse = {
+          canvas: {
+            content: {
+              components: [
+                createTextComponent('training_header', 'Pete User Training Topic', 'header'),
+                createInputComponent('training_topic', 'Enter training topic', true),
+                createButtonComponent('save_training', 'Save Training Topic')
+              ]
+            },
+            stored_data: { ...storedData, userId }
+          }
+        };
+
+        return { success: true, data: response };
+      }
+
+      case 'save_training': {
+        const topic = inputValues.training_topic;
+        if (!topic?.trim()) {
+          const response: CanvasKitResponse = {
+            canvas: {
+              content: {
+                components: [
+                  createTextComponent('error', 'Training topic is required.', 'error'),
+                  createButtonComponent('try_again', 'Try Again')
+                ]
+              },
+              stored_data: storedData
+            }
+          };
+          return { success: false, data: response, error: 'Training topic required' };
+        }
+
+        // TODO: Update user training topic via Intercom API
+        console.log(`Training topic updated for user ${userId}: ${topic}`);
+
+        const response: CanvasKitResponse = {
+          canvas: {
+            content: {
+              components: [
+                createTextComponent('success', `Training topic updated: "${topic}"`, 'header'),
+                createButtonComponent('back_to_menu', 'Back to Main Menu', 'secondary')
+              ]
+            }
+          }
+        };
+
+        return { success: true, data: response };
+      }
+
+      default: {
+        // Return to main menu
+        return initializeCanvasKit();
+      }
+    }
+
+  } catch (error) {
+    console.error('[Canvas Kit] Submit error:', error);
+    
+    const errorResponse: CanvasKitResponse = {
+      canvas: {
+        content: {
+          components: [
+            createTextComponent('error', 'Something went wrong. Please try again.', 'error'),
+            createButtonComponent('back_to_menu', 'Back to Main Menu')
+          ]
+        }
+      }
+    };
+
+    return { 
+      success: false, 
+      data: errorResponse,
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}

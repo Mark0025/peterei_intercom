@@ -4,7 +4,7 @@
  * Handles full onboarding form submissions from the popout window.
  * Sends email notification to admins with all form answers.
  *
- * @see Issue #3: Email Integration
+ * @see Issue #3: Email Integration (SMTP Implementation)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -87,7 +87,7 @@ export async function GET() {
   return NextResponse.json({
     endpoint: '/api/popout-submit',
     method: 'POST',
-    description: 'Submit onboarding form and send email notification',
+    description: 'Submit onboarding form and send email notification (SMTP)',
     emailConfigured: isEmailConfigured(),
   });
 }

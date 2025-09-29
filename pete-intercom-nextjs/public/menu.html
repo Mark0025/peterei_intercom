@@ -1,0 +1,19 @@
+<nav style="background:#2d72d2;padding:12px 0 8px 0;text-align:center;margin-bottom:32px;">
+  <a href="/" class="nav-home" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Home</a>
+  <a href="/popout" class="nav-popout" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Onboarding</a>
+  <a href="/PeteAI" class="nav-peteai" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">PeteAI</a>
+  <a href="/whatsworking" class="nav-whatsworking" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">What's Working</a>
+</nav>
+<script>
+  // Highlight the current page link
+  const path = window.location.pathname;
+  if (path === '/' || path === '/index.html') {
+    document.querySelector('.nav-home').style.textDecoration = 'underline';
+  } else if (path.startsWith('/popout')) {
+    document.querySelector('.nav-popout').style.textDecoration = 'underline';
+  } else if (path.startsWith('/PeteAI')) {
+    document.querySelector('.nav-peteai').style.textDecoration = 'underline';
+  } else if (path.startsWith('/whatsworking')) {
+    document.querySelector('.nav-whatsworking').style.textDecoration = 'underline';
+  }
+</script> 

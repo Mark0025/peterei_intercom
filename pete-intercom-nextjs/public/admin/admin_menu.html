@@ -1,0 +1,28 @@
+<nav style="background:#2d72d2;padding:12px 0 8px 0;text-align:center;margin-bottom:32px;">
+  <a href="/admin/testapi" class="nav-testapi" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">API Tester</a>
+  <a href="/admin/peteAI" class="nav-peteai" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">PeteAI</a>
+  <a href="/admin/peteTraining" class="nav-training" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Training</a>
+  <a href="/admin/logs" class="nav-logs" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Logs</a>
+  <a href="/admin/support" class="nav-support" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Support</a>
+  <a href="/admin/health" class="nav-health" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">Health</a>
+  <a href="/whatsworking" class="nav-whatsworking" style="color:#fff;margin:0 18px;text-decoration:none;font-weight:bold;">What's Working</a>
+</nav>
+<script>
+  // Highlight the current page link
+  const path = window.location.pathname;
+  if (path.startsWith('/admin/testapi')) {
+    document.querySelector('.nav-testapi').style.textDecoration = 'underline';
+  } else if (path.startsWith('/admin/peteAI')) {
+    document.querySelector('.nav-peteai').style.textDecoration = 'underline';
+  } else if (path.startsWith('/admin/peteTraining')) {
+    document.querySelector('.nav-training').style.textDecoration = 'underline';
+  } else if (path.startsWith('/admin/logs')) {
+    document.querySelector('.nav-logs').style.textDecoration = 'underline';
+  } else if (path.startsWith('/admin/support')) {
+    document.querySelector('.nav-support').style.textDecoration = 'underline';
+  } else if (path.startsWith('/admin/health')) {
+    document.querySelector('.nav-health').style.textDecoration = 'underline';
+  } else if (path.startsWith('/whatsworking')) {
+    document.querySelector('.nav-whatsworking').style.textDecoration = 'underline';
+  }
+</script> 

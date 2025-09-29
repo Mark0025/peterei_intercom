@@ -1,0 +1,62 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function Navigation() {
+  const pathname = usePathname();
+
+  const navStyle = {
+    background: '#2d72d2',
+    padding: '12px 0 8px 0',
+    textAlign: 'center' as const,
+    marginBottom: '32px'
+  };
+
+  const linkStyle = {
+    color: '#fff',
+    margin: '0 18px',
+    textDecoration: 'none',
+    fontWeight: 'bold'
+  };
+
+  const activeLinkStyle = {
+    ...linkStyle,
+    textDecoration: 'underline'
+  };
+
+  return (
+    <nav style={navStyle}>
+      <Link 
+        href="/" 
+        style={pathname === '/' ? activeLinkStyle : linkStyle}
+      >
+        Home
+      </Link>
+      <Link 
+        href="/popout" 
+        style={pathname.startsWith('/popout') ? activeLinkStyle : linkStyle}
+      >
+        Onboarding
+      </Link>
+      <Link 
+        href="/peteai" 
+        style={pathname.startsWith('/peteai') ? activeLinkStyle : linkStyle}
+      >
+        PeteAI
+      </Link>
+      <Link 
+        href="/whatsworking" 
+        style={pathname.startsWith('/whatsworking') ? activeLinkStyle : linkStyle}
+      >
+        What's Working
+      </Link>
+      <Link 
+        href="/admin" 
+        style={pathname.startsWith('/admin') ? activeLinkStyle : linkStyle}
+      >
+        Admin
+      </Link>
+    </nav>
+  );
+}
