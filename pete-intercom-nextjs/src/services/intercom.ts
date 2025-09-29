@@ -1,5 +1,6 @@
 import type { IntercomContact, IntercomCompany, IntercomAdmin, IntercomConversation, IntercomCache } from '@/types';
 import { logInfo, logError, logDebug } from './logger';
+import { loadCacheFromDisk, saveCacheToDisk } from './cacheStorage';
 
 const INTERCOM_API_BASE = 'https://api.intercom.io';
 
@@ -22,6 +23,10 @@ const cache: IntercomCache = {
   conversations: [],
   lastRefreshed: null,
 };
+
+// Track if initial cache load is in progress
+let isInitializing = false;
+let initializationPromise: Promise<void> | null = null;
 
 function extractArrayFromResponse(data: any, preferredKeys: string[] = []): any[] {
   // Try preferred keys first
@@ -94,30 +99,51 @@ async function getAllFromIntercom(path: string, preferredKeys: string[] = []): P
 }
 
 export async function refreshIntercomCache(): Promise<void> {
-  logInfo('[INTERCOM] Refreshing Intercom data cache...', 'api.log');
-  
-  try {
-    const [contacts, companies, admins, conversations] = await Promise.all([
-      getAllFromIntercom('/contacts', ['contacts', 'data']),
-      getAllFromIntercom('/companies', ['companies', 'data']),
-      getAllFromIntercom('/admins', ['admins', 'data']),
-      getAllFromIntercom('/conversations', ['conversations', 'data']),
-    ]);
-
-    cache.contacts = contacts;
-    cache.companies = companies;
-    cache.admins = admins;
-    cache.conversations = conversations;
-    cache.lastRefreshed = new Date();
-
-    logInfo(`[INTERCOM] Cache refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}`, 'api.log');
-  } catch (err) {
-    logError(`[INTERCOM] Error refreshing cache: ${err instanceof Error ? err.message : err}`, 'api.log');
-    throw err;
+  // If already initializing, wait for that to complete
+  if (isInitializing && initializationPromise) {
+    logInfo('[INTERCOM] Cache refresh already in progress, waiting...', 'api.log');
+    return initializationPromise;
   }
+
+  isInitializing = true;
+  logInfo('[INTERCOM] Refreshing Intercom data cache...', 'api.log');
+
+  initializationPromise = (async () => {
+    try {
+      const [contacts, companies, admins, conversations] = await Promise.all([
+        getAllFromIntercom('/contacts', ['contacts', 'data']),
+        getAllFromIntercom('/companies', ['companies', 'data']),
+        getAllFromIntercom('/admins', ['admins', 'data']),
+        getAllFromIntercom('/conversations', ['conversations', 'data']),
+      ]);
+
+      cache.contacts = contacts;
+      cache.companies = companies;
+      cache.admins = admins;
+      cache.conversations = conversations;
+      cache.lastRefreshed = new Date();
+
+      logInfo(`[INTERCOM] Cache refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}`, 'api.log');
+
+      // Save to disk for next startup
+      await saveCacheToDisk(cache);
+    } catch (err) {
+      logError(`[INTERCOM] Error refreshing cache: ${err instanceof Error ? err.message : err}`, 'api.log');
+      throw err;
+    } finally {
+      isInitializing = false;
+      initializationPromise = null;
+    }
+  })();
+
+  return initializationPromise;
 }
 
-export function getIntercomCache(): IntercomCache {
+export async function getIntercomCache(): Promise<IntercomCache> {
+  // If cache is being initialized, wait for it
+  if (isInitializing && initializationPromise) {
+    await initializationPromise;
+  }
   return cache;
 }
 
@@ -129,7 +155,8 @@ export function getCacheStatus() {
       companies: cache.companies.length,
       admins: cache.admins.length,
       conversations: cache.conversations.length,
-    }
+    },
+    isInitializing,
   };
 }
 
@@ -243,11 +270,25 @@ export async function updateUserTrainingTopic(userId: string, topic: string): Pr
   }
 }
 
-// Initialize cache on module load
+// Initialize cache on module load - try disk first, then API
 if (ACCESS_TOKEN) {
-  refreshIntercomCache().catch(err => {
-    logError(`[INTERCOM] Failed to initialize cache: ${err instanceof Error ? err.message : err}`, 'api.log');
-  });
+  (async () => {
+    const diskCache = await loadCacheFromDisk();
+    if (diskCache) {
+      // Load from disk immediately
+      cache.contacts = diskCache.contacts;
+      cache.companies = diskCache.companies;
+      cache.admins = diskCache.admins;
+      cache.conversations = diskCache.conversations;
+      cache.lastRefreshed = diskCache.lastRefreshed;
+      logInfo('[INTERCOM] Using cached data from disk for instant startup', 'api.log');
+    } else {
+      // No disk cache, fetch from API
+      refreshIntercomCache().catch(err => {
+        logError(`[INTERCOM] Failed to initialize cache: ${err instanceof Error ? err.message : err}`, 'api.log');
+      });
+    }
+  })();
 } else {
   logError('[INTERCOM] INTERCOM_ACCESS_TOKEN not found in environment', 'api.log');
 }

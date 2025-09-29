@@ -4,27 +4,18 @@ import Image from 'next/image';
 export default function Header() {
   return (
     <>
-      <header style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '18px',
-        padding: '18px 0 8px 0'
-      }}>
-        <Link href="/" style={{ display: 'inline-block' }}>
-          <Image 
-            src="/pete.png" 
-            alt="PETE Logo" 
-            width={48} 
-            height={48}
-            style={{ verticalAlign: 'middle' }}
+      <header className="flex justify-center items-center py-6 px-6">
+        <Link href="/" className="inline-block">
+          <Image
+            src="/pete.png"
+            alt="PETE Logo"
+            width={64}
+            height={64}
+            className="hover:opacity-80 transition-opacity"
           />
         </Link>
       </header>
-      <div style={{
-        height: '10px',
-        background: '#2d72d2',
-        marginBottom: '32px'
-      }} />
+      <div className="h-2 bg-primary mb-8" />
     </>
   );
 }

@@ -1,63 +1,164 @@
-import { initializeCanvasKit } from "@/actions/canvas-kit";
-import { getOnboardingData } from "@/services/onboarding-data";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export default async function Home() {
-  // Test server actions and data loading
-  const canvasKit = await initializeCanvasKit();
-  const onboardingData = getOnboardingData();
-  
+export default function Home() {
   return (
-    <>
-      <h1>Pete Intercom App Status</h1>
-      <p>✅ <b>Status:</b> Pete Intercom Next.js App is running!</p>
-      <p><b>Development URL:</b> <span className="endpoint">http://localhost:3000</span></p>
-      
-      <h2>System Status</h2>
-      <ul>
-        <li>
-          🔧 Canvas Kit: {canvasKit.success ? 
-            <span style={{color: 'green'}}>Working</span> : 
-            <span style={{color: 'red'}}>Error</span>
-          }
-          {canvasKit.data && (
-            <span className="note"> - {canvasKit.data.canvas.content.components.length} components loaded</span>
-          )}
-        </li>
-        <li>
-          📋 Onboarding Data: <span style={{color: 'green'}}>Loaded</span>
-          <span className="note"> - {onboardingData.sections.length} sections, {onboardingData.sections.reduce((acc, section) => acc + section.questions.length, 0)} questions</span>
-        </li>
-        <li>🚀 Server Actions: <span style={{color: 'green'}}>Active</span></li>
-        <li>🎨 UI Components: <span style={{color: 'green'}}>shadcn/ui + Original Styling</span></li>
-        <li>🔍 TypeScript: <span style={{color: 'green'}}>Strict Mode Enabled</span></li>
-      </ul>
-
-      <h2>Intercom Webhook Endpoints</h2>
-      <ul>
-        <li><span className="endpoint">/api/initialize</span> <span className="note">(POST only, for Intercom Canvas Kit)</span></li>
-        <li><span className="endpoint">/api/submit</span> <span className="note">(POST only, for Intercom Canvas Kit)</span></li>
-      </ul>
-
-      <h2>Available Features</h2>
-      <div style={{ marginTop: '20px' }}>
-        <Link href="/popout" className="btn-pete" style={{ marginRight: '10px' }}>
-          📋 Open Full Onboarding Form
-        </Link>
-        <Link href="/whatsworking" className="btn-pete" style={{ marginRight: '10px' }}>
-          🔍 What's Working
-        </Link>
-        <Link href="/admin" className="btn-pete">
-          ⚙️ Admin Dashboard
-        </Link>
+    <div className="space-y-8">
+      <div className="text-center space-y-3 pb-4">
+        <h1 className="text-4xl font-bold tracking-tight">Pete Admin Dashboard</h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Manage your Intercom workspace, users, and training topics
+        </p>
       </div>
-      
-      <p className="note">The popout form is for browser testing and full onboarding submissions.</p>
-      
-      <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #ddd' }} />
-      <p style={{ fontSize: '0.9em', color: '#888' }}>
-        &copy; Pete Intercom App &mdash; Next.js 15 + React 19 + TypeScript Migration
-      </p>
-    </>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Training Management */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              📚 Training Management
+            </CardTitle>
+            <CardDescription className="text-base">
+              View and update user training topics across all Intercom users
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/training">
+              <Button className="w-full h-11 text-base">Manage Training Topics</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* API Testing */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              🔌 API Testing
+            </CardTitle>
+            <CardDescription className="text-base">
+              Test Intercom API endpoints and view responses
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/testapi">
+              <Button className="w-full h-11 text-base" variant="outline">Test API</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* System Logs */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              📊 System Logs
+            </CardTitle>
+            <CardDescription className="text-base">
+              View application logs and debug information
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/logs">
+              <Button className="w-full h-11 text-base" variant="outline">View Logs</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Onboarding Form */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              📋 Onboarding
+            </CardTitle>
+            <CardDescription className="text-base">
+              Full onboarding form for browser testing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/popout">
+              <Button className="w-full h-11 text-base" variant="outline">Open Form</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* What's Working */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              ✅ What's Working
+            </CardTitle>
+            <CardDescription className="text-base">
+              View successful features and system status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/whatsworking">
+              <Button className="w-full h-11 text-base" variant="outline">View Status</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* PeteAI */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              🤖 PeteAI
+            </CardTitle>
+            <CardDescription className="text-base">
+              AI-powered assistance and automation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/peteai">
+              <Button className="w-full h-11 text-base" variant="outline">Open PeteAI</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Conversation History */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              💬 Conversation History
+            </CardTitle>
+            <CardDescription className="text-base">
+              View analytics, trends, and search all Intercom conversations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/conversations">
+              <Button className="w-full h-11 text-base">View Conversations</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* System Info */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle className="text-xl">🚀 System Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 text-base">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Status:</span>
+              <span className="text-green-600">✅ Running</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Environment:</span>
+              <span className="text-muted-foreground">Development</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Stack:</span>
+              <span className="text-muted-foreground">Next.js 15 + React 19 + TypeScript</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">UI:</span>
+              <span className="text-muted-foreground">shadcn/ui + Tailwind CSS v4</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

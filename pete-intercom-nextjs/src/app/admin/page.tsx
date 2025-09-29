@@ -5,6 +5,7 @@ const adminTools = [
   { title: '📊 Logs', desc: 'View application logs and debugging information', href: '/admin/logs' },
   { title: '🤖 PeteAI', desc: 'AI assistant and training management', href: '/admin/peteai' },
   { title: '🎓 Training', desc: 'Manage user training topics and materials', href: '/admin/training' },
+  { title: '⚙️ Settings', desc: 'Configure Intercom data fields and app settings', href: '/admin/settings' },
   { title: '🛠️ Support', desc: 'Support tools and user assistance', href: '/admin/support' },
   { title: '🧪 Test API', desc: 'Test Intercom API endpoints and Canvas Kit', href: '/admin/testapi' },
 ];
