@@ -12,11 +12,11 @@ export default clerkMiddleware(async (auth, req) => {
       return authResult.redirectToSignIn();
     }
 
-    // Check if user email ends with @peterie.com
+    // Check if user email ends with @peterei.com
     const userEmail = authResult.sessionClaims?.email as string | undefined;
-    if (!userEmail || !userEmail.endsWith('@peterie.com')) {
+    if (!userEmail || !userEmail.endsWith('@peterei.com')) {
       return NextResponse.json(
-        { error: 'Unauthorized - Admin access restricted to @peterie.com users only' },
+        { error: 'Unauthorized - Admin access restricted to @peterei.com users only' },
         { status: 403 }
       );
     }

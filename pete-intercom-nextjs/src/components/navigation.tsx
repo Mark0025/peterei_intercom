@@ -8,8 +8,8 @@ export default function Navigation() {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
 
-  // Check if user is an admin (@peterie.com email)
-  const isAdmin = isLoaded && user?.primaryEmailAddress?.emailAddress?.endsWith('@peterie.com');
+  // Check if user is an admin (@peterei.com email)
+  const isAdmin = isLoaded && user?.primaryEmailAddress?.emailAddress?.endsWith('@peterei.com');
 
   const navStyle = {
     background: '#2d72d2',
