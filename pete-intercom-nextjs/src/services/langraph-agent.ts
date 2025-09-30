@@ -45,14 +45,13 @@ Process:
 
 // Create the LLM with proper configuration for OpenRouter
 const llm = new ChatOpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
   modelName: 'openai/gpt-4o-mini',
   temperature: 0.7,  // Higher for better tool reasoning
   maxTokens: 4000,   // Enough space for tool calls + reasoning
-}, {
-  baseOptions: {
-    headers: {
+  configuration: {
+    baseURL: 'https://openrouter.ai/api/v1',
+    defaultHeaders: {
       'HTTP-Referer': process.env.PUBLIC_URL || 'http://localhost:3000',
       'X-Title': 'PeteAI Intercom Assistant',
     }
