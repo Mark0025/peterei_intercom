@@ -27,14 +27,24 @@ Available Tools:
 5. **search_companies** - Search companies by name
 6. **analyze_conversations** - Get conversation insights and stats
 7. **get_cache_info** - Get cache status and sample data
-8. **recommend_help_doc** - Recommend relevant help documentation based on user's question
+8. **fetch_help_doc** - Fetch and analyze help documentation from Pete help center URL
+9. **generate_process_map** - Generate Mermaid flowchart from step-by-step instructions
+10. **recommend_help_doc** - Recommend relevant help documentation based on user's question
 
 📋 Examples of REQUIRED tool usage:
 - "what company id is strycam?" → MUST call fuzzy_search_company("strycam")
 - "show timeline for Stkcam" → MUST call get_company_timeline(company_id)
 - "find john@example.com" → MUST call search_contacts(email="john@example.com")
 - "get company attributes" → MUST call extract_company_attributes(company_id)
-- "how do I set up workflows?" → MUST call recommend_help_doc(query="set up workflows")
+- "how do I upload data?" → MUST call recommend_help_doc → fetch_help_doc(url) → generate_process_map(title, steps)
+
+🎨 Help Documentation Workflow:
+When users ask HOW to do something:
+1. Call recommend_help_doc to find relevant doc URL
+2. Call fetch_help_doc to read the documentation
+3. Analyze the content and extract step-by-step instructions
+4. Call generate_process_map to create a visual Mermaid flowchart
+5. Present the flowchart with links to the documentation
 
 ⚠️ DO NOT give generic responses about "94 companies" - USE THE TOOLS to get actual data!
 
@@ -319,6 +329,118 @@ const extractCompanyAttributesTool = tool(
   }
 );
 
+// Fetch and analyze help documentation tool
+const fetchHelpDocTool = tool(
+  async ({ url }: { url: string }) => {
+    try {
+      logInfo(`[LANGGRAPH] Fetching help doc from: ${url}`);
+
+      // Use Node.js fetch to get the help doc content
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+
+      // Simple HTML parsing - extract text content
+      // Remove script and style tags
+      let content = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      content = content.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+      // Extract text between tags (simplified)
+      content = content.replace(/<[^>]+>/g, ' ');
+
+      // Clean up whitespace
+      content = content.replace(/\s+/g, ' ').trim();
+
+      // Limit to first 2000 characters for token efficiency
+      const summary = content.substring(0, 2000);
+
+      return {
+        success: true,
+        url,
+        content: summary,
+        fullLength: content.length,
+        message: "Help doc fetched successfully. Analyze this content to create a process map."
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: "Failed to fetch help documentation. Please try a different URL."
+      };
+    }
+  },
+  {
+    name: "fetch_help_doc",
+    description: "Fetch and analyze help documentation from Pete help center URL to extract step-by-step instructions",
+    schema: z.object({
+      url: z.string().describe("The full URL to the help documentation article to fetch")
+    }),
+  }
+);
+
+// Generate Mermaid process map tool
+const generateProcessMapTool = tool(
+  async ({ title, steps }: { title: string; steps: string[] }) => {
+    try {
+      logInfo(`[LANGGRAPH] Generating process map: ${title}`);
+
+      if (!steps || steps.length === 0) {
+        return {
+          success: false,
+          error: "No steps provided for process map"
+        };
+      }
+
+      // Generate Mermaid flowchart syntax
+      let mermaid = `graph TD\n`;
+      mermaid += `    Start([${title}])\n`;
+
+      // Add steps with sequential connections
+      steps.forEach((step, index) => {
+        const stepId = `Step${index + 1}`;
+        const nextStepId = index < steps.length - 1 ? `Step${index + 2}` : 'End';
+
+        // Escape special characters and limit step text length
+        const stepText = step.replace(/["\[\]]/g, '').substring(0, 60);
+
+        if (index === 0) {
+          mermaid += `    Start --> ${stepId}[${stepText}]\n`;
+        }
+
+        if (index < steps.length - 1) {
+          mermaid += `    ${stepId} --> ${nextStepId}\n`;
+        } else {
+          mermaid += `    ${stepId} --> End([Complete])\n`;
+        }
+      });
+
+      return {
+        success: true,
+        mermaid,
+        title,
+        stepCount: steps.length,
+        message: "Process map generated successfully. Display this Mermaid diagram to the user."
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "generate_process_map",
+    description: "Generate a Mermaid flowchart/process map from a list of step-by-step instructions",
+    schema: z.object({
+      title: z.string().describe("The title/name of the process"),
+      steps: z.array(z.string()).describe("Array of step-by-step instructions in order")
+    }),
+  }
+);
+
 // Help documentation recommendation tool
 const recommendHelpDocTool = tool(
   async ({ query }: { query: string }) => {
@@ -414,6 +536,8 @@ const tools = [
   fuzzySearchCompanyTool,
   getCompanyTimelineTool,
   extractCompanyAttributesTool,
+  fetchHelpDocTool,
+  generateProcessMapTool,
   recommendHelpDocTool
 ];
 

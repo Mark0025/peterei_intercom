@@ -4,11 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import mermaid from 'mermaid';
 
 interface Message {
     role: 'user' | 'ai';
     content: string;
     timestamp: Date;
+    hasMermaid?: boolean;
 }
 
 export function PeteAIChat() {
@@ -16,6 +18,15 @@ export function PeteAIChat() {
     const [isLoading, setIsLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const chatLogRef = useRef<HTMLDivElement>(null);
+
+    // Initialize Mermaid
+    useEffect(() => {
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+        });
+    }, []);
 
     const scrollToBottom = () => {
         if (chatLogRef.current) {
@@ -25,6 +36,8 @@ export function PeteAIChat() {
 
     useEffect(() => {
         scrollToBottom();
+        // Render Mermaid diagrams after messages update
+        mermaid.contentLoaded();
     }, [messages]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -113,17 +126,47 @@ export function PeteAIChat() {
                         </div>
                     )}
 
-                    {messages.map((message, index) => (
-                        <div key={index} className={`mb-3 ${message.role === 'user'
-                                ? 'text-primary font-semibold'
-                                : 'text-green-700'
-                            }`}>
-                            <div className="text-sm font-medium mb-1">
-                                {message.role === 'user' ? 'You' : 'PeteAI'}
+                    {messages.map((message, index) => {
+                        // Check if message contains Mermaid diagram
+                        const hasMermaid = message.content.includes('graph TD') || message.content.includes('graph LR') || message.content.includes('```mermaid');
+
+                        // Extract Mermaid code if present
+                        let textContent = message.content;
+                        let mermaidCode = '';
+
+                        if (hasMermaid) {
+                            // Extract mermaid code from backticks or raw content
+                            const mermaidMatch = message.content.match(/```mermaid\n([\s\S]+?)\n```/);
+                            if (mermaidMatch) {
+                                mermaidCode = mermaidMatch[1];
+                                textContent = message.content.replace(/```mermaid\n[\s\S]+?\n```/, '').trim();
+                            } else {
+                                // Look for raw graph TD or graph LR
+                                const graphMatch = message.content.match(/(graph (?:TD|LR)\n[\s\S]+?)(?=\n\n|$)/);
+                                if (graphMatch) {
+                                    mermaidCode = graphMatch[1];
+                                    textContent = message.content.replace(graphMatch[1], '').trim();
+                                }
+                            }
+                        }
+
+                        return (
+                            <div key={index} className={`mb-3 ${message.role === 'user'
+                                    ? 'text-primary font-semibold'
+                                    : 'text-green-700'
+                                }`}>
+                                <div className="text-sm font-medium mb-1">
+                                    {message.role === 'user' ? 'You' : 'PeteAI'}
+                                </div>
+                                {textContent && <div className="text-sm mb-2">{textContent}</div>}
+                                {mermaidCode && (
+                                    <div className="mermaid bg-white p-4 rounded border my-2">
+                                        {mermaidCode}
+                                    </div>
+                                )}
                             </div>
-                            <div className="text-sm">{message.content}</div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Input Form */}
