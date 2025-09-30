@@ -7,6 +7,7 @@ import { z } from "zod";
 import { smartSearchContacts, smartSearchCompanies, getSmartCacheStatus, getSmartCache } from './smart-cache';
 import { logInfo, logError } from './logger';
 import { fuzzySearchCompany, getCompanyTimeline, extractCompanyAttributes } from './company-tools';
+import { PeteAIHelpLinks, HELP_PATHS } from '../utils/help-links';
 
 // Define the agent state
 interface AgentState {
@@ -30,26 +31,57 @@ Available Tools:
 8. **fetch_help_doc** - Fetch and analyze help documentation from Pete help center URL
 9. **generate_process_map** - Generate Mermaid flowchart from step-by-step instructions
 10. **recommend_help_doc** - Recommend relevant help documentation based on user's question
+11. **generate_help_link** - Generate formatted HTML links to help documentation
+12. **generate_multiple_help_links** - Generate multiple formatted HTML links to help documentation
+13. **map_pete_app_route** - Map user actions to actual Pete app URLs (e.g., "upload data" → https://app.thepete.io/settings/general/import)
 
 📋 Examples of REQUIRED tool usage:
 - "what company id is strycam?" → MUST call fuzzy_search_company("strycam")
 - "show timeline for Stkcam" → MUST call get_company_timeline(company_id)
 - "find john@example.com" → MUST call search_contacts(email="john@example.com")
 - "get company attributes" → MUST call extract_company_attributes(company_id)
-- "how do I upload data?" → MUST call recommend_help_doc("upload data") → fetch_help_doc(url) → generate_process_map(title, steps)
+- "how do I upload data?" → MUST call recommend_help_doc("upload data") → fetch_help_doc(url) → generate_process_map(title, steps) → generate_help_link(path, text)
 - "I need to upload data" → MUST call recommend_help_doc("upload data") then fetch and generate map
+- "show me help links" → MUST call generate_help_link(path, text) or generate_multiple_help_links(links)
+- "link to getting started" → MUST call generate_help_link("collections/10827028-getting-started", "Getting Started Guide")
 
 🎨 Help Documentation Workflow:
 **CRITICAL: When users ask HOW to do ANYTHING, you MUST use the help doc workflow:**
 1. ALWAYS call recommend_help_doc with the user's question
 2. Call fetch_help_doc with the recommended URL to read the actual documentation
-3. Analyze the fetched content and extract 3-7 step-by-step instructions
-4. Call generate_process_map with extracted steps to create a visual Mermaid flowchart
-5. Present the flowchart markdown AND link to the full documentation
+   - This automatically extracts article links, collection links, and step-by-step instructions from <ol> tags
+   - Use the extractedSteps array if available, or analyze the content to create your own steps
+3. Analyze the fetched content and extract 3-5 simple, clear steps (use extractedSteps if provided)
+4. **FOR STEPS WITH NAVIGATION - Build URL Array:**
+   - For each navigation step (e.g., "Go to Settings → General → Import"):
+   - Call map_pete_app_route to get the Pete app URL (e.g., "https://app.thepete.io/settings/general/import")
+   - Build an array of URLs (one per step) - use empty string "" for steps without navigation
+   - Example: ["", "https://app.thepete.io/settings/general/import", "https://app.thepete.io/properties", ""]
+5. **MUST CALL generate_process_map tool** with title, steps array, stepUrls array, and sourceUrl:
+   - This tool returns properly formatted Mermaid syntax with triple backticks and clickable nodes
+   - Each step will be automatically assigned an icon (⚙️ for settings, 📤 for upload, 🎯 for select, ✅ for confirm)
+   - DO NOT manually write Mermaid syntax - ALWAYS use the tool
+   - Pass stepUrls array so each Mermaid node links to the corresponding Pete app page
+6. **RESPONSE FORMAT (MUST FOLLOW EXACTLY):**
+   - Start with: "Here's how to [action]:"
+   - List 3-5 numbered steps with clickable navigation links formatted as: "**Step 1:** Go to <a href='URL'>Settings → General → Import</a>"
+   - Include the Mermaid diagram from generate_process_map tool response (just paste it exactly)
+   - End with: "**Reference**: This guide is based on [link]"
+7. Call generate_help_link to create the reference link
 
 **Questions that REQUIRE help doc workflow:**
 - "how do I..." / "how to..." / "I need to..." / "I want to..." / "help me..." / "show me how..."
 - ANY question about Pete features, setup, configuration, or usage
+
+**Critical Formatting Rules:**
+- Navigation paths MUST use breadcrumb arrows (→) and be clickable links
+- Steps should be simple, action-oriented (3-5 steps max)
+- Mermaid diagram should be clean and simple (not overly detailed)
+- Always include a "Reference" section at the end linking to source documentation
+- **URL Prefixes**:
+  - Pete app navigation: https://app.thepete.io/ (e.g., https://app.thepete.io/settings/general/import)
+  - Help documentation: https://help.thepete.io/en/ (e.g., https://help.thepete.io/en/collections/10827028-getting-started)
+- Example: Settings → General → Import = https://app.thepete.io/settings/general/import
 
 ⚠️ DO NOT give generic responses about "94 companies" - USE THE TOOLS to get actual data!
 
@@ -348,10 +380,50 @@ const fetchHelpDocTool = tool(
 
       const html = await response.text();
 
+      // Extract article links from the page
+      const articleLinks: Array<{ title: string; url: string }> = [];
+      const articleRegex = /<a[^>]+href="(\/en\/articles\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+      let articleMatch;
+      while ((articleMatch = articleRegex.exec(html)) !== null) {
+        articleLinks.push({
+          title: articleMatch[2].trim(),
+          url: `https://help.thepete.io${articleMatch[1]}`
+        });
+      }
+
+      // Extract collection links
+      const collectionLinks: Array<{ title: string; url: string }> = [];
+      const collectionRegex = /<a[^>]+href="(\/en\/collections\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+      let collectionMatch;
+      while ((collectionMatch = collectionRegex.exec(html)) !== null) {
+        collectionLinks.push({
+          title: collectionMatch[2].trim(),
+          url: `https://help.thepete.io${collectionMatch[1]}`
+        });
+      }
+
       // Simple HTML parsing - extract text content
       // Remove script and style tags
       let content = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
       content = content.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+      // Extract ordered list items (steps) more precisely
+      const orderedListRegex = /<ol[^>]*>([\s\S]*?)<\/ol>/gi;
+      const listMatches = content.match(orderedListRegex);
+      const extractedSteps: string[] = [];
+
+      if (listMatches) {
+        listMatches.forEach(olBlock => {
+          const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+          let liMatch;
+          while ((liMatch = liRegex.exec(olBlock)) !== null) {
+            const stepText = liMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            if (stepText.length > 5) {
+              extractedSteps.push(stepText);
+            }
+          }
+        });
+      }
 
       // Extract text between tags (simplified)
       content = content.replace(/<[^>]+>/g, ' ');
@@ -367,7 +439,10 @@ const fetchHelpDocTool = tool(
         url,
         content: summary,
         fullLength: content.length,
-        message: "Help doc fetched successfully. Analyze this content to create a process map."
+        articleLinks: articleLinks.slice(0, 5), // Top 5 article links
+        collectionLinks: collectionLinks.slice(0, 3), // Top 3 collection links
+        extractedSteps, // Automatically extracted steps from <ol> tags
+        message: "Help doc fetched successfully. Analyze this content to create a process map with contextual links."
       };
     } catch (error) {
       return {
@@ -379,7 +454,7 @@ const fetchHelpDocTool = tool(
   },
   {
     name: "fetch_help_doc",
-    description: "Fetch and analyze help documentation from Pete help center URL to extract step-by-step instructions",
+    description: "Fetch and analyze help documentation from Pete help center URL to extract step-by-step instructions and related article links",
     schema: z.object({
       url: z.string().describe("The full URL to the help documentation article to fetch")
     }),
@@ -388,7 +463,7 @@ const fetchHelpDocTool = tool(
 
 // Generate Mermaid process map tool
 const generateProcessMapTool = tool(
-  async ({ title, steps }: { title: string; steps: string[] }) => {
+  async ({ title, steps, stepUrls, sourceUrl }: { title: string; steps: string[]; stepUrls?: string[]; sourceUrl?: string }) => {
     try {
       logInfo(`[LANGGRAPH] Generating process map: ${title}`);
 
@@ -401,33 +476,75 @@ const generateProcessMapTool = tool(
 
       // Generate Mermaid flowchart syntax
       let mermaid = `graph TD\n`;
-      mermaid += `    Start([${title}])\n`;
+
+      // Escape title for Mermaid
+      const safeTitle = title.replace(/[^a-zA-Z0-9\s]/g, '').substring(0, 30);
+      mermaid += `    Start([${safeTitle}])\n`;
 
       // Add steps with sequential connections
       steps.forEach((step, index) => {
         const stepId = `Step${index + 1}`;
         const nextStepId = index < steps.length - 1 ? `Step${index + 2}` : 'End';
 
-        // Escape special characters and limit step text length
-        const stepText = step.replace(/["\[\]]/g, '').substring(0, 60);
+        // Add icon based on step content
+        let icon = '📝'; // Default
+        if (step.toLowerCase().includes('settings') || step.toLowerCase().includes('general')) icon = '⚙️';
+        if (step.toLowerCase().includes('import') || step.toLowerCase().includes('upload')) icon = '📤';
+        if (step.toLowerCase().includes('select') || step.toLowerCase().includes('choose')) icon = '🎯';
+        if (step.toLowerCase().includes('confirm') || step.toLowerCase().includes('review')) icon = '✅';
+
+        // Properly escape special characters for Mermaid
+        const stepText = step
+          .replace(/[\[\](){}]/g, '') // Remove brackets and parentheses
+          .replace(/["']/g, '') // Remove quotes
+          .replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim()
+          .substring(0, 45); // Shorter to make room for icon
+
+        const stepLabel = `${icon} ${stepText}`;
 
         if (index === 0) {
-          mermaid += `    Start --> ${stepId}[${stepText}]\n`;
+          mermaid += `    Start --> ${stepId}["${stepLabel}"]\n`;
         }
 
         if (index < steps.length - 1) {
-          mermaid += `    ${stepId} --> ${nextStepId}\n`;
+          mermaid += `    ${stepId}["${stepLabel}"] --> ${nextStepId}\n`;
         } else {
-          mermaid += `    ${stepId} --> End([Complete])\n`;
+          mermaid += `    ${stepId}["${stepLabel}"] --> End([Complete])\n`;
         }
       });
 
+      // Add click events - show clean paths in diagram, but link to full URLs
+      if (stepUrls && stepUrls.length > 0) {
+        mermaid += `\n    %% Click steps to navigate to Pete app\n`;
+        steps.forEach((_, index) => {
+          if (stepUrls[index]) {
+            const stepId = `Step${index + 1}`;
+            // Extract clean path from URL (e.g., "settings/general" from "https://app.thepete.io/settings/general")
+            const cleanPath = stepUrls[index].replace('https://app.thepete.io/', '').replace(/^\//, '');
+            // Still link to full URL for navigation, but show clean path in node label
+            mermaid += `    click ${stepId} "${stepUrls[index]}" "Go to ${cleanPath}"\n`;
+          }
+        });
+      } else if (sourceUrl) {
+        mermaid += `\n    %% Click any step to view full documentation\n`;
+        steps.forEach((_, index) => {
+          const stepId = `Step${index + 1}`;
+          mermaid += `    click ${stepId} "${sourceUrl}" "View full guide"\n`;
+        });
+      }
+
+      // Wrap Mermaid code in triple backticks for proper markdown rendering
+      const formattedMermaid = `\`\`\`mermaid\n${mermaid}\n\`\`\``;
+
       return {
         success: true,
-        mermaid,
+        mermaid: formattedMermaid,
         title,
         stepCount: steps.length,
-        message: "Process map generated successfully. Display this Mermaid diagram to the user."
+        sourceUrl: sourceUrl || null,
+        message: `CRITICAL: You MUST copy the 'mermaid' field EXACTLY as provided below into your response. Do NOT modify, reformat, or regenerate it:\n\n${formattedMermaid}\n\nJust paste this entire block into your response after the numbered steps.`
       };
     } catch (error) {
       return {
@@ -438,10 +555,12 @@ const generateProcessMapTool = tool(
   },
   {
     name: "generate_process_map",
-    description: "Generate a Mermaid flowchart/process map from a list of step-by-step instructions",
+    description: "Generate a Mermaid flowchart/process map from a list of step-by-step instructions with optional clickable links to Pete app pages",
     schema: z.object({
       title: z.string().describe("The title/name of the process"),
-      steps: z.array(z.string()).describe("Array of step-by-step instructions in order")
+      steps: z.array(z.string()).describe("Array of step-by-step instructions in order"),
+      stepUrls: z.array(z.string()).optional().describe("Optional array of URLs (one per step) to make each step clickable and navigate to Pete app pages. Use map_pete_app_route tool to get these URLs."),
+      sourceUrl: z.string().optional().describe("Optional fallback URL if stepUrls not provided")
     }),
   }
 );
@@ -532,6 +651,173 @@ const recommendHelpDocTool = tool(
   }
 );
 
+// Map Pete App Routes - converts common actions to actual app URLs
+const mapPeteAppRouteTool = tool(
+  async ({ action }: { action: string }) => {
+    try {
+      logInfo(`[LANGGRAPH] Mapping Pete app route for action: ${action}`);
+
+      // Common Pete app routes based on user actions
+      const routeMap: Record<string, { url: string; description: string }> = {
+        // Settings routes
+        'settings': { url: 'https://app.thepete.io/settings', description: 'General settings' },
+        'import': { url: 'https://app.thepete.io/settings/general/import', description: 'Import data' },
+        'import data': { url: 'https://app.thepete.io/settings/general/import', description: 'Import data' },
+        'upload': { url: 'https://app.thepete.io/settings/general/import', description: 'Upload data' },
+        'upload data': { url: 'https://app.thepete.io/settings/general/import', description: 'Upload data' },
+        'upload properties': { url: 'https://app.thepete.io/settings/general/import', description: 'Upload property data' },
+
+        // Properties routes
+        'properties': { url: 'https://app.thepete.io/properties', description: 'View properties' },
+        'property list': { url: 'https://app.thepete.io/properties', description: 'Property list' },
+        'add property': { url: 'https://app.thepete.io/properties/new', description: 'Add new property' },
+
+        // Dashboard
+        'dashboard': { url: 'https://app.thepete.io/dashboard', description: 'Main dashboard' },
+        'home': { url: 'https://app.thepete.io', description: 'Pete home' },
+
+        // Workflows
+        'workflows': { url: 'https://app.thepete.io/workflows', description: 'Workflows' },
+        'automation': { url: 'https://app.thepete.io/workflows', description: 'Automation settings' },
+
+        // Tasks
+        'tasks': { url: 'https://app.thepete.io/tasks', description: 'Task management' },
+
+        // Communications
+        'messages': { url: 'https://app.thepete.io/messages', description: 'Messages' },
+        'communication': { url: 'https://app.thepete.io/messages', description: 'Communication center' },
+      };
+
+      const lowerAction = action.toLowerCase();
+
+      // Find matching route
+      for (const [key, value] of Object.entries(routeMap)) {
+        if (lowerAction.includes(key)) {
+          return {
+            success: true,
+            url: value.url,
+            description: value.description,
+            action: key,
+            message: `Found Pete app route for "${action}": ${value.url}`
+          };
+        }
+      }
+
+      return {
+        success: false,
+        message: `No specific Pete app route found for "${action}". Use general help link.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "map_pete_app_route",
+    description: "Map a user action or navigation step to an actual Pete app URL (e.g., 'upload data' -> 'https://app.thepete.io/settings/general/import')",
+    schema: z.object({
+      action: z.string().describe("The action or navigation step to map (e.g., 'upload data', 'go to settings', 'view properties')")
+    }),
+  }
+);
+
+// Generate help documentation links tool
+const generateHelpLinkTool = tool(
+  async ({ path, text, context = 'chat' }: { path: string; text: string; context?: 'chat' | 'admin' | 'navigation' }) => {
+    try {
+      logInfo(`[LANGGRAPH] Generating help link: ${path} - ${text} (${context})`);
+
+      let linkHtml: string;
+
+      switch (context) {
+        case 'admin':
+          linkHtml = PeteAIHelpLinks.generateLink(path, text);
+          break;
+        case 'navigation':
+          linkHtml = PeteAIHelpLinks.generateLink(path, text);
+          break;
+        case 'chat':
+        default:
+          linkHtml = PeteAIHelpLinks.generateLink(path, text);
+          break;
+      }
+
+      return {
+        success: true,
+        linkHtml,
+        path,
+        text,
+        context,
+        message: "Help link generated successfully. Include this HTML in your response."
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "generate_help_link",
+    description: "Generate formatted HTML links to help documentation for use in responses",
+    schema: z.object({
+      path: z.string().describe("The help documentation path (e.g., 'collections/10827028-getting-started')"),
+      text: z.string().describe("The display text for the link"),
+      context: z.enum(['chat', 'admin', 'navigation']).optional().describe("The context where the link will be used (default: 'chat')")
+    }),
+  }
+);
+
+// Generate multiple help links tool
+const generateMultipleHelpLinksTool = tool(
+  async ({ links, context = 'chat' }: { links: Array<{ path: string; text: string }>; context?: 'chat' | 'admin' | 'navigation' }) => {
+    try {
+      logInfo(`[LANGGRAPH] Generating multiple help links: ${links.length} links (${context})`);
+
+      const linkHtmls = links.map(({ path, text }) => {
+        switch (context) {
+          case 'admin':
+            return PeteAIHelpLinks.generateLink(path, text);
+          case 'navigation':
+            return PeteAIHelpLinks.generateLink(path, text);
+          case 'chat':
+          default:
+            return PeteAIHelpLinks.generateLink(path, text);
+        }
+      });
+
+      const combinedHtml = linkHtmls.join(' • ');
+
+      return {
+        success: true,
+        linkHtml: combinedHtml,
+        individualLinks: linkHtmls,
+        linkCount: links.length,
+        context,
+        message: "Multiple help links generated successfully. Include this HTML in your response."
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "generate_multiple_help_links",
+    description: "Generate multiple formatted HTML links to help documentation",
+    schema: z.object({
+      links: z.array(z.object({
+        path: z.string().describe("The help documentation path"),
+        text: z.string().describe("The display text for the link")
+      })).describe("Array of link objects with path and text"),
+      context: z.enum(['chat', 'admin', 'navigation']).optional().describe("The context where the links will be used (default: 'chat')")
+    }),
+  }
+);
+
 // Bind tools to the LLM with auto tool selection
 const tools = [
   searchContactsTool,
@@ -543,7 +829,10 @@ const tools = [
   extractCompanyAttributesTool,
   fetchHelpDocTool,
   generateProcessMapTool,
-  recommendHelpDocTool
+  recommendHelpDocTool,
+  generateHelpLinkTool,
+  generateMultipleHelpLinksTool,
+  mapPeteAppRouteTool
 ];
 
 // Enable automatic tool selection
@@ -555,22 +844,9 @@ const llmWithTools = llm.bindTools(tools, {
 async function callModel(state: AgentState): Promise<Partial<AgentState>> {
   const messages = state.messages;
   
-  // Add system context about Intercom data
-  const systemMessage = new AIMessage({
-    content: `You are PeteAI, an intelligent assistant for the Pete Intercom application. You have access to real Intercom data and can help with:
-
-1. **Contact Management**: Search, analyze, and manage contacts
-2. **Company Insights**: Find and analyze company data
-3. **Conversation Analysis**: Analyze support tickets, ratings, and trends
-4. **Cache Management**: Check data freshness and cache status
-
-You can use the available tools to:
-- search_contacts: Find specific contacts by email or name
-- search_companies: Find companies by name
-- get_cache_info: Get current data cache status and sample data
-- analyze_conversations: Analyze conversation patterns and metrics
-
-Be helpful, specific, and data-driven in your responses. When users ask about their Intercom data, always use the tools to provide accurate, real-time information.`
+  // Add system context about Intercom data - use the comprehensive SYSTEM_PROMPT
+  const systemMessage = new SystemMessage({
+    content: SYSTEM_PROMPT
   });
 
   const response = await llmWithTools.invoke([systemMessage, ...messages]);
