@@ -1,11 +1,25 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/api/admin(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     const authResult = await auth();
-    authResult.protect();
+
+    // Require authentication first
+    if (!authResult.userId) {
+      return authResult.redirectToSignIn();
+    }
+
+    // Check if user email ends with @peterie.com
+    const userEmail = authResult.sessionClaims?.email as string | undefined;
+    if (!userEmail || !userEmail.endsWith('@peterie.com')) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin access restricted to @peterie.com users only' },
+        { status: 403 }
+      );
+    }
   }
 });
 
