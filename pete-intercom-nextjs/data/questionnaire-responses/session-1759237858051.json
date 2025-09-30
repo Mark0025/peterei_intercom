@@ -1,0 +1,513 @@
+{
+  "sessionId": "session-1759237858051",
+  "respondent": "",
+  "startedAt": 1759238184802,
+  "responses": [
+    {
+      "questionId": "data-upload-l1",
+      "sectionId": "data-upload",
+      "level": 1,
+      "question": "What is our current data upload process for new clients?",
+      "answer": "We have them upload what can be uploaded in the ui for other things we scrape out of clients other crm , sometimes other crms have differnt naming or structures. ",
+      "respondent": "",
+      "timestamp": 1759238184802
+    },
+    {
+      "questionId": "data-upload-l2",
+      "sectionId": "data-upload",
+      "level": 2,
+      "question": "Why do we use this specific data upload method?",
+      "answer": "We upload the data into pete or we scrape the data into pete templates and upload that way\n",
+      "respondent": "",
+      "timestamp": 1759238222980
+    },
+    {
+      "questionId": "data-upload-l3",
+      "sectionId": "data-upload",
+      "level": 3,
+      "question": "Why is this method better than alternatives (manual entry, API sync, bulk imports)?",
+      "answer": "we are using bulk imports i never said it was better",
+      "respondent": "",
+      "timestamp": 1759238245077
+    },
+    {
+      "questionId": "data-upload-l4",
+      "sectionId": "data-upload",
+      "level": 4,
+      "question": "Why do clients struggle with this process? What breaks down?",
+      "answer": "Confusion or lack of being able to get data so we have to build. custom scraper which takes time , and if our data is off anywhere it can make us feel like we dont know what we are doing. ",
+      "respondent": "",
+      "timestamp": 1759238302846
+    },
+    {
+      "questionId": "data-upload-l5",
+      "sectionId": "data-upload",
+      "level": 5,
+      "question": "Why haven't we fixed these issues yet? What's blocking us?",
+      "answer": "I dont know what is blocking us ? ",
+      "respondent": "",
+      "timestamp": 1759238320134
+    },
+    {
+      "questionId": "data-upload-l6",
+      "sectionId": "data-upload",
+      "level": 6,
+      "question": "Why is solving this problem important for business success?",
+      "answer": "If onboarding fails people dont get the opportunity to use peterei.com because they dont get the time to train on it because their onboarding failed. ",
+      "respondent": "",
+      "timestamp": 1759238368910
+    },
+    {
+      "questionId": "data-upload-l7",
+      "sectionId": "data-upload",
+      "level": 7,
+      "question": "Why would a perfect data upload process transform our client relationships?",
+      "answer": "If we put the clinet upload on them then error rates on them. Also we can only get the data you can pull out of your crm for an extra cost we could scrape it but this could take time and delay your start date by 1 month ",
+      "respondent": "",
+      "timestamp": 1759238437055
+    },
+    {
+      "questionId": "handoff-l1",
+      "sectionId": "marketing-handoff",
+      "level": 1,
+      "question": "What information does marketing/sales pass to us when onboarding begins?",
+      "answer": "I dont know this answer ",
+      "respondent": "",
+      "timestamp": 1759238451613
+    },
+    {
+      "questionId": "handoff-l2",
+      "sectionId": "marketing-handoff",
+      "level": 2,
+      "question": "Why do we need this specific information to start onboarding?",
+      "answer": "The sooner we get this info the better equipped we are for onboarding people ",
+      "respondent": "",
+      "timestamp": 1759238495020
+    },
+    {
+      "questionId": "handoff-l3",
+      "sectionId": "marketing-handoff",
+      "level": 3,
+      "question": "Why is information often incomplete or inaccurate at handoff?",
+      "answer": "ALl data and systems use differnt names for data and people dont want to mess with trying to download so as a service we do this for our clients. so they can continue running their business. ",
+      "respondent": "",
+      "timestamp": 1759238554614
+    },
+    {
+      "questionId": "handoff-l4",
+      "sectionId": "marketing-handoff",
+      "level": 4,
+      "question": "Why does incomplete handoff information delay or derail onboarding?",
+      "answer": "Dont know that it does but sooner we get access to things in the onboarding process the sooer we can start to get a plan for how we are going to integrate someone into the pete crm ",
+      "respondent": "",
+      "timestamp": 1759238607455
+    },
+    {
+      "questionId": "handoff-l5",
+      "sectionId": "marketing-handoff",
+      "level": 5,
+      "question": "Why don't we have a standardized handoff checklist/form?",
+      "answer": "We may have one not sure ? ",
+      "respondent": "",
+      "timestamp": 1759238621021
+    },
+    {
+      "questionId": "handoff-l6",
+      "sectionId": "marketing-handoff",
+      "level": 6,
+      "question": "Why would fixing the handoff process improve customer satisfaction?",
+      "answer": "Essentially giving us more time to get data and get it uploaded if we are doing the uploading process if the client is doing it probably not as relevant. ",
+      "respondent": "",
+      "timestamp": 1759238675358
+    },
+    {
+      "questionId": "handoff-l7",
+      "sectionId": "marketing-handoff",
+      "level": 7,
+      "question": "Why is a seamless handoff critical to our competitive advantage?",
+      "answer": "Not sure that it is ? ",
+      "respondent": "",
+      "timestamp": 1759238689336
+    },
+    {
+      "questionId": "intake-l1",
+      "sectionId": "intake-requirements",
+      "level": 1,
+      "question": "What questions do we ask clients during initial intake?",
+      "answer": "{\n  \"sections\": [\n    {\n      \"title\": \"Current Systems\",\n      \"questions\": [\n        {\n          \"shorthand\": \"CRM\",\n          \"detailed\": \"What is your current CRM or lead management software? (e.g., Podio, Salesforce, etc.)\"\n        },\n        {\n          \"shorthand\": \"Phone System\",\n          \"detailed\": \"What phone system(s) are you currently using? Are there any issues or special routing setups?\"\n        },\n        {\n          \"shorthand\": \"Task Management\",\n          \"detailed\": \"Do you use any task management tools? If so, which ones?\"\n        },\n        {\n          \"shorthand\": \"Project Management\",\n          \"detailed\": \"Do you use any project management software? Please specify.\"\n        },\n        {\n          \"shorthand\": \"Website\",\n          \"detailed\": \"What is your current website URL?\"\n        },\n        {\n          \"shorthand\": \"PPL Providers\",\n          \"detailed\": \"Which Pay Per Lead (PPL) providers are you using, if any?\"\n        },\n        {\n          \"shorthand\": \"Email Provider\",\n          \"detailed\": \"What is your current email provider?\"\n        },\n        {\n          \"shorthand\": \"Zapier\",\n          \"detailed\": \"Are you using Zapier or any automation tools? Please specify.\"\n        },\n        {\n          \"shorthand\": \"Overflow Call Center\",\n          \"detailed\": \"Do you have an overflow call center? How are overflow calls handled?\"\n        },\n        {\n          \"shorthand\": \"Apple or Android\",\n          \"detailed\": \"Do you primarily use Apple (iOS) or Android devices?\"\n        },\n        {\n          \"shorthand\": \"Mail\",\n          \"detailed\": \"How do you handle physical mail for your business?\"\n        }\n      ]\n    },\n    {\n      \"title\": \"Items Needed From Them\",\n      \"questions\": [\n        {\n          \"shorthand\": \"EIN & Company Name\",\n          \"detailed\": \"What is your company's legal name and EIN (Employer Identification Number)?\"\n        },\n        {\n          \"shorthand\": \"Contract Templates\",\n          \"detailed\": \"Do you have contract templates? If so, how will you provide them to us?\"\n        }\n      ]\n    },\n    {\n      \"title\": \"Questions\",\n      \"questions\": [\n        {\n          \"shorthand\": \"How to access their systems?\",\n          \"detailed\": \"How should we access your current systems? (e.g., login credentials, invite, etc.)\"\n        },\n        {\n          \"shorthand\": \"Convert Dead Leads?\",\n          \"detailed\": \"Do you want to migrate or convert your dead leads from your current system?\"\n        },\n        {\n          \"shorthand\": \"Convert Sequences/Drip Campaigns\",\n          \"detailed\": \"Do you want to migrate your existing sequences or drip campaigns?\"\n        },\n        {\n          \"shorthand\": \"Convert Tasks?\",\n          \"detailed\": \"Should we migrate your existing tasks?\"\n        },\n        {\n          \"shorthand\": \"Convert Notes?\",\n          \"detailed\": \"Should we migrate your existing notes?\"\n        },\n        {\n          \"shorthand\": \"Anything special in current systems?\",\n          \"detailed\": \"Is there anything unique or special in your current systems we should know about?\"\n        },\n        {\n          \"shorthand\": \"Team Size & Roles\",\n          \"detailed\": \"What is your current team size and what are their roles?\"\n        },\n        {\n          \"shorthand\": \"Lead Distribution\",\n          \"detailed\": \"How are leads currently distributed among your team?\"\n        },\n        {\n          \"shorthand\": \"Phone Routing at Night\",\n          \"detailed\": \"How should phone calls be routed after business hours?\"\n        },\n        {\n          \"shorthand\": \"Functions Most Excited About\",\n          \"detailed\": \"Which functions or features are you most excited to use?\"\n        },\n        {\n          \"shorthand\": \"Functions not planning to use for now?\",\n          \"detailed\": \"Are there any features you do not plan to use at this time?\"\n        },\n        {\n          \"shorthand\": \"Critical Timeframe/Date?\",\n          \"detailed\": \"Is there a critical date or timeframe we should be aware of?\"\n        },\n        {\n          \"shorthand\": \"Slowest & Busiest Days\",\n          \"detailed\": \"What are your slowest and busiest days of the week?\"\n        },\n        {\n          \"shorthand\": \"Workflows?\",\n          \"detailed\": \"Do you have any specific workflows we should know about?\"\n        },\n        {\n          \"shorthand\": \"KPIs?\",\n          \"detailed\": \"What are your key performance indicators (KPIs)?\"\n        },\n        {\n          \"shorthand\": \"Dashboards?\",\n          \"detailed\": \"Do you need any specific dashboards or reports?\"\n        },\n        {\n          \"shorthand\": \"Area Code for new numbers?\",\n          \"detailed\": \"What area codes do you want for any new phone numbers?\"\n        }\n      ]\n    },\n    {\n      \"title\": \"Info for them\",\n      \"questions\": [\n        {\n          \"shorthand\": \"youtube.com/@thepeterei\",\n          \"detailed\": \"Our YouTube channel: youtube.com/@thepeterei\"\n        },\n        {\n          \"shorthand\": \"Demo Company\",\n          \"detailed\": \"We have a demo company available for training and testing.\"\n        },\n        {\n          \"shorthand\": \"Bi-weekly online training\",\n          \"detailed\": \"We offer bi-weekly online training sessions.\"\n        }\n      ]\n    }\n  ]\n} ",
+      "respondent": "",
+      "timestamp": 1759238832206
+    },
+    {
+      "questionId": "intake-l2",
+      "sectionId": "intake-requirements",
+      "level": 2,
+      "question": "Why do we ask these specific questions?",
+      "answer": "gets us information about our clients ",
+      "respondent": "",
+      "timestamp": 1759238844837
+    },
+    {
+      "questionId": "intake-l3",
+      "sectionId": "intake-requirements",
+      "level": 3,
+      "question": "Why do clients often misunderstand or misanswer these questions?",
+      "answer": "they dont clients dont have a problem answer these questions this meeting should take place as soon as marketing does handoff though to see if we can get theri data acces sooner ",
+      "respondent": "",
+      "timestamp": 1759238893426
+    },
+    {
+      "questionId": "intake-l4",
+      "sectionId": "intake-requirements",
+      "level": 4,
+      "question": "Why do unclear requirements cause project delays and scope creep?",
+      "answer": "I think we need to understand what is the users responsability what is ours i mean all of it is ours but how can we modify our onboarding process to help them the most feel like they are having success by tangible results. ",
+      "respondent": "",
+      "timestamp": 1759238961284
+    },
+    {
+      "questionId": "intake-l5",
+      "sectionId": "intake-requirements",
+      "level": 5,
+      "question": "Why haven't we created a foolproof intake questionnaire yet?",
+      "answer": "We have its the one i sent you but dont know if we are missing some questions or need more questions around their expectaitons and or our expectations. ",
+      "respondent": "",
+      "timestamp": 1759239002776
+    },
+    {
+      "questionId": "intake-l6",
+      "sectionId": "intake-requirements",
+      "level": 6,
+      "question": "Why is perfect requirements clarity impossible but still worth pursuing?",
+      "answer": "Becasue everyones data is differnt for everyones crm for notes or sms , or email some use flows some use templates some use tags some use statuses some use something we have not heard of probably and forcing data hygine at onboarding helps clients and us move forward and we have to be honest about their quality of data it could affect what they see in peterei.com",
+      "respondent": "",
+      "timestamp": 1759239215532
+    },
+    {
+      "questionId": "intake-l7",
+      "sectionId": "intake-requirements",
+      "level": 7,
+      "question": "Why would AI-assisted intake (like PeteAI) transform our onboarding?",
+      "answer": "It could guide them based on their data and their best practices. ",
+      "respondent": "",
+      "timestamp": 1759239242601
+    },
+    {
+      "questionId": "timeline-l1",
+      "sectionId": "timeline-expectations",
+      "level": 1,
+      "question": "How do we currently set onboarding timelines with clients?",
+      "answer": "about roughly 2 months i think. ",
+      "respondent": "",
+      "timestamp": 1759239263232
+    },
+    {
+      "questionId": "timeline-l2",
+      "sectionId": "timeline-expectations",
+      "level": 2,
+      "question": "Why do we use this timeline estimation method?",
+      "answer": "I dont know",
+      "respondent": "",
+      "timestamp": 1759239272514
+    },
+    {
+      "questionId": "timeline-l3",
+      "sectionId": "timeline-expectations",
+      "level": 3,
+      "question": "Why do we frequently miss our estimated timelines?",
+      "answer": "its not that we missed them our pete mobile some lacking dev isues made us look bad our data scraping our of reiblack book took us longer then we wanted it too",
+      "respondent": "",
+      "timestamp": 1759239319485
+    },
+    {
+      "questionId": "timeline-l4",
+      "sectionId": "timeline-expectations",
+      "level": 4,
+      "question": "Why do missed timelines damage trust and client satisfaction?",
+      "answer": "Its your first imporessions if you dont get this right they dont believe you will get anything correct ",
+      "respondent": "",
+      "timestamp": 1759239349643
+    },
+    {
+      "questionId": "timeline-l5",
+      "sectionId": "timeline-expectations",
+      "level": 5,
+      "question": "Why don't we pad timelines more or communicate uncertainty better?",
+      "answer": "We do a pretty good jo communicating uncertainty. we probably could pad the timeline and say dependit on how much you can help us depends on how fast you are onboarded. ",
+      "respondent": "",
+      "timestamp": 1759239409484
+    },
+    {
+      "questionId": "timeline-l6",
+      "sectionId": "timeline-expectations",
+      "level": 6,
+      "question": "Why is under-promising and over-delivering a better strategy?",
+      "answer": "Because when we do or if we do a data scrape it is precedented on this is not a guarantee what is a gurantee is if you follow our upload process your data will be there but if your data is not clean it could cause major problems. ",
+      "respondent": "",
+      "timestamp": 1759239492363
+    },
+    {
+      "questionId": "timeline-l7",
+      "sectionId": "timeline-expectations",
+      "level": 7,
+      "question": "Why would perfect timeline accuracy transform our client relationships?",
+      "answer": "Because we would have a better path to success for the client. ",
+      "respondent": "",
+      "timestamp": 1759239524906
+    },
+    {
+      "questionId": "technical-l1",
+      "sectionId": "technical-setup",
+      "level": 1,
+      "question": "What technical integrations do we typically set up during onboarding?",
+      "answer": "Zapier webhooks for web leads, Twilio phone swapping integrations , sms workflows , call workflows task workflows email workflows all dont through templates. ",
+      "respondent": "",
+      "timestamp": 1759239602994
+    },
+    {
+      "questionId": "technical-l2",
+      "sectionId": "technical-setup",
+      "level": 2,
+      "question": "Why do these specific integrations matter for client success?",
+      "answer": "Most clients come to us with some type of system they are used to certain named statuses , tags , notes sms , email templates all for reaching out to clients it is always in differnt formats often times templates for sms and email are not in csv type format. so that can cause us to manualy or build a scraper to get this information out of their account and pull from the parent id , which can be some work. and each system is differnt this one was reiblack book. ",
+      "respondent": "",
+      "timestamp": 1759239814275
+    },
+    {
+      "questionId": "technical-l3",
+      "sectionId": "technical-setup",
+      "level": 3,
+      "question": "Why do technical setups often fail or require multiple attempts?",
+      "answer": "Not sure why we have to scrape theri account as many times as we do if we scrape it and save it the only thing else we would have to scrape is newer information. i think that is one way to speed it up if we are going to continue to scrape peoples data.  I dont think it failed it was alot of things had small instances that weren't perfect pete mobile being the final straw for the strycam clients. ",
+      "respondent": "",
+      "timestamp": 1759239980892
+    },
+    {
+      "questionId": "technical-l4",
+      "sectionId": "technical-setup",
+      "level": 4,
+      "question": "Why do technical delays cascade into other onboarding problems?",
+      "answer": "Data is everthing if your dat is off so is everthing else but some of that is on them some of it is on us we need to think of either process to make this not on us so they own it or massively increase our scraping abilityes in differnt platforms and make it damn good. ",
+      "respondent": "",
+      "timestamp": 1759240071514
+    },
+    {
+      "questionId": "technical-l5",
+      "sectionId": "technical-setup",
+      "level": 5,
+      "question": "Why haven't we automated or simplified these technical steps?",
+      "answer": "We have but systems change their ways of doing things we have many hacker scripts to do this ? maybe a solution is building a ai system that helps us do this for a client ? ",
+      "respondent": "",
+      "timestamp": 1759240122957
+    },
+    {
+      "questionId": "technical-l6",
+      "sectionId": "technical-setup",
+      "level": 6,
+      "question": "Why is reducing technical friction a competitive differentiator?",
+      "answer": "Man what if our ai agent could use the scraper jon built as a tool. and that was in the onboarding widget as they came on board because as soon as the agent has the information it can begin working behind the scenes if it had access to scraper for rei black book having the agent read a csv like a config file to know which scraper to spin up the scraper could live in the cloud under a docker container and have a database and only scrape info it does not have. - it would have the templates that we uploaded to you and it would help the clent with theri onboarding but it would feel like they own the data and we could also help them clean the data as we go ",
+      "respondent": "",
+      "timestamp": 1759240277992
+    },
+    {
+      "questionId": "technical-l7",
+      "sectionId": "technical-setup",
+      "level": 7,
+      "question": "Why would one-click technical setup revolutionize our onboarding?",
+      "answer": "It would make it feel so much faster for the client and for us",
+      "respondent": "",
+      "timestamp": 1759240297059
+    },
+    {
+      "questionId": "training-l1",
+      "sectionId": "training-enablement",
+      "level": 1,
+      "question": "What training do we provide to new users during onboarding?",
+      "answer": "help.thepeterei.com",
+      "respondent": "",
+      "timestamp": 1759240315939
+    },
+    {
+      "questionId": "training-l2",
+      "sectionId": "training-enablement",
+      "level": 2,
+      "question": "Why do we use this specific training format/method?",
+      "answer": "It is our process documented. and loom videos. ",
+      "respondent": "",
+      "timestamp": 1759240345340
+    },
+    {
+      "questionId": "training-l3",
+      "sectionId": "training-enablement",
+      "level": 3,
+      "question": "Why do users still struggle after completing our training?",
+      "answer": "Some is their tech ability some it is theri system did not have great data in the first place and so transfering into pete canbe alot of work not everthing is extractable with csv some things like email and sms templates are tied to differnt workflows that can be difficult at times to parse or they have nuiance things like their system using %firstName ours uses - #Firstname in templates small things like that. or nested , in theri data or name instead of first name last name etc. ",
+      "respondent": "",
+      "timestamp": 1759240495924
+    },
+    {
+      "questionId": "training-l4",
+      "sectionId": "training-enablement",
+      "level": 4,
+      "question": "Why does poor training lead to increased support tickets and churn?",
+      "answer": "Users have to be trainied on pete it is smart but you need to know your way around pete in order to have any success. ",
+      "respondent": "",
+      "timestamp": 1759240533966
+    },
+    {
+      "questionId": "training-l5",
+      "sectionId": "training-enablement",
+      "level": 5,
+      "question": "Why haven't we built better training materials or interactive guides?",
+      "answer": "We have pretty good training i think we need to have a system to see what articles could be written off of already solved issues when it comes to onboarding and since we now have acccess to all that data we can access it. and learn from what we have done right and create more articles like the ones we currently have. - ",
+      "respondent": "",
+      "timestamp": 1759240615667
+    },
+    {
+      "questionId": "training-l6",
+      "sectionId": "training-enablement",
+      "level": 6,
+      "question": "Why is effective training essential to product adoption and retention?",
+      "answer": "If they are trainied on it then they can use if not they wont and they will leave - we need to be lclear on things that are in betta and clearly display our products and what they do but more importantly what they dont do and their current limitaitons. lets be honest about where we are and figure out a better way forward. ",
+      "respondent": "",
+      "timestamp": 1759240705781
+    },
+    {
+      "questionId": "training-l7",
+      "sectionId": "training-enablement",
+      "level": 7,
+      "question": "Why would AI-powered personalized training (PeteAI) transform user success?",
+      "answer": "If we had a module that used canvas kit to help them in the onboarding process i think we could either help them get their own data out , or recreate their templates in pete and then last resort scraping only if we had to and it being an additional service with no guranntes becasue whe scraping somethings things get wired. ",
+      "respondent": "",
+      "timestamp": 1759240794791
+    },
+    {
+      "questionId": "workflow-l1",
+      "sectionId": "workflow-automation",
+      "level": 1,
+      "question": "What workflows or automations do we typically configure during onboarding?",
+      "answer": "We manually pull them or scrape them out of people accounts or they use the ones in pete ",
+      "respondent": "",
+      "timestamp": 1759240832003
+    },
+    {
+      "questionId": "workflow-l2",
+      "sectionId": "workflow-automation",
+      "level": 2,
+      "question": "Why are these specific workflows critical for client operations?",
+      "answer": "becasue it helps them continue their current state of marketing sms and email workflows. ",
+      "respondent": "",
+      "timestamp": 1759240864114
+    },
+    {
+      "questionId": "workflow-l3",
+      "sectionId": "workflow-automation",
+      "level": 3,
+      "question": "Why do workflows often need multiple revisions before they work correctly?",
+      "answer": "because the client workflow and our workflws maybe named differnt or opperate differnt then ours and so mapping that is not as easy as property data being a download clean upload into pete maybe change a few column names but workflows are often combined with call flows for rvm or other things clients may use or their is not a list of templates they just have 20 differnt varications of text messages in a workflow in rei black book that i have to then build kinda manualy into pete t would be better if they were helped to either create new ones as they are onboarding or use some tool that allows them to login and copy and paste their workflows in or possibly use a widget that houses our scraper if we are going to do it for them ? ",
+      "respondent": "",
+      "timestamp": 1759241065351
+    },
+    {
+      "questionId": "workflow-l4",
+      "sectionId": "workflow-automation",
+      "level": 4,
+      "question": "Why do workflow mistakes cause operational problems for clients?",
+      "answer": "Workflows is how they automate theri business it is how every crm does it regardless if they cal them workflows or not. ",
+      "respondent": "",
+      "timestamp": 1759241103713
+    },
+    {
+      "questionId": "workflow-l5",
+      "sectionId": "workflow-automation",
+      "level": 5,
+      "question": "Why haven't we created workflow templates or a configuration wizard?",
+      "answer": "We have templates i think a workflow widget makes a alot of sense copy and paste your workflow from your crm for this or that campaign could be a idea and not to difficult to build somtthing that sees how many steps their workflow has is it sms or email template or something else etc. ",
+      "respondent": "",
+      "timestamp": 1759241199295
+    },
+    {
+      "questionId": "workflow-l6",
+      "sectionId": "workflow-automation",
+      "level": 6,
+      "question": "Why are pre-built workflow templates a major time-saver and differentiator?",
+      "answer": "It allows people to hit the ground running then we could back fill their custom worflows But could be realy confusing for non technical people ? ",
+      "respondent": "",
+      "timestamp": 1759241279896
+    },
+    {
+      "questionId": "workflow-l7",
+      "sectionId": "workflow-automation",
+      "level": 7,
+      "question": "Why would intelligent workflow recommendations transform onboarding speed?",
+      "answer": "It helps people adopt learn understand and visualize how theri business will be transformed by peterei.com ",
+      "respondent": "",
+      "timestamp": 1759241316058
+    },
+    {
+      "questionId": "metrics-l1",
+      "sectionId": "success-metrics",
+      "level": 1,
+      "question": "How do we currently measure whether onboarding was successful?",
+      "answer": "We dont have a way i dont think other then us the devs checking to see if their information is correct an dhaving them verbaly say it was correct. ",
+      "respondent": "",
+      "timestamp": 1759241356204
+    },
+    {
+      "questionId": "metrics-l2",
+      "sectionId": "success-metrics",
+      "level": 2,
+      "question": "Why did we choose these specific success metrics?",
+      "answer": "I dont know just common sense logic i suppose. ",
+      "respondent": "",
+      "timestamp": 1759241375003
+    },
+    {
+      "questionId": "metrics-l3",
+      "sectionId": "success-metrics",
+      "level": 3,
+      "question": "Why do our success metrics sometimes fail to predict actual client satisfaction?",
+      "answer": "cliets range in the complexities of their business and what they are doing. ",
+      "respondent": "",
+      "timestamp": 1759241404673
+    },
+    {
+      "questionId": "metrics-l4",
+      "sectionId": "success-metrics",
+      "level": 4,
+      "question": "Why is measuring the right things critical to improving onboarding?",
+      "answer": "We have to measuer i think if our user is understanding the onboarding process and the things behind them so they can adopt to the syetm with relative ease. ",
+      "respondent": "",
+      "timestamp": 1759241452316
+    },
+    {
+      "questionId": "metrics-l5",
+      "sectionId": "success-metrics",
+      "level": 5,
+      "question": "Why don't we have automated dashboards tracking onboarding health?",
+      "answer": "this could be possibly acchived with the app we have now. in conjuction with building a canvas kit widget for healthy onboarding module. ",
+      "respondent": "",
+      "timestamp": 1759241501978
+    },
+    {
+      "questionId": "metrics-l6",
+      "sectionId": "success-metrics",
+      "level": 6,
+      "question": "Why would real-time onboarding metrics enable proactive intervention?",
+      "answer": "It would tell us percisely like a plane taking off checklist what we did for the client and what we did not do or what they are doing by tracking their success through a module using canvas kit to guide them to the appropricate next step in the journey making onboarding like a game where you get points ",
+      "respondent": "",
+      "timestamp": 1759241576940
+    },
+    {
+      "questionId": "metrics-l7",
+      "sectionId": "success-metrics",
+      "level": 7,
+      "question": "Why would predictive onboarding analytics revolutionize our client success?",
+      "answer": "Becasue it would help them know they are doing what they are doing while educating them on pete.rei.com and eductaing them on - https://help.thepete.io/en/. using that as a guide and also allowing us to know what we need to create next to further improve the client onboarding process. ",
+      "respondent": "",
+      "timestamp": 1759241722485
+    }
+  ],
+  "completedAt": 1759241712363,
+  "resolutionCategory": "Process"
+}
