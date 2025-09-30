@@ -17,7 +17,7 @@ interface AgentState {
 // System prompt - tells the LLM to USE tools
 const SYSTEM_PROMPT = `You are PeteAI, an expert Intercom assistant with access to powerful tools.
 
-🎯 CRITICAL: You MUST use tools when asked about companies, contacts, or conversations.
+🎯 CRITICAL: You MUST use tools when asked about companies, contacts, conversations, or help documentation.
 
 Available Tools:
 1. **fuzzy_search_company** - Find companies by name (handles typos like "strycam" → "Strycam")
@@ -27,12 +27,14 @@ Available Tools:
 5. **search_companies** - Search companies by name
 6. **analyze_conversations** - Get conversation insights and stats
 7. **get_cache_info** - Get cache status and sample data
+8. **recommend_help_doc** - Recommend relevant help documentation based on user's question
 
 📋 Examples of REQUIRED tool usage:
 - "what company id is strycam?" → MUST call fuzzy_search_company("strycam")
 - "show timeline for Stkcam" → MUST call get_company_timeline(company_id)
 - "find john@example.com" → MUST call search_contacts(email="john@example.com")
 - "get company attributes" → MUST call extract_company_attributes(company_id)
+- "how do I set up workflows?" → MUST call recommend_help_doc(query="set up workflows")
 
 ⚠️ DO NOT give generic responses about "94 companies" - USE THE TOOLS to get actual data!
 
@@ -317,6 +319,92 @@ const extractCompanyAttributesTool = tool(
   }
 );
 
+// Help documentation recommendation tool
+const recommendHelpDocTool = tool(
+  async ({ query }: { query: string }) => {
+    try {
+      logInfo(`[LANGGRAPH] Recommending help docs for query: ${query}`);
+
+      // Help doc categories with relevant topics
+      const helpDocs = [
+        {
+          category: "Getting Started",
+          url: "https://help.thepete.io/en/",
+          keywords: ["start", "begin", "setup", "initial", "first", "onboard", "intro", "basic"],
+          description: "Everything you need to get started with Pete"
+        },
+        {
+          category: "Workflows & Automation",
+          url: "https://help.thepete.io/en/",
+          keywords: ["workflow", "automat", "task", "process", "trigger", "action", "flow"],
+          description: "Automate your Pete and streamline tasks"
+        },
+        {
+          category: "Communication",
+          url: "https://help.thepete.io/en/",
+          keywords: ["message", "email", "notify", "alert", "communicate", "send", "contact"],
+          description: "Configure your communication settings"
+        },
+        {
+          category: "Properties",
+          url: "https://help.thepete.io/en/",
+          keywords: ["property", "field", "attribute", "custom", "data", "metadata"],
+          description: "Navigate properties with ease"
+        },
+        {
+          category: "Training",
+          url: "https://help.thepete.io/en/",
+          keywords: ["train", "learn", "video", "tutorial", "guide", "course", "teach"],
+          description: "Video training to enhance your knowledge"
+        },
+        {
+          category: "Support",
+          url: "https://help.thepete.io/en/",
+          keywords: ["help", "support", "issue", "problem", "troubleshoot", "fix", "error"],
+          description: "Comprehensive guide to navigate Pete"
+        }
+      ];
+
+      const lowerQuery = query.toLowerCase();
+
+      // Find matching docs based on keywords
+      const matches = helpDocs.filter(doc =>
+        doc.keywords.some(keyword => lowerQuery.includes(keyword))
+      );
+
+      if (matches.length === 0) {
+        return {
+          success: true,
+          recommendation: "General Help Center",
+          url: "https://help.thepete.io/en/",
+          description: "Browse all Pete documentation",
+          matches: helpDocs.slice(0, 3)  // Show first 3 categories as suggestions
+        };
+      }
+
+      return {
+        success: true,
+        recommendation: matches[0].category,
+        url: matches[0].url,
+        description: matches[0].description,
+        matches: matches.slice(0, 3)  // Return top 3 matches
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "recommend_help_doc",
+    description: "Recommend relevant help documentation based on user's question or topic",
+    schema: z.object({
+      query: z.string().describe("The user's question or topic to find relevant help documentation for")
+    }),
+  }
+);
+
 // Bind tools to the LLM with auto tool selection
 const tools = [
   searchContactsTool,
@@ -325,7 +413,8 @@ const tools = [
   analyzeConversationsTool,
   fuzzySearchCompanyTool,
   getCompanyTimelineTool,
-  extractCompanyAttributesTool
+  extractCompanyAttributesTool,
+  recommendHelpDocTool
 ];
 
 // Enable automatic tool selection

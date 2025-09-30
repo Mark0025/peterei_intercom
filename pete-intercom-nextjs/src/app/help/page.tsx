@@ -1,54 +1,37 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HelpCenterViewer } from '@/components/help/HelpCenterViewer';
+import { PeteAIChat } from '@/components/help/PeteAIChat';
 
 export default function HelpCenterPage() {
-    const [isIframeLoaded, setIsIframeLoaded] = useState(false);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Header */}
-            <div className="text-center space-y-3 pb-4">
-                <h1 className="text-4xl font-bold tracking-tight">
+            <div className="text-center space-y-2 pb-2">
+                <h1 className="text-3xl font-bold tracking-tight">
                     Pete Help Center
                 </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-base text-muted-foreground max-w-2xl mx-auto">
                     Find answers, tutorials, and support resources for Pete
                 </p>
             </div>
 
-            {/* Loading State */}
-            {!isIframeLoaded && (
-                <Card className="max-w-4xl mx-auto">
-                    <CardHeader>
-                        <CardTitle>Loading Help Center...</CardTitle>
-                        <CardDescription>
-                            Connecting to the Pete Help Center
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
 
-            {/* Help Center iframe */}
-            <div className="max-w-7xl mx-auto">
-                <iframe
-                    src="https://help.thepete.io/en/"
-                    title="Pete Help Center"
-                    className="w-full h-[80vh] border-0 rounded-lg shadow-lg"
-                    onLoad={() => setIsIframeLoaded(true)}
-                    style={{ display: isIframeLoaded ? 'block' : 'none' }}
-                />
+            {/* Help Center - Using proxy to bypass iframe restrictions - Full Width */}
+            <div className="w-full mx-auto" style={{ maxWidth: '95vw' }}>
+                <HelpCenterViewer className="h-[85vh] border rounded-lg shadow-lg" />
+            </div>
+
+            {/* PeteAI Chat Assistant */}
+            <div className="w-full mx-auto" style={{ maxWidth: '95vw' }}>
+                <PeteAIChat />
             </div>
 
             {/* Quick Links */}
-            <Card className="max-w-4xl mx-auto">
+            <Card className="w-full mx-auto" style={{ maxWidth: '95vw' }}>
                 <CardHeader>
                     <CardTitle>Quick Links</CardTitle>
                     <CardDescription>
@@ -63,7 +46,7 @@ export default function HelpCenterPage() {
                             onClick={() => {
                                 const iframe = document.querySelector('iframe');
                                 if (iframe) {
-                                    iframe.src = 'https://help.thepete.io/en/';
+                                    iframe.src = '/api/help-proxy';
                                 }
                             }}
                         >
@@ -79,7 +62,7 @@ export default function HelpCenterPage() {
                             onClick={() => {
                                 const iframe = document.querySelector('iframe');
                                 if (iframe) {
-                                    iframe.src = 'https://help.thepete.io/en/';
+                                    iframe.src = '/api/help-proxy';
                                 }
                             }}
                         >
@@ -95,7 +78,7 @@ export default function HelpCenterPage() {
                             onClick={() => {
                                 const iframe = document.querySelector('iframe');
                                 if (iframe) {
-                                    iframe.src = 'https://help.thepete.io/en/';
+                                    iframe.src = '/api/help-proxy';
                                 }
                             }}
                         >
@@ -111,7 +94,7 @@ export default function HelpCenterPage() {
                             onClick={() => {
                                 const iframe = document.querySelector('iframe');
                                 if (iframe) {
-                                    iframe.src = 'https://help.thepete.io/en/';
+                                    iframe.src = '/api/help-proxy';
                                 }
                             }}
                         >
@@ -127,7 +110,7 @@ export default function HelpCenterPage() {
                             onClick={() => {
                                 const iframe = document.querySelector('iframe');
                                 if (iframe) {
-                                    iframe.src = 'https://help.thepete.io/en/';
+                                    iframe.src = '/api/help-proxy';
                                 }
                             }}
                         >
@@ -143,7 +126,7 @@ export default function HelpCenterPage() {
                             onClick={() => {
                                 const iframe = document.querySelector('iframe');
                                 if (iframe) {
-                                    iframe.src = 'https://help.thepete.io/en/';
+                                    iframe.src = '/api/help-proxy';
                                 }
                             }}
                         >
@@ -160,7 +143,12 @@ export default function HelpCenterPage() {
             <div className="text-center">
                 <Button
                     variant="link"
-                    onClick={() => window.open('https://help.thepete.io/en/', '_blank')}
+                    onClick={() => {
+                        const iframe = document.querySelector('iframe');
+                        if (iframe) {
+                            iframe.src = '/api/help-proxy';
+                        }
+                    }}
                     className="text-primary"
                 >
                     Open Help Center in New Tab →
