@@ -24,7 +24,8 @@ import {
   Target,
   Lightbulb,
   FileText,
-  Download
+  Download,
+  Upload
 } from 'lucide-react';
 import {
   saveQuestionnaireResponse,
@@ -34,6 +35,11 @@ import {
 } from '@/actions/questionnaire';
 import type { QuestionnaireSession } from '@/actions/questionnaire';
 import questionnaireData from '@/data/onboarding-questionnaire.json';
+import FileUpload from '@/components/file-upload';
+import DataStructureReport from '@/components/data-structure-report';
+import { analyzeUploadedData } from '@/actions/analyze-upload';
+import type { ParsedData } from '@/utils/file-parser';
+import type { DataStructureAnalysis } from '@/types/nlp-analysis';
 
 type QuestionData = {
   id: string;
@@ -62,6 +68,12 @@ export default function OnboardingQuestionnairePage() {
   const [completed, setCompleted] = useState(false);
   const [resolutionCategory, setResolutionCategory] = useState<string>('');
   const [notes, setNotes] = useState('');
+
+  // New state for file upload and analysis
+  const [showUpload, setShowUpload] = useState(true);
+  const [parsedData, setParsedData] = useState<ParsedData | null>(null);
+  const [analysis, setAnalysis] = useState<DataStructureAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const sections = questionnaireData.sections as SectionData[];
   const currentSection = sections[currentSectionIndex];
@@ -175,7 +187,87 @@ export default function OnboardingQuestionnairePage() {
     }
   }
 
-  // Start screen
+  async function handleFileProcessed(data: ParsedData) {
+    setParsedData(data);
+    setAnalyzing(true);
+
+    try {
+      const result = await analyzeUploadedData(data);
+      if (result.success && result.data) {
+        setAnalysis(result.data);
+        setShowUpload(false);
+      }
+    } catch (error) {
+      console.error('Analysis failed:', error);
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
+  function handleStartQuestionnaire() {
+    setShowUpload(false);
+  }
+
+  // Upload & Analysis screen
+  if (!started && showUpload) {
+    return (
+      <div className="container mx-auto py-8 max-w-4xl">
+        <div className="mb-8 text-center space-y-2">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center mb-4">
+            <Upload className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Upload Client Data
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Upload your client&apos;s onboarding data to begin NLP-powered analysis
+          </p>
+        </div>
+
+        {analyzing ? (
+          <Card className="border-2 border-purple-200">
+            <CardContent className="py-16 text-center space-y-4">
+              <Loader2 className="h-12 w-12 animate-spin mx-auto text-purple-600" />
+              <p className="text-lg font-medium">Analyzing data structure...</p>
+              <p className="text-sm text-muted-foreground">
+                Running NLP analysis on fields, quality metrics, and patterns
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <FileUpload onFileProcessed={handleFileProcessed} />
+        )}
+
+        <div className="mt-8 bg-slate-50 dark:bg-slate-900 p-6 rounded-lg">
+          <p className="font-semibold flex items-center gap-2 mb-3">
+            <Lightbulb className="h-4 w-4 text-yellow-600" />
+            What Happens Next
+          </p>
+          <ul className="space-y-2 ml-6 text-sm text-muted-foreground">
+            <li>• NLP engine analyzes field types, quality, and patterns</li>
+            <li>• View comprehensive data structure report</li>
+            <li>• Receive dynamic questions tailored to your data</li>
+            <li>• 7-levels deep EOS-style questioning</li>
+            <li>• Export insights and action items</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  // Analysis Report screen
+  if (!started && !showUpload && analysis) {
+    return (
+      <div className="container mx-auto py-8 max-w-4xl">
+        <DataStructureReport
+          analysis={analysis}
+          onStartQuestionnaire={() => setStarted(true)}
+        />
+      </div>
+    );
+  }
+
+  // Start screen (name input)
   if (!started) {
     return (
       <div className="container mx-auto py-16 max-w-2xl">
