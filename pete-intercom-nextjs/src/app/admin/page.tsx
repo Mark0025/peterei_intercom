@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTypography } from '@/contexts/UIConfigContext';
 
 const adminTools = [
   {
@@ -17,16 +18,26 @@ const adminTools = [
   { title: '📊 Logs', desc: 'View application logs and debugging information', href: '/admin/logs' },
   { title: '🤖 PeteAI', desc: 'AI assistant and training management', href: '/admin/peteai' },
   { title: '🎓 Training', desc: 'Manage user training topics and materials', href: '/admin/training' },
-  { title: '⚙️ Settings', desc: 'Configure Intercom data fields and app settings', href: '/admin/settings' },
+  {
+    title: '⚙️ Settings',
+    desc: 'Configure Intercom data fields and app settings',
+    href: '/admin/settings',
+    links: [
+      { label: '📊 Intercom Fields', href: '/admin/settings' },
+      { label: '🎨 UI Configuration', href: '/admin/settings/ui' }
+    ]
+  },
   { title: '🛠️ Support', desc: 'Support tools and user assistance', href: '/admin/support' },
   { title: '🧪 Test API', desc: 'Test Intercom API endpoints and Canvas Kit', href: '/admin/testapi' },
 ];
 
 export default function AdminPage() {
+  const typography = useTypography();
+
   return (
     <>
-      <h1>Admin Dashboard</h1>
-      <p>Administrative tools and monitoring for the Pete Intercom application.</p>
+      <h1 className={typography.h1}>Admin Dashboard</h1>
+      <p className={typography.paragraph}>Administrative tools and monitoring for the Pete Intercom application.</p>
 
       <div style={{
         display: 'grid',
@@ -58,13 +69,13 @@ export default function AdminPage() {
               e.currentTarget.style.borderColor = '#ddd';
             }}
           >
-            <h3 style={{ margin: '0 0 10px 0', color: '#2d72d2' }}>{tool.title}</h3>
-            <p style={{ margin: '0 0 15px 0', fontSize: '0.9em', color: '#666' }}>{tool.desc}</p>
+            <h3 className={typography.h3} style={{ margin: '0 0 10px 0', color: '#2d72d2' }}>{tool.title}</h3>
+            <p className={typography.paragraph} style={{ margin: '0 0 15px 0', color: '#666' }}>{tool.desc}</p>
 
             {tool.links && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
                 {tool.links.map((link, idx) => (
-                  <a
+                  <Link
                     key={idx}
                     href={link.href}
                     onClick={(e) => e.stopPropagation()}
@@ -85,7 +96,7 @@ export default function AdminPage() {
                     }}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             )}
@@ -94,7 +105,7 @@ export default function AdminPage() {
       </div>
 
       <div style={{ marginTop: '40px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-        <h3>Quick Stats</h3>
+        <h3 className={typography.h3}>Quick Stats</h3>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',

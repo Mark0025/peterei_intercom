@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Download, Eye, Calendar, User } from 'lucide-react';
+import { Loader2, Download, Eye, Calendar, User, Sparkles } from 'lucide-react';
 import { listQuestionnaireSessions, exportSessionToMarkdown } from '@/actions/questionnaire';
 import type { QuestionnaireSession } from '@/actions/questionnaire';
 
@@ -199,6 +199,16 @@ export default function OnboardingResponsesPage() {
                     {session.responses.length} questions answered
                   </p>
                   <div className="flex gap-2">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      asChild
+                    >
+                      <a href={`/admin/onboarding-responses/${session.sessionId}/analysis`}>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        AI Analysis
+                      </a>
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

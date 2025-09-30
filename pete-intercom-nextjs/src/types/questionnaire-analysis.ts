@@ -131,7 +131,7 @@ export interface UploadedDocSummary {
   type: 'intake-questionnaire' | 'workflow-data' | 'client-data' | 'documentation' | 'other';
   summary: string;
   keyInsights: string[];
-  structuredData?: Record<string, any>; // Parsed JSON/data
+  structuredData?: Record<string, unknown>; // Parsed JSON/data
 }
 
 /**
@@ -214,7 +214,7 @@ export interface ChartData {
     borderColor?: string | string[];
     borderWidth?: number;
   }>;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 /**
@@ -303,8 +303,8 @@ export interface AgentMessage {
  */
 export interface AgentToolCall {
   tool: 'generate_chart' | 'find_conversation' | 'estimate_effort' | 'recommend_priority' | 'analyze_file';
-  parameters: Record<string, any>;
-  result?: any;
+  parameters: Record<string, unknown>;
+  result?: unknown;
 }
 
 /**

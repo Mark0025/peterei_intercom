@@ -138,7 +138,7 @@ function analyzeObjectFields(
  */
 export function analyzeField(
   fieldName: string,
-  values: any[]
+  values: unknown[]
 ): FieldAnalysis {
   // Remove null/undefined/empty values
   const nonNullValues = values.filter(v => v !== null && v !== undefined && v !== '');
@@ -178,7 +178,7 @@ export function analyzeField(
  */
 function inferFieldType(
   fieldName: string,
-  values: any[]
+  values: unknown[]
 ): { type: FieldAnalysis['inferredType']; confidence: number } {
   if (values.length === 0) {
     return { type: 'text', confidence: 0.3 };

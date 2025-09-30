@@ -74,7 +74,7 @@ export async function getConversationStats(): Promise<ActionResult<ConversationS
     open: conversations.filter(c => c.state === 'open').length,
     closed: conversations.filter(c => c.state === 'closed').length,
     snoozed: conversations.filter(c => c.state === 'snoozed').length,
-    priority: conversations.filter(c => c.priority === 'priority').length,
+    priority: conversations.filter(c => 'priority' in c && c.priority === 'priority').length,
     byDay: [],
     byState: [
       { state: 'open', count: 0 },

@@ -130,14 +130,18 @@ export function getEnabledCompanyFields(): IntercomFieldConfig[] {
 /**
  * Extract a field value from an object, supporting nested paths
  */
-export function extractFieldValue(obj: any, field: IntercomFieldConfig): any {
+export function extractFieldValue(obj: Record<string, unknown>, field: IntercomFieldConfig): unknown {
   if (field.path) {
     // Handle nested paths like 'custom_attributes.user_training_topic'
     const parts = field.path.split('.');
-    let value = obj;
+    let value: unknown = obj;
     for (const part of parts) {
-      value = value?.[part];
-      if (value === undefined) break;
+      if (value && typeof value === 'object' && part in value) {
+        value = (value as Record<string, unknown>)[part];
+      } else {
+        value = undefined;
+        break;
+      }
     }
     return value ?? null;
   }

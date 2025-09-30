@@ -14,18 +14,14 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp, MessageSquare, Filter } from 'lucide-react';
 import { analyzeOnboardingConversations, generateOnboardingMermaid } from '@/actions/onboarding-analysis';
 import type { OnboardingAnalysisResult, OnboardingInsight } from '@/actions/onboarding-analysis';
-import dynamic from 'next/dynamic';
-
-const MarkdownRenderer = dynamic(() => import('@/components/markdown-renderer'), {
-  ssr: false,
-  loading: () => <p className="text-sm text-muted-foreground">Loading diagram...</p>
-});
+import { MermaidDiagram } from '@/components/mermaid-diagram';
 
 export default function OnboardingInsightsPage() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<OnboardingAnalysisResult | null>(null);
   const [mermaidDiagram, setMermaidDiagram] = useState<string>('');
   const [selectedTopic, setSelectedTopic] = useState<string>('all');
+  const [generatingDiagram, setGeneratingDiagram] = useState(false);
 
   useEffect(() => {
     loadAnalysis();
@@ -48,6 +44,54 @@ export default function OnboardingInsightsPage() {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Generate topic-specific diagram when topic changes
+  useEffect(() => {
+    if (analysis && selectedTopic !== 'all') {
+      generateTopicDiagram(selectedTopic);
+    } else if (mermaidDiagram && selectedTopic === 'all') {
+      // Keep original diagram for 'all'
+    }
+  }, [selectedTopic]);
+
+  async function generateTopicDiagram(topic: string) {
+    if (!analysis) return;
+
+    setGeneratingDiagram(true);
+    try {
+      // Get insights for this topic
+      const topicInsights = analysis.insights.filter(i => i.topic === topic);
+      const topicCount = topicInsights.length;
+
+      // Generate focused diagram for this topic
+      let diagram = 'graph TD\n';
+      diagram += `    Start[Customer Starts Onboarding] --> Topic[${topic}<br/>${topicCount} conversations]\n`;
+
+      // Extract common keywords for this topic
+      const keywordCounts: Record<string, number> = {};
+      topicInsights.forEach(insight => {
+        insight.matchedTerms.forEach(term => {
+          keywordCounts[term] = (keywordCounts[term] || 0) + 1;
+        });
+      });
+
+      // Add top keywords as sub-nodes
+      const topKeywords = Object.entries(keywordCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5);
+
+      topKeywords.forEach(([keyword, count], index) => {
+        const nodeId = `KW${index}`;
+        diagram += `    Topic --> ${nodeId}[${keyword}<br/>${count} mentions]\n`;
+      });
+
+      diagram += `    Topic --> Complete[Complete Onboarding]\n`;
+
+      setMermaidDiagram(diagram);
+    } finally {
+      setGeneratingDiagram(false);
     }
   }
 
@@ -127,12 +171,31 @@ export default function OnboardingInsightsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-lg overflow-x-auto">
-            <MarkdownRenderer htmlContent={`<pre><code class="language-mermaid">${mermaidDiagram}</code></pre>`} />
-          </div>
-          <p className="text-xs text-muted-foreground mt-4">
-            Diagram auto-renders using Mermaid library
-          </p>
+          {generatingDiagram ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+              <span className="text-sm text-muted-foreground">Generating diagram...</span>
+            </div>
+          ) : mermaidDiagram ? (
+            <>
+              <div className="mb-2">
+                {selectedTopic !== 'all' && (
+                  <Badge variant="secondary">Filtered: {selectedTopic}</Badge>
+                )}
+              </div>
+              <MermaidDiagram chart={mermaidDiagram} className="bg-white dark:bg-slate-900 p-6 rounded-lg border" />
+              <details className="mt-4">
+                <summary className="text-sm cursor-pointer text-muted-foreground hover:text-foreground">
+                  View Mermaid Source
+                </summary>
+                <pre className="text-xs overflow-auto bg-muted p-4 rounded-lg mt-2">
+                  {mermaidDiagram}
+                </pre>
+              </details>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">No diagram data available</p>
+          )}
         </CardContent>
       </Card>
 

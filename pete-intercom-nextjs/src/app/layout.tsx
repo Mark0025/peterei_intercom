@@ -3,6 +3,9 @@ import "./globals.css";
 import Header from "@/components/header";
 import Navigation from "@/components/navigation";
 import { validateEnvironment, getEnvironmentInfo } from "@/lib/env";
+import { UIConfigProvider } from "@/contexts/UIConfigContext";
+import { getUIConfig } from "@/actions/ui-config";
+import { ClerkProvider } from '@clerk/nextjs';
 
 export const metadata: Metadata = {
   title: "Pete Intercom App",
@@ -21,20 +24,32 @@ try {
   throw error; // Re-throw to prevent app from starting
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Load UI configuration
+  const configResult = await getUIConfig();
+  const uiConfig = configResult.success && configResult.data ? configResult.data : undefined;
+
+  if (!uiConfig) {
+    console.error('Failed to load UI config:', configResult.error);
+  }
+
   return (
-    <html lang="en">
-      <body>
-        <div className="page-container">
-          <Header />
-          <Navigation />
-          <main>{children}</main>
-        </div>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <UIConfigProvider config={uiConfig!}>
+            <div className="page-container">
+              <Header />
+              <Navigation />
+              <main>{children}</main>
+            </div>
+          </UIConfigProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
