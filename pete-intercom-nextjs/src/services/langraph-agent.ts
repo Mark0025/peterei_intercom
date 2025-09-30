@@ -50,8 +50,9 @@ const llm = new ChatOpenAI({
   modelName: 'openai/gpt-4o-mini',
   temperature: 0.7,  // Higher for better tool reasoning
   maxTokens: 4000,   // Enough space for tool calls + reasoning
-  configuration: {
-    defaultHeaders: {
+}, {
+  baseOptions: {
+    headers: {
       'HTTP-Referer': process.env.PUBLIC_URL || 'http://localhost:3000',
       'X-Title': 'PeteAI Intercom Assistant',
     }
