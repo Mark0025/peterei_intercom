@@ -69,11 +69,19 @@ const searchContactsTool = tool(
         count: contacts.length,
         contacts: contacts.slice(0, 10).map(c => ({
           id: c.id,
+          external_id: c.external_id || null,  // Pete user ID
           name: c.name || 'No name',
           email: c.email || 'No email',
+          role: c.role || 'user',
           companies: c.companies?.companies?.map(comp => comp.name) || [],
+          location: c.location ? `${c.location.city || ''}, ${c.location.region || ''}, ${c.location.country || ''}`.trim() : null,
+          browser: c.browser || null,
+          os: c.os || null,
           last_seen: c.last_seen_at ? new Date(c.last_seen_at * 1000).toLocaleDateString() : 'Never',
-          created: new Date(c.created_at * 1000).toLocaleDateString()
+          created: new Date(c.created_at * 1000).toLocaleDateString(),
+          custom_attributes: c.custom_attributes || {},  // All custom attributes including user_training_topic, WebinarConfirmed
+          tags: c.tags?.data?.map((t: any) => t.name || t.id) || [],  // User tags
+          segments: c.segments?.data?.map((s: any) => s.name || s.id) || []  // User segments
         }))
       };
     } catch (error) {
@@ -103,12 +111,19 @@ const searchCompaniesTool = tool(
         success: true,
         count: companies.length,
         companies: companies.slice(0, 10).map(c => ({
-          id: c.id,
+          id: c.id,  // Intercom ID
+          company_id: c.company_id || null,  // Pete company ID (external ID)
           name: c.name,
           user_count: c.user_count || 0,
           website: c.website || 'No website',
           created: new Date(c.created_at * 1000).toLocaleDateString(),
-          monthly_spend: c.monthly_spend || 0
+          updated: new Date(c.updated_at * 1000).toLocaleDateString(),
+          monthly_spend: c.monthly_spend || 0,
+          session_count: c.session_count || 0,
+          plan: c.plan?.name || null,  // Silver/Gold/Platinum/etc
+          custom_attributes: c.custom_attributes || {},  // All custom attributes including Petetraining
+          tags: c.tags?.tags?.map((t: any) => t.name || t.id) || [],  // Company tags
+          segments: c.segments?.segments?.map((s: any) => s.name || s.id) || []  // Company segments
         }))
       };
     } catch (error) {
