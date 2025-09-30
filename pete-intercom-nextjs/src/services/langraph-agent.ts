@@ -43,13 +43,19 @@ Process:
 4. Use the tool's response to answer the question
 5. Be specific with actual data from tools`;
 
-// Create the LLM with proper configuration
+// Create the LLM with proper configuration for OpenRouter
 const llm = new ChatOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
   modelName: 'openai/gpt-4o-mini',
   temperature: 0.7,  // Higher for better tool reasoning
   maxTokens: 4000,   // Enough space for tool calls + reasoning
+  configuration: {
+    defaultHeaders: {
+      'HTTP-Referer': process.env.PUBLIC_URL || 'http://localhost:3000',
+      'X-Title': 'PeteAI Intercom Assistant',
+    }
+  }
 });
 
 // Define tools for Intercom operations
