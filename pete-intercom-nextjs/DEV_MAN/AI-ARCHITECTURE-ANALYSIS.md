@@ -385,3 +385,34 @@ messages.unshift(new SystemMessage(systemPrompt));
 **The Bottom Line**: PeteAI is not smart because the LLM isn't being **told** to use tools or **shown** how. We have all the infrastructure (tools, cache, LangGraph), but missing the critical **prompt engineering** that makes the agent actually use them.
 
 **Fix**: Add system prompt, increase tokens, enable tool_choice → Agent will become smart immediately.
+
+---
+
+## UPDATE 2025-09-30: Root Cause Found
+
+### The Real Problem
+
+**API Route IS calling LangGraph correctly** (`/api/PeteAI/route.ts:29` calls `sendMessageToPeteAIJson`).
+
+**But LangGraph is erroring and falling back to cache-only** (`peteai.ts:284-286`):
+```typescript
+} catch (error) {
+  logError(`LangGraph error: ${error instanceof Error ? error.message : error}`);
+  // Fallback to cache-only response
+  reply = await getCacheOnlyResponse(message.trim());
+}
+```
+
+### Why It's Falling Back
+
+1. **OpenRouter 401 error** - Was missing HTTP-Referer and X-Title headers
+2. **Fixed in commit 685d9d6** - Added configuration.defaultHeaders to ChatOpenAI
+3. **But error might still be occurring** - Need to check server logs
+
+### Call Chain (Correct)
+
+```
+User Browser (localhost:3000/peteai)
+  ↓ POST /api/PeteAI
+src/app/api/PeteAI/route.ts
+  ↓ sendMessageToPeteAIJson()

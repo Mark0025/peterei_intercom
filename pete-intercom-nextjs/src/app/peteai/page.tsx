@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { sendMessageToPeteAI } from '@/actions/peteai';
+import { sendMessageToPeteAIJson } from '@/actions/peteai';
 
 interface Message {
   role: 'user' | 'ai';
