@@ -1,6 +1,18 @@
+'use client';
+
 import Link from 'next/link';
 
 const adminTools = [
+  {
+    title: '💡 Onboarding Discovery',
+    desc: 'Deep dive into onboarding with insights & 7-levels questionnaire',
+    href: '/admin/onboarding-insights',
+    links: [
+      { label: '📊 Conversation Insights', href: '/admin/onboarding-insights' },
+      { label: '📝 7-Levels Questionnaire', href: '/admin/onboarding-questionnaire' },
+      { label: '💾 View Responses', href: '/admin/onboarding-responses' }
+    ]
+  },
   { title: '🏥 Health Check', desc: 'Monitor application health and endpoint status', href: '/admin/health' },
   { title: '📊 Logs', desc: 'View application logs and debugging information', href: '/admin/logs' },
   { title: '🤖 PeteAI', desc: 'AI assistant and training management', href: '/admin/peteai' },
@@ -23,19 +35,61 @@ export default function AdminPage() {
         marginTop: '20px'
       }}>
         {adminTools.map((tool) => (
-          <div key={tool.href} style={{
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            padding: '20px',
-            backgroundColor: '#fff',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
+          <Link
+            key={tool.href}
+            href={tool.links ? tool.links[0].href : tool.href}
+            style={{
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              padding: '20px',
+              backgroundColor: '#fff',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              textDecoration: 'none',
+              display: 'block',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(45,114,210,0.2)';
+              e.currentTarget.style.borderColor = '#2d72d2';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+              e.currentTarget.style.borderColor = '#ddd';
+            }}
+          >
             <h3 style={{ margin: '0 0 10px 0', color: '#2d72d2' }}>{tool.title}</h3>
             <p style={{ margin: '0 0 15px 0', fontSize: '0.9em', color: '#666' }}>{tool.desc}</p>
-            <Link href={tool.href} className="btn-pete" style={{ textDecoration: 'none' }}>
-              Access Tool
-            </Link>
-          </div>
+
+            {tool.links && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                {tool.links.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.href}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      fontSize: '0.85em',
+                      color: '#2d72d2',
+                      textDecoration: 'none',
+                      padding: '4px 0',
+                      borderBottom: '1px solid #e0e0e0'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.color = '#1a4d8f';
+                      e.currentTarget.style.textDecoration = 'underline';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.color = '#2d72d2';
+                      e.currentTarget.style.textDecoration = 'none';
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </Link>
         ))}
       </div>
 

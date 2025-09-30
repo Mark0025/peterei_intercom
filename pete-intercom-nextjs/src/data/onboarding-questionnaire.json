@@ -1,0 +1,458 @@
+{
+  "meta": {
+    "title": "7-Levels Deep Onboarding Discovery",
+    "description": "EOS-style questioning to understand why our onboarding works or fails",
+    "targetAudience": ["Jon (Owner)", "Mark (Developer)"],
+    "resolutionCategories": ["Education", "Coding", "Expectations", "Process", "Data Validation"]
+  },
+  "sections": [
+    {
+      "id": "data-upload",
+      "title": "Data Upload & Migration",
+      "shortDescription": "Understanding the data onboarding process",
+      "questions": [
+        {
+          "id": "data-upload-l1",
+          "level": 1,
+          "question": "What is our current data upload process for new clients?",
+          "context": "Start with the observable process",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "data-upload-l2",
+          "level": 2,
+          "question": "Why do we use this specific data upload method?",
+          "context": "Understand the reasoning behind the process",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "data-upload-l3",
+          "level": 3,
+          "question": "Why is this method better than alternatives (manual entry, API sync, bulk imports)?",
+          "context": "Challenge assumptions, explore tradeoffs",
+          "expectedAnswerType": "comparative-analysis"
+        },
+        {
+          "id": "data-upload-l4",
+          "level": 4,
+          "question": "Why do clients struggle with this process? What breaks down?",
+          "context": "Identify pain points and failure modes",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "data-upload-l5",
+          "level": 5,
+          "question": "Why haven't we fixed these issues yet? What's blocking us?",
+          "context": "Uncover root causes and constraints",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "data-upload-l6",
+          "level": 6,
+          "question": "Why is solving this problem important for business success?",
+          "context": "Connect to business value and outcomes",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "data-upload-l7",
+          "level": 7,
+          "question": "Why would a perfect data upload process transform our client relationships?",
+          "context": "Envision the ultimate outcome and impact",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "marketing-handoff",
+      "title": "Marketing Handoff Process",
+      "shortDescription": "Understanding the sales-to-onboarding transition",
+      "questions": [
+        {
+          "id": "handoff-l1",
+          "level": 1,
+          "question": "What information does marketing/sales pass to us when onboarding begins?",
+          "context": "Map the current handoff process",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "handoff-l2",
+          "level": 2,
+          "question": "Why do we need this specific information to start onboarding?",
+          "context": "Understand information dependencies",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "handoff-l3",
+          "level": 3,
+          "question": "Why is information often incomplete or inaccurate at handoff?",
+          "context": "Identify systematic problems",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "handoff-l4",
+          "level": 4,
+          "question": "Why does incomplete handoff information delay or derail onboarding?",
+          "context": "Trace impact through the system",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "handoff-l5",
+          "level": 5,
+          "question": "Why don't we have a standardized handoff checklist/form?",
+          "context": "Explore solution attempts and barriers",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "handoff-l6",
+          "level": 6,
+          "question": "Why would fixing the handoff process improve customer satisfaction?",
+          "context": "Connect to customer outcomes",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "handoff-l7",
+          "level": 7,
+          "question": "Why is a seamless handoff critical to our competitive advantage?",
+          "context": "Link to strategic positioning",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "intake-requirements",
+      "title": "Client Intake & Requirements Gathering",
+      "shortDescription": "Understanding how we gather client needs",
+      "questions": [
+        {
+          "id": "intake-l1",
+          "level": 1,
+          "question": "What questions do we ask clients during initial intake?",
+          "context": "Document current intake questions",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "intake-l2",
+          "level": 2,
+          "question": "Why do we ask these specific questions?",
+          "context": "Understand question design intent",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "intake-l3",
+          "level": 3,
+          "question": "Why do clients often misunderstand or misanswer these questions?",
+          "context": "Identify communication gaps",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "intake-l4",
+          "level": 4,
+          "question": "Why do unclear requirements cause project delays and scope creep?",
+          "context": "Map consequences through project lifecycle",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "intake-l5",
+          "level": 5,
+          "question": "Why haven't we created a foolproof intake questionnaire yet?",
+          "context": "Explore attempted solutions and barriers",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "intake-l6",
+          "level": 6,
+          "question": "Why is perfect requirements clarity impossible but still worth pursuing?",
+          "context": "Acknowledge tradeoffs and iterate toward better",
+          "expectedAnswerType": "philosophy"
+        },
+        {
+          "id": "intake-l7",
+          "level": 7,
+          "question": "Why would AI-assisted intake (like PeteAI) transform our onboarding?",
+          "context": "Envision future-state solution",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "timeline-expectations",
+      "title": "Timeline & Expectations Management",
+      "shortDescription": "Understanding how we set and meet deadlines",
+      "questions": [
+        {
+          "id": "timeline-l1",
+          "level": 1,
+          "question": "How do we currently set onboarding timelines with clients?",
+          "context": "Map timeline-setting process",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "timeline-l2",
+          "level": 2,
+          "question": "Why do we use this timeline estimation method?",
+          "context": "Understand estimation logic",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "timeline-l3",
+          "level": 3,
+          "question": "Why do we frequently miss our estimated timelines?",
+          "context": "Identify prediction failure modes",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "timeline-l4",
+          "level": 4,
+          "question": "Why do missed timelines damage trust and client satisfaction?",
+          "context": "Understand psychological and business impact",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "timeline-l5",
+          "level": 5,
+          "question": "Why don't we pad timelines more or communicate uncertainty better?",
+          "context": "Explore solution space and barriers",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "timeline-l6",
+          "level": 6,
+          "question": "Why is under-promising and over-delivering a better strategy?",
+          "context": "Connect to customer psychology and retention",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "timeline-l7",
+          "level": 7,
+          "question": "Why would perfect timeline accuracy transform our client relationships?",
+          "context": "Envision ideal outcome",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "technical-setup",
+      "title": "Technical Setup & Integration",
+      "shortDescription": "Understanding technical onboarding challenges",
+      "questions": [
+        {
+          "id": "technical-l1",
+          "level": 1,
+          "question": "What technical integrations do we typically set up during onboarding?",
+          "context": "List technical requirements",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "technical-l2",
+          "level": 2,
+          "question": "Why do these specific integrations matter for client success?",
+          "context": "Understand value of each integration",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "technical-l3",
+          "level": 3,
+          "question": "Why do technical setups often fail or require multiple attempts?",
+          "context": "Identify technical failure patterns",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "technical-l4",
+          "level": 4,
+          "question": "Why do technical delays cascade into other onboarding problems?",
+          "context": "Map technical dependencies",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "technical-l5",
+          "level": 5,
+          "question": "Why haven't we automated or simplified these technical steps?",
+          "context": "Explore automation barriers",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "technical-l6",
+          "level": 6,
+          "question": "Why is reducing technical friction a competitive differentiator?",
+          "context": "Connect to market positioning",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "technical-l7",
+          "level": 7,
+          "question": "Why would one-click technical setup revolutionize our onboarding?",
+          "context": "Envision frictionless future",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "training-enablement",
+      "title": "User Training & Enablement",
+      "shortDescription": "Understanding how we train clients to use the system",
+      "questions": [
+        {
+          "id": "training-l1",
+          "level": 1,
+          "question": "What training do we provide to new users during onboarding?",
+          "context": "Map current training approach",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "training-l2",
+          "level": 2,
+          "question": "Why do we use this specific training format/method?",
+          "context": "Understand training design rationale",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "training-l3",
+          "level": 3,
+          "question": "Why do users still struggle after completing our training?",
+          "context": "Identify training effectiveness gaps",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "training-l4",
+          "level": 4,
+          "question": "Why does poor training lead to increased support tickets and churn?",
+          "context": "Trace long-term impact",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "training-l5",
+          "level": 5,
+          "question": "Why haven't we built better training materials or interactive guides?",
+          "context": "Explore resource and priority constraints",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "training-l6",
+          "level": 6,
+          "question": "Why is effective training essential to product adoption and retention?",
+          "context": "Connect to business outcomes",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "training-l7",
+          "level": 7,
+          "question": "Why would AI-powered personalized training (PeteAI) transform user success?",
+          "context": "Envision adaptive training future",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "workflow-automation",
+      "title": "Workflow & Automation Setup",
+      "shortDescription": "Understanding how we set up client workflows",
+      "questions": [
+        {
+          "id": "workflow-l1",
+          "level": 1,
+          "question": "What workflows or automations do we typically configure during onboarding?",
+          "context": "List workflow setup tasks",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "workflow-l2",
+          "level": 2,
+          "question": "Why are these specific workflows critical for client operations?",
+          "context": "Understand workflow value",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "workflow-l3",
+          "level": 3,
+          "question": "Why do workflows often need multiple revisions before they work correctly?",
+          "context": "Identify configuration complexity",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "workflow-l4",
+          "level": 4,
+          "question": "Why do workflow mistakes cause operational problems for clients?",
+          "context": "Map operational impact",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "workflow-l5",
+          "level": 5,
+          "question": "Why haven't we created workflow templates or a configuration wizard?",
+          "context": "Explore solution attempts",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "workflow-l6",
+          "level": 6,
+          "question": "Why are pre-built workflow templates a major time-saver and differentiator?",
+          "context": "Connect to efficiency and value prop",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "workflow-l7",
+          "level": 7,
+          "question": "Why would intelligent workflow recommendations transform onboarding speed?",
+          "context": "Envision AI-assisted workflow design",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    },
+    {
+      "id": "success-metrics",
+      "title": "Success Metrics & Follow-up",
+      "shortDescription": "Understanding how we measure and ensure onboarding success",
+      "questions": [
+        {
+          "id": "metrics-l1",
+          "level": 1,
+          "question": "How do we currently measure whether onboarding was successful?",
+          "context": "Identify current metrics",
+          "expectedAnswerType": "process-description"
+        },
+        {
+          "id": "metrics-l2",
+          "level": 2,
+          "question": "Why did we choose these specific success metrics?",
+          "context": "Understand metric selection rationale",
+          "expectedAnswerType": "rationale"
+        },
+        {
+          "id": "metrics-l3",
+          "level": 3,
+          "question": "Why do our success metrics sometimes fail to predict actual client satisfaction?",
+          "context": "Challenge metric validity",
+          "expectedAnswerType": "problem-identification"
+        },
+        {
+          "id": "metrics-l4",
+          "level": 4,
+          "question": "Why is measuring the right things critical to improving onboarding?",
+          "context": "Connect measurement to improvement",
+          "expectedAnswerType": "impact-analysis"
+        },
+        {
+          "id": "metrics-l5",
+          "level": 5,
+          "question": "Why don't we have automated dashboards tracking onboarding health?",
+          "context": "Explore tooling and visibility gaps",
+          "expectedAnswerType": "constraint-analysis"
+        },
+        {
+          "id": "metrics-l6",
+          "level": 6,
+          "question": "Why would real-time onboarding metrics enable proactive intervention?",
+          "context": "Connect to operational excellence",
+          "expectedAnswerType": "business-impact"
+        },
+        {
+          "id": "metrics-l7",
+          "level": 7,
+          "question": "Why would predictive onboarding analytics revolutionize our client success?",
+          "context": "Envision data-driven future state",
+          "expectedAnswerType": "vision-statement"
+        }
+      ]
+    }
+  ]
+}
