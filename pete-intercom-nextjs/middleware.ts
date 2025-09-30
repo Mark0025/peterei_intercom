@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/api/admin(.*)']);
@@ -12,13 +12,14 @@ export default clerkMiddleware(async (auth, req) => {
       return authResult.redirectToSignIn();
     }
 
-    // Check if user email ends with @peterei.com
-    const userEmail = authResult.sessionClaims?.email as string | undefined;
+    // Fetch user data from Clerk API to get email
+    const client = await clerkClient();
+    const user = await client.users.getUser(authResult.userId);
+    const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
 
     // Debug logging
     console.log('[Middleware] User ID:', authResult.userId);
     console.log('[Middleware] User email:', userEmail);
-    console.log('[Middleware] Session claims:', JSON.stringify(authResult.sessionClaims, null, 2));
 
     if (!userEmail || !userEmail.endsWith('@peterei.com')) {
       console.log('[Middleware] Access denied - email does not end with @peterei.com');
