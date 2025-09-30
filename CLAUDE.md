@@ -161,18 +161,81 @@ Located in `intercomApp/src/scripts/`, these bash scripts provide direct API acc
 
 ## Next.js Migration Status
 
-The project is currently on the `Next-refactor` branch preparing for migration from Express to Next.js 15 with TypeScript.
+The project is currently on the `Next-refactor` branch with Next.js 15, TypeScript, and strict type safety fully implemented.
+
+### ✅ Completed Migration Work
+
+#### TypeScript Strict Mode (2025-01)
+- **Eliminated all `any` types** across 32 files (50+ instances)
+- **Fixed exactOptionalPropertyTypes conflicts** with conditional rendering
+- **All types extracted to `/types` directory** following DRY principles
+- **Build compiles successfully** with zero type errors (warnings only)
+- All JSX unescaped entity errors resolved
+- Used proper TypeScript types: `unknown`, `Record<string, T>`, typed arrays
+
+#### 7-Levels Deep Onboarding Discovery System (2025-01)
+**Problem:** Need to understand WHY our onboarding works or fails at a root-cause level using EOS-style questioning.
+
+**Solution Built:**
+
+1. **Conversation Analysis Engine** (`src/actions/onboarding-analysis.ts`)
+   - Analyzes ALL cached conversations for onboarding keywords
+   - 8 topic categories: Data Upload, Marketing Handoff, Intake, Timeline, Technical, Training, Workflow, Success Metrics
+   - Generates Mermaid diagrams of current onboarding process flow
+   - Extracts insights with conversation excerpts
+   - Timeline visualization of onboarding conversations
+
+2. **Onboarding Insights Dashboard** (`/admin/onboarding-insights`)
+   - Beautiful Pete-branded UI (purple-to-pink gradients)
+   - Stats cards: total conversations, onboarding-related, topics identified
+   - Auto-generated Mermaid diagram for visualization
+   - Topic breakdown with filtering
+   - Conversation insights list with badges
+   - Top keywords analysis
+
+3. **7-Levels Deep Questionnaire** (`/admin/onboarding-questionnaire`)
+   - 56 questions across 8 sections (7 questions per section)
+   - Each question digs deeper: What → Why → Why better → Why fails → Why unfixed → Why matters → Why perfection transforms
+   - Progress tracking with visual indicators
+   - Auto-save functionality (file-based storage)
+   - Markdown export for documentation
+   - Resolution categorization: Education, Coding, Expectations, Process, Data Validation
+   - Pete-branded UI with gradients and clean design
+
+4. **Questionnaire Server Actions** (`src/actions/questionnaire.ts`)
+   - Session management with resume capability
+   - File-based JSON storage in `data/questionnaire-responses/`
+   - Markdown export with formatting
+   - Multi-respondent support (Jon, Mark)
+
+5. **Questionnaire Data Structure** (`src/data/onboarding-questionnaire.json`)
+   - 8 sections with comprehensive coverage
+   - Context and expectedAnswerType for each question
+   - Metadata with resolution categories
+   - EOS methodology applied throughout
+
+**Access Points:**
+- `/admin/onboarding-insights` - Analyze existing conversations
+- `/admin/onboarding-questionnaire` - Complete 7-levels deep discovery
+
+**Next Steps:**
+- Jon and Mark to complete questionnaires
+- Analyze responses to identify root causes
+- Build AI assistance layer (PeteAI integration)
+- Create action items from insights
+
+See `DEV_MAN/Onboarding-7DEEP/` for full documentation and planning.
 
 ### Migration Strategy (Server Actions First)
-1. **Bootstrap Next.js 15 + TypeScript** with strict configuration
-2. **Extract all types to centralized `/types` directory** for type safety
-3. **Convert POST endpoints to server actions** (eliminates client/server boundary)
-4. **Migrate Canvas Kit logic to React Server Components**
-5. **Build questionnaire flow with server actions**
-6. **Add admin dashboard with server actions**
-7. **Convert bash scripts to admin server actions** (eliminate `intercomApp/src/scripts/`)
-8. **Preserve webhook API routes** for Intercom external webhooks
-9. **Delete old Express app entirely** once migration is complete
+1. **Bootstrap Next.js 15 + TypeScript** ✅ COMPLETE
+2. **Extract all types to centralized `/types` directory** ✅ COMPLETE
+3. **Convert POST endpoints to server actions** ✅ COMPLETE
+4. **Migrate Canvas Kit logic to React Server Components** ✅ COMPLETE
+5. **Build questionnaire flow with server actions** ✅ COMPLETE
+6. **Add admin dashboard with server actions** ✅ COMPLETE
+7. **Convert bash scripts to admin server actions** 🚧 IN PROGRESS
+8. **Preserve webhook API routes** ✅ COMPLETE
+9. **Delete old Express app entirely** ⏳ PENDING
 
 ### Express Routes → Next.js Migration Map
 
