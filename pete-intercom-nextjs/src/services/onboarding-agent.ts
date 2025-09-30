@@ -30,11 +30,17 @@ interface OnboardingAgentState {
 
 // Create LLM with OpenRouter - exact same config as working langraph-agent.ts
 const llm = new ChatOpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
   modelName: 'openai/gpt-4o-mini',
-  temperature: 0.1,
-  maxTokens: 1000,
+  temperature: 0.7,  // Higher for better tool reasoning
+  maxTokens: 4000,   // Enough space for tool calls + reasoning
+  configuration: {   // MUST be in first parameter with correct structure
+    baseURL: 'https://openrouter.ai/api/v1',
+    defaultHeaders: {
+      'HTTP-Referer': process.env.PUBLIC_URL || 'http://localhost:3000',
+      'X-Title': 'PeteAI Onboarding Analysis',
+    }
+  }
 });
 
 // ============================================================================

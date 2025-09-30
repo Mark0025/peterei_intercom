@@ -14,6 +14,16 @@ const adminTools = [
       { label: '💾 View Responses', href: '/admin/onboarding-responses' }
     ]
   },
+  {
+    title: '👥 Contacts & Companies',
+    desc: 'View and manage Intercom contacts and companies',
+    href: '/admin/contacts',
+    links: [
+      { label: '👤 Contacts', href: '/admin/contacts' },
+      { label: '🏢 Companies', href: '/admin/companies' },
+      { label: '💬 Conversations', href: '/admin/conversations' }
+    ]
+  },
   { title: '🏥 Health Check', desc: 'Monitor application health and endpoint status', href: '/admin/health' },
   { title: '📊 Logs', desc: 'View application logs and debugging information', href: '/admin/logs' },
   { title: '🤖 PeteAI', desc: 'AI assistant and training management', href: '/admin/peteai' },
