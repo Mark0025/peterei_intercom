@@ -44,12 +44,16 @@ export async function GET(request: NextRequest) {
     html = html.replace(/x-frame-options:\s*deny/gi, '');
     html = html.replace(/X-Frame-Options:\s*DENY/gi, '');
     
-    // Update relative URLs to absolute URLs
-    html = html.replace(/src="\//g, `src="${HELP_CENTER_URL}/`);
-    html = html.replace(/href="\//g, `href="${HELP_CENTER_URL}/`);
+    // Update relative URLs to point to our proxy
+    html = html.replace(/src="\//g, `src="/api/help-proxy?path=/`);
+    html = html.replace(/href="\//g, `href="/api/help-proxy?path=/`);
     
     // Update form actions to point to our proxy
     html = html.replace(/action="\//g, `action="/api/help-proxy?path=/`);
+    
+    // Update any absolute help.thepete.io URLs to use our proxy
+    html = html.replace(/href="https:\/\/help\.thepete\.io\//g, `href="/api/help-proxy?path=`);
+    html = html.replace(/src="https:\/\/help\.thepete\.io\//g, `src="/api/help-proxy?path=`);
     
     // Add some basic styling to make it look better in iframe
     html = html.replace(

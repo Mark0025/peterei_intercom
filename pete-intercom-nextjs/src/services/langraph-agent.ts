@@ -36,15 +36,20 @@ Available Tools:
 - "show timeline for Stkcam" → MUST call get_company_timeline(company_id)
 - "find john@example.com" → MUST call search_contacts(email="john@example.com")
 - "get company attributes" → MUST call extract_company_attributes(company_id)
-- "how do I upload data?" → MUST call recommend_help_doc → fetch_help_doc(url) → generate_process_map(title, steps)
+- "how do I upload data?" → MUST call recommend_help_doc("upload data") → fetch_help_doc(url) → generate_process_map(title, steps)
+- "I need to upload data" → MUST call recommend_help_doc("upload data") then fetch and generate map
 
 🎨 Help Documentation Workflow:
-When users ask HOW to do something:
-1. Call recommend_help_doc to find relevant doc URL
-2. Call fetch_help_doc to read the documentation
-3. Analyze the content and extract step-by-step instructions
-4. Call generate_process_map to create a visual Mermaid flowchart
-5. Present the flowchart with links to the documentation
+**CRITICAL: When users ask HOW to do ANYTHING, you MUST use the help doc workflow:**
+1. ALWAYS call recommend_help_doc with the user's question
+2. Call fetch_help_doc with the recommended URL to read the actual documentation
+3. Analyze the fetched content and extract 3-7 step-by-step instructions
+4. Call generate_process_map with extracted steps to create a visual Mermaid flowchart
+5. Present the flowchart markdown AND link to the full documentation
+
+**Questions that REQUIRE help doc workflow:**
+- "how do I..." / "how to..." / "I need to..." / "I want to..." / "help me..." / "show me how..."
+- ANY question about Pete features, setup, configuration, or usage
 
 ⚠️ DO NOT give generic responses about "94 companies" - USE THE TOOLS to get actual data!
 
@@ -451,39 +456,39 @@ const recommendHelpDocTool = tool(
       const helpDocs = [
         {
           category: "Getting Started",
-          url: "https://help.thepete.io/en/",
-          keywords: ["start", "begin", "setup", "initial", "first", "onboard", "intro", "basic"],
-          description: "Everything you need to get started with Pete"
+          url: "https://help.thepete.io/en/collections/10827028-getting-started",
+          keywords: ["start", "begin", "setup", "initial", "first", "onboard", "intro", "basic", "upload", "import", "data", "csv", "file", "add", "create", "new"],
+          description: "Everything you need to get started with Pete - includes uploading data, importing contacts, and initial setup"
         },
         {
           category: "Workflows & Automation",
-          url: "https://help.thepete.io/en/",
-          keywords: ["workflow", "automat", "task", "process", "trigger", "action", "flow"],
+          url: "https://help.thepete.io/en/collections/11235880-workflows-automation",
+          keywords: ["workflow", "automat", "task", "process", "trigger", "action", "flow", "schedule", "recurring"],
           description: "Automate your Pete and streamline tasks"
         },
         {
+          category: "Tasks",
+          url: "https://help.thepete.io/en/collections/10826939-tasks",
+          keywords: ["task", "to-do", "todo", "checklist", "assignment", "work", "job"],
+          description: "Set up and manage tasks in Pete"
+        },
+        {
           category: "Communication",
-          url: "https://help.thepete.io/en/",
-          keywords: ["message", "email", "notify", "alert", "communicate", "send", "contact"],
+          url: "https://help.thepete.io/en/collections/10827385-communication",
+          keywords: ["message", "email", "notify", "alert", "communicate", "send", "contact", "sms", "text"],
           description: "Configure your communication settings"
         },
         {
           category: "Properties",
-          url: "https://help.thepete.io/en/",
-          keywords: ["property", "field", "attribute", "custom", "data", "metadata"],
+          url: "https://help.thepete.io/en/collections/10827549-properties",
+          keywords: ["property", "field", "attribute", "custom", "metadata", "column", "value"],
           description: "Navigate properties with ease"
         },
         {
-          category: "Training",
-          url: "https://help.thepete.io/en/",
-          keywords: ["train", "learn", "video", "tutorial", "guide", "course", "teach"],
-          description: "Video training to enhance your knowledge"
-        },
-        {
-          category: "Support",
-          url: "https://help.thepete.io/en/",
-          keywords: ["help", "support", "issue", "problem", "troubleshoot", "fix", "error"],
-          description: "Comprehensive guide to navigate Pete"
+          category: "Integrations",
+          url: "https://help.thepete.io/en/collections/11235874-integrations",
+          keywords: ["integration", "connect", "sync", "api", "webhook", "zapier", "third-party"],
+          description: "Set up integrations with other tools"
         }
       ];
 
