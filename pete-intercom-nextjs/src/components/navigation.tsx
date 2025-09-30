@@ -2,9 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user, isLoaded } = useUser();
+
+  // Check if user is an admin (@peterie.com email)
+  const isAdmin = isLoaded && user?.primaryEmailAddress?.emailAddress?.endsWith('@peterie.com');
 
   const navStyle = {
     background: '#2d72d2',
@@ -51,12 +56,14 @@ export default function Navigation() {
       >
         What&apos;s Working
       </Link>
-      <Link
-        href="/admin"
-        style={pathname.startsWith('/admin') ? activeLinkStyle : linkStyle}
-      >
-        Admin
-      </Link>
+      {isAdmin && (
+        <Link
+          href="/admin"
+          style={pathname.startsWith('/admin') ? activeLinkStyle : linkStyle}
+        >
+          Admin
+        </Link>
+      )}
       <Link
         href="/help"
         style={pathname.startsWith('/help') ? activeLinkStyle : linkStyle}
