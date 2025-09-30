@@ -1,9 +1,9 @@
 import { getAllCompanies, getCompanyStats } from '@/actions/companies';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Building2, Users, Tag, TrendingUp, DollarSign } from 'lucide-react';
+import CompaniesListClient from '@/components/companies/CompaniesListClient';
 
 // Next.js 15: Opt into dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -134,100 +134,8 @@ export default async function CompaniesPage() {
         </Card>
       </div>
 
-      {/* Companies Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Companies</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b">
-                <tr className="text-left text-sm text-muted-foreground">
-                  <th className="pb-3 font-medium">Name</th>
-                  <th className="pb-3 font-medium">Pete ID</th>
-                  <th className="pb-3 font-medium">Plan</th>
-                  <th className="pb-3 font-medium">Users</th>
-                  <th className="pb-3 font-medium">Revenue</th>
-                  <th className="pb-3 font-medium">Tags</th>
-                  <th className="pb-3 font-medium">Website</th>
-                  <th className="pb-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {companies.map((company) => (
-                  <tr key={company.id} className="border-b last:border-0 hover:bg-muted/50">
-                    <td className="py-4 font-medium">{company.name}</td>
-                    <td className="py-4">
-                      {company.company_id ? (
-                        <Badge variant="secondary">{company.company_id}</Badge>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4">
-                      {company.plan?.name ? (
-                        <Badge variant="outline">{company.plan.name}</Badge>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">No plan</span>
-                      )}
-                    </td>
-                    <td className="py-4 text-sm">
-                      {company.user_count || 0} users
-                    </td>
-                    <td className="py-4 text-sm">
-                      {company.monthly_spend ? (
-                        `$${company.monthly_spend.toLocaleString()}`
-                      ) : (
-                        <span className="text-muted-foreground">$0</span>
-                      )}
-                    </td>
-                    <td className="py-4">
-                      {company.tags?.tags && company.tags.tags.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {company.tags.tags.slice(0, 2).map((tag) => (
-                            <Badge key={tag.id} variant="outline" className="text-xs">
-                              {tag.name || tag.id}
-                            </Badge>
-                          ))}
-                          {company.tags.tags.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{company.tags.tags.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4 text-sm">
-                      {company.website ? (
-                        <a
-                          href={company.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          {new URL(company.website).hostname}
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4">
-                      <Link href={`/admin/companies/${company.id}`}>
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Client Component with Search + PeteAI + Table */}
+      <CompaniesListClient companies={companies} />
 
       {/* Data Note */}
       <Card className="bg-slate-50 dark:bg-slate-900">

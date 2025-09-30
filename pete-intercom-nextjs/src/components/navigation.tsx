@@ -27,35 +27,41 @@ export default function Navigation() {
 
   return (
     <nav style={navStyle}>
-      <Link 
-        href="/" 
+      <Link
+        href="/"
         style={pathname === '/' ? activeLinkStyle : linkStyle}
       >
         Home
       </Link>
-      <Link 
-        href="/popout" 
+      <Link
+        href="/popout"
         style={pathname.startsWith('/popout') ? activeLinkStyle : linkStyle}
       >
         Onboarding
       </Link>
-      <Link 
-        href="/peteai" 
+      <Link
+        href="/peteai"
         style={pathname.startsWith('/peteai') ? activeLinkStyle : linkStyle}
       >
         PeteAI
       </Link>
-      <Link 
-        href="/whatsworking" 
+      <Link
+        href="/whatsworking"
         style={pathname.startsWith('/whatsworking') ? activeLinkStyle : linkStyle}
       >
         What&apos;s Working
       </Link>
-      <Link 
-        href="/admin" 
+      <Link
+        href="/admin"
         style={pathname.startsWith('/admin') ? activeLinkStyle : linkStyle}
       >
         Admin
+      </Link>
+      <Link
+        href="/help"
+        style={pathname.startsWith('/help') ? activeLinkStyle : linkStyle}
+      >
+        Help Center
       </Link>
     </nav>
   );

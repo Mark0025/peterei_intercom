@@ -1,9 +1,9 @@
 import { getAllContacts, getContactStats } from '@/actions/contacts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Users, MapPin, Tag, TrendingUp, Building2 } from 'lucide-react';
+import { Users, Tag, TrendingUp, Building2 } from 'lucide-react';
+import ContactsListClient from '@/components/contacts/ContactsListClient';
 
 // Next.js 15: Opt into dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -121,97 +121,8 @@ export default async function ContactsPage() {
         </Card>
       </div>
 
-      {/* Contacts Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Contacts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b">
-                <tr className="text-left text-sm text-muted-foreground">
-                  <th className="pb-3 font-medium">Name/Email</th>
-                  <th className="pb-3 font-medium">Pete ID</th>
-                  <th className="pb-3 font-medium">Company</th>
-                  <th className="pb-3 font-medium">Location</th>
-                  <th className="pb-3 font-medium">Tags</th>
-                  <th className="pb-3 font-medium">Last Seen</th>
-                  <th className="pb-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {contacts.map((contact) => (
-                  <tr key={contact.id} className="border-b last:border-0 hover:bg-muted/50">
-                    <td className="py-4">
-                      <div>
-                        <div className="font-medium">{contact.name || 'Unnamed'}</div>
-                        <div className="text-sm text-muted-foreground">{contact.email || 'No email'}</div>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      {contact.external_id ? (
-                        <Badge variant="secondary">{contact.external_id}</Badge>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4 text-sm">
-                      {contact.companies?.companies?.[0]?.name || (
-                        <span className="text-muted-foreground">No company</span>
-                      )}
-                    </td>
-                    <td className="py-4 text-sm">
-                      {contact.location?.city || contact.location?.country ? (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-muted-foreground" />
-                          {contact.location?.city && contact.location?.country
-                            ? `${contact.location.city}, ${contact.location.country}`
-                            : contact.location?.country || contact.location?.city}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4">
-                      {contact.tags?.data && contact.tags.data.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {contact.tags.data.slice(0, 2).map((tag) => (
-                            <Badge key={tag.id} variant="outline" className="text-xs">
-                              {tag.name || tag.id}
-                            </Badge>
-                          ))}
-                          {contact.tags.data.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{contact.tags.data.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4 text-sm">
-                      {contact.last_seen_at ? (
-                        new Date(contact.last_seen_at * 1000).toLocaleDateString()
-                      ) : (
-                        <span className="text-muted-foreground">Never</span>
-                      )}
-                    </td>
-                    <td className="py-4">
-                      <Link href={`/admin/contacts/${contact.id}`}>
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Client Component with Search + PeteAI + Table */}
+      <ContactsListClient contacts={contacts} />
 
       {/* Data Note */}
       <Card className="bg-slate-50 dark:bg-slate-900">
