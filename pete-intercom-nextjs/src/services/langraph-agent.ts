@@ -1,6 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { StateGraph, END, START } from "@langchain/langgraph";
-import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
+import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from "@langchain/core/messages";
 import { ToolMessage } from "@langchain/core/messages";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
@@ -14,13 +14,42 @@ interface AgentState {
   next: string;
 }
 
-// Create the LLM
+// System prompt - tells the LLM to USE tools
+const SYSTEM_PROMPT = `You are PeteAI, an expert Intercom assistant with access to powerful tools.
+
+🎯 CRITICAL: You MUST use tools when asked about companies, contacts, or conversations.
+
+Available Tools:
+1. **fuzzy_search_company** - Find companies by name (handles typos like "strycam" → "Strycam")
+2. **get_company_timeline** - Get full conversation history for a company
+3. **extract_company_attributes** - Get all company metadata in JSON
+4. **search_contacts** - Find contacts by email or name
+5. **search_companies** - Search companies by name
+6. **analyze_conversations** - Get conversation insights and stats
+7. **get_cache_info** - Get cache status and sample data
+
+📋 Examples of REQUIRED tool usage:
+- "what company id is strycam?" → MUST call fuzzy_search_company("strycam")
+- "show timeline for Stkcam" → MUST call get_company_timeline(company_id)
+- "find john@example.com" → MUST call search_contacts(email="john@example.com")
+- "get company attributes" → MUST call extract_company_attributes(company_id)
+
+⚠️ DO NOT give generic responses about "94 companies" - USE THE TOOLS to get actual data!
+
+Process:
+1. Identify what the user is asking for
+2. Select the appropriate tool
+3. Call the tool with correct parameters
+4. Use the tool's response to answer the question
+5. Be specific with actual data from tools`;
+
+// Create the LLM with proper configuration
 const llm = new ChatOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
   modelName: 'openai/gpt-4o-mini',
-  temperature: 0.1,
-  maxTokens: 1000,
+  temperature: 0.7,  // Higher for better tool reasoning
+  maxTokens: 4000,   // Enough space for tool calls + reasoning
 });
 
 // Define tools for Intercom operations
@@ -267,7 +296,7 @@ const extractCompanyAttributesTool = tool(
   }
 );
 
-// Bind tools to the LLM
+// Bind tools to the LLM with auto tool selection
 const tools = [
   searchContactsTool,
   searchCompaniesTool,
@@ -277,7 +306,11 @@ const tools = [
   getCompanyTimelineTool,
   extractCompanyAttributesTool
 ];
-const llmWithTools = llm.bindTools(tools);
+
+// Enable automatic tool selection
+const llmWithTools = llm.bindTools(tools, {
+  tool_choice: "auto"  // Let LLM decide when to use tools intelligently
+});
 
 // Define the agent node
 async function callModel(state: AgentState): Promise<Partial<AgentState>> {

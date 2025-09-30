@@ -44,3 +44,6 @@ next-env.d.ts
 .cache/
 cache/
 data/questionnaire-responses/*.json
+
+# clerk configuration (can include secrets)
+/.clerk/
