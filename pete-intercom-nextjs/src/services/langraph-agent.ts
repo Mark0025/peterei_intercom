@@ -6,6 +6,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { smartSearchContacts, smartSearchCompanies, getSmartCacheStatus, getSmartCache } from './smart-cache';
 import { logInfo, logError } from './logger';
+import { fuzzySearchCompany, getCompanyTimeline, extractCompanyAttributes } from './company-tools';
 
 // Define the agent state
 interface AgentState {
@@ -199,8 +200,83 @@ const analyzeConversationsTool = tool(
   }
 );
 
+// Company-specific tools for timeline analysis
+const fuzzySearchCompanyTool = tool(
+  async ({ searchTerm }: { searchTerm: string }) => {
+    try {
+      logInfo(`[LANGGRAPH] Fuzzy searching company: ${searchTerm}`);
+      const result = await fuzzySearchCompany(searchTerm);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "fuzzy_search_company",
+    description: "Search for companies using fuzzy matching (handles typos and partial names like 'stkcam' -> 'Stkcam')",
+    schema: z.object({
+      searchTerm: z.string().describe("Company name or partial name to search for")
+    }),
+  }
+);
+
+const getCompanyTimelineTool = tool(
+  async ({ companyId }: { companyId: string }) => {
+    try {
+      logInfo(`[LANGGRAPH] Getting company timeline: ${companyId}`);
+      const result = await getCompanyTimeline(companyId);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "get_company_timeline",
+    description: "Get complete conversation timeline for a specific company including all contacts and topics",
+    schema: z.object({
+      companyId: z.string().describe("The Intercom company ID")
+    }),
+  }
+);
+
+const extractCompanyAttributesTool = tool(
+  async ({ companyId }: { companyId: string }) => {
+    try {
+      logInfo(`[LANGGRAPH] Extracting company attributes: ${companyId}`);
+      const result = await extractCompanyAttributes(companyId);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "extract_company_attributes",
+    description: "Get all company attributes and metadata in JSON format",
+    schema: z.object({
+      companyId: z.string().describe("The Intercom company ID")
+    }),
+  }
+);
+
 // Bind tools to the LLM
-const tools = [searchContactsTool, searchCompaniesTool, getCacheInfoTool, analyzeConversationsTool];
+const tools = [
+  searchContactsTool,
+  searchCompaniesTool,
+  getCacheInfoTool,
+  analyzeConversationsTool,
+  fuzzySearchCompanyTool,
+  getCompanyTimelineTool,
+  extractCompanyAttributesTool
+];
 const llmWithTools = llm.bindTools(tools);
 
 // Define the agent node
