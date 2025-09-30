@@ -46,14 +46,24 @@ function createButtonComponent(id: string, label: string, style: 'primary' | 'se
 export async function initializeCanvasKit(): Promise<ActionResult<CanvasKitResponse>> {
   try {
     logInfo('Canvas Kit initialization requested');
-    
+
     const response: CanvasKitResponse = {
       canvas: {
         content: {
           components: [
-            createTextComponent('welcome', 'Welcome to Pete Intercom App! Choose an action below:', 'header'),
-            createButtonComponent('start_onboarding', 'Start Onboarding Questionnaire'),
-            createButtonComponent('pete_user_training', 'Pete User Training', 'secondary')
+            createTextComponent('welcome', 'Welcome to Pete! Access the app or update your training topic:', 'header'),
+            {
+              type: 'button',
+              id: 'open_pete_app',
+              label: '🚀 Open Pete App',
+              style: 'primary',
+              action: {
+                type: 'url',
+                url: 'https://app.thepete.io'
+              }
+            },
+            createButtonComponent('pete_user_training', '⚙️ Change Training Topic', 'secondary'),
+            createButtonComponent('start_onboarding', '📝 Start Onboarding', 'secondary')
           ]
         }
       }
@@ -63,9 +73,9 @@ export async function initializeCanvasKit(): Promise<ActionResult<CanvasKitRespo
     return { success: true, data: response };
   } catch (error) {
     logError(`Canvas Kit Initialize error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    return { 
-      success: false, 
-      error: 'Failed to initialize Canvas Kit' 
+    return {
+      success: false,
+      error: 'Failed to initialize Canvas Kit'
     };
   }
 }
