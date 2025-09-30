@@ -1,0 +1,251 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import mermaid from 'mermaid';
+
+interface MarkdownRendererProps {
+  content: string;
+  className?: string;
+}
+
+export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Initialize Mermaid
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+    });
+  }, []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      // Render Mermaid diagrams after content update
+      mermaid.contentLoaded();
+    }
+  }, [content]);
+
+  // Parse markdown and extract Mermaid diagrams
+  const renderContent = () => {
+    const sections: JSX.Element[] = [];
+    let currentIndex = 0;
+    let keyCounter = 0;
+
+    // Split content by Mermaid code blocks
+    const mermaidRegex = /```mermaid\n([\s\S]+?)\n```/g;
+    let match;
+
+    while ((match = mermaidRegex.exec(content)) !== null) {
+      // Add text before Mermaid diagram
+      if (match.index > currentIndex) {
+        const textBefore = content.substring(currentIndex, match.index);
+        sections.push(
+          <div
+            key={`text-${keyCounter++}`}
+            className="markdown-content"
+            dangerouslySetInnerHTML={{ __html: parseMarkdown(textBefore) }}
+          />
+        );
+      }
+
+      // Add Mermaid diagram
+      const mermaidCode = match[1];
+      sections.push(
+        <div key={`mermaid-${keyCounter++}`} className="mermaid-container my-6 p-4 bg-white rounded-lg border">
+          <div className="mermaid">{mermaidCode}</div>
+        </div>
+      );
+
+      currentIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (currentIndex < content.length) {
+      const textAfter = content.substring(currentIndex);
+      sections.push(
+        <div
+          key={`text-${keyCounter++}`}
+          className="markdown-content"
+          dangerouslySetInnerHTML={{ __html: parseMarkdown(textAfter) }}
+        />
+      );
+    }
+
+    return sections;
+  };
+
+  return (
+    <div ref={containerRef} className={`markdown-renderer ${className}`}>
+      {renderContent()}
+
+      <style jsx global>{`
+        .markdown-renderer {
+          line-height: 1.6;
+          color: #333;
+        }
+
+        .markdown-content h1 {
+          font-size: 2em;
+          font-weight: bold;
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 0.3em;
+        }
+
+        .markdown-content h2 {
+          font-size: 1.5em;
+          font-weight: bold;
+          margin-top: 1.3em;
+          margin-bottom: 0.5em;
+        }
+
+        .markdown-content h3 {
+          font-size: 1.25em;
+          font-weight: bold;
+          margin-top: 1.2em;
+          margin-bottom: 0.5em;
+        }
+
+        .markdown-content p {
+          margin-bottom: 1em;
+        }
+
+        .markdown-content ul, .markdown-content ol {
+          margin-left: 2em;
+          margin-bottom: 1em;
+        }
+
+        .markdown-content li {
+          margin-bottom: 0.5em;
+        }
+
+        .markdown-content code {
+          background-color: #f4f4f4;
+          padding: 0.2em 0.4em;
+          border-radius: 3px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.9em;
+        }
+
+        .markdown-content pre {
+          background-color: #f4f4f4;
+          padding: 1em;
+          border-radius: 5px;
+          overflow-x: auto;
+          margin-bottom: 1em;
+        }
+
+        .markdown-content pre code {
+          background-color: transparent;
+          padding: 0;
+        }
+
+        .markdown-content blockquote {
+          border-left: 4px solid #ddd;
+          padding-left: 1em;
+          margin-left: 0;
+          color: #666;
+          font-style: italic;
+        }
+
+        .markdown-content a {
+          color: #0066cc;
+          text-decoration: none;
+        }
+
+        .markdown-content a:hover {
+          text-decoration: underline;
+        }
+
+        .markdown-content table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-bottom: 1em;
+        }
+
+        .markdown-content th,
+        .markdown-content td {
+          border: 1px solid #ddd;
+          padding: 0.5em;
+          text-align: left;
+        }
+
+        .markdown-content th {
+          background-color: #f4f4f4;
+          font-weight: bold;
+        }
+
+        .markdown-content hr {
+          border: none;
+          border-top: 1px solid #ddd;
+          margin: 2em 0;
+        }
+
+        .mermaid-container {
+          overflow-x: auto;
+        }
+
+        .mermaid {
+          display: flex;
+          justify-content: center;
+          min-height: 100px;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/**
+ * Basic markdown parser (supports common syntax)
+ */
+function parseMarkdown(text: string): string {
+  // Headers
+  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+  // Bold
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/\_\_(.*?)\_\_/g, '<strong>$1</strong>');
+
+  // Italic
+  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  text = text.replace(/\_(.*?)\_/g, '<em>$1</em>');
+
+  // Code blocks (non-mermaid)
+  text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+    return `<pre><code class="language-${lang || 'text'}">${escapeHtml(code)}</code></pre>`;
+  });
+
+  // Inline code
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Links
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  // Lists
+  text = text.replace(/^\* (.*$)/gim, '<li>$1</li>');
+  text = text.replace(/^\- (.*$)/gim, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+  // Line breaks
+  text = text.replace(/\n\n/g, '</p><p>');
+  text = text.replace(/^(?!<[hul])/gim, '<p>');
+  text = text.replace(/(?<![hul]>)$/gim, '</p>');
+
+  return text;
+}
+
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}

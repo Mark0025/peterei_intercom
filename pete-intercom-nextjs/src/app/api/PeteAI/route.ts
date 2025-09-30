@@ -27,13 +27,17 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await sendMessageToPeteAIJson({ message });
-    
+
     if (!result.success) {
       return NextResponse.json(
         { error: result.error },
         { status: 500 }
       );
     }
+
+    // Debug: Log the reply content to see if backticks are present
+    console.log('[PeteAI API] Reply preview (first 300 chars):', result.data?.reply?.substring(0, 300));
+    console.log('[PeteAI API] Contains ```mermaid?', result.data?.reply?.includes('```mermaid'));
 
     // Return in the format expected by the original frontend
     return NextResponse.json({

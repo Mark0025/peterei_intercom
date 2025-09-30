@@ -39,6 +39,7 @@ const adminTools = [
   },
   { title: '🛠️ Support', desc: 'Support tools and user assistance', href: '/admin/support' },
   { title: '🧪 Test API', desc: 'Test Intercom API endpoints and Canvas Kit', href: '/admin/testapi' },
+  { title: '📚 Documentation', desc: 'Browse DEV_MAN docs with Mermaid diagrams', href: '/admin/docs' },
 ];
 
 export default function AdminPage() {

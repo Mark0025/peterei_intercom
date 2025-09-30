@@ -9,13 +9,35 @@
 ```
 DEV_MAN/
 ├── README.md                                      # This file
-├── completed/                                     # Completed plans with GitHub issue links
-│   └── [task-name]-[issue-#].md                  # Archived completed work
+├── AI-AGENTS-ARCHITECTURE.md                      # ✅ Complete AI architecture with Mermaid diagrams
+├── AI-ARCHITECTURE-ANALYSIS.md                    # PeteAI analysis
+├── CONSOLIDATION-COMPLETE.md                      # ✅ Consolidation of all DEV_MAN directories
+├── TIMELINE-CHURN-ARCHITECTURE.md                 # Timeline system plan
+├── TYPESCRIPT-ANY-TYPES-PREVENTION.md             # ✅ Type safety guide
 ├── clerk-integration-plan.md                      # IN PROGRESS: Clerk auth integration
 ├── company-timeline-analysis-plan.md              # IN PROGRESS: Company timeline system (6 stages)
-├── LEARNING-2025-01-company-timeline-planning.md  # COMPLETED: Planning session learnings
-├── TYPESCRIPT-ANY-TYPES-PREVENTION.md            # COMPLETED: Type safety guide
-└── tailwind-shadcn-best-practices.md             # REFERENCE: UI best practices
+├── tailwind-shadcn-best-practices.md              # REFERENCE: UI best practices
+├── LEARNING-2025-01-*.md                          # Learning sessions
+├── Onboarding-7DEEP/                              # 7-levels questionnaire system
+│   ├── feature-requests.md
+│   ├── github-issues.md
+│   ├── implementation-plan.md
+│   ├── intelligent-analysis-system.md
+│   └── progress-summary.md
+└── completed/                                     # ✅ Archived completed work
+    ├── README.md                                  # Completed work index
+    ├── migration/                                 # Express → Next.js migration docs
+    │   ├── express-app-analysis.md
+    │   ├── migration-completion-plan.md
+    │   ├── nextjs-app-analysis.md
+    │   └── Onboarding-7DEEP/
+    └── express-app/                               # Legacy Express app docs
+        ├── banner/
+        ├── howTOIntercom/
+        ├── learn/
+        ├── pete-user-training-serries/
+        ├── plans/
+        └── whatworkin.md
 ```
 
 ---
@@ -112,14 +134,18 @@ git commit -m "docs: archive completed plan for feature (closes #123)"
 
 ---
 
-## Related DEV_MAN Directories
+## Consolidated DEV_MAN Structure
 
-**Other locations**:
-- `../intercomApp/DEV_MAN/` - Old Express app docs (pre-Next.js migration)
-- `../DEV_MAN/` - Root project docs
-- Other projects: `../../*/DEV_MAN/`
+**✅ CONSOLIDATION COMPLETE** (2025-09-30)
 
-**This directory** (`pete-intercom-nextjs/DEV_MAN/`) is the ACTIVE development manual for the Next.js app.
+All DEV_MAN directories have been consolidated into this single location:
+- ✅ `/DEV_MAN/` (root) → `completed/migration/` - Express to Next.js migration docs
+- ✅ `/intercomApp/DEV_MAN/` → `completed/express-app/` - Legacy Express app docs
+- ✅ AI operational rules → `/.claude/cursor-rules-plan.md` - Cursor/Claude rules
+
+**This directory** (`pete-intercom-nextjs/DEV_MAN/`) is now the **ONLY** active development manual.
+
+**Documentation Browser**: View all docs at http://localhost:3000/admin/docs with full Mermaid rendering!
 
 ---
 
@@ -135,5 +161,17 @@ git commit -m "docs: archive completed plan for feature (closes #123)"
 
 ---
 
-**Last Updated**: 2025-01-30
+**Last Updated**: 2025-09-30
 **Maintained By**: Claude Code + Mark Carpenter
+
+---
+
+## Migration Status
+
+**✅ Express → Next.js 15 Migration: COMPLETE** (95%)
+
+See `CONSOLIDATION-COMPLETE.md` for:
+- Full migration timeline
+- GitHub issues #2-5 (all closed)
+- Documentation browser at `/admin/docs`
+- Evidence of completion

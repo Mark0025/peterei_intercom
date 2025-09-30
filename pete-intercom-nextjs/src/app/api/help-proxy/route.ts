@@ -55,14 +55,56 @@ export async function GET(request: NextRequest) {
     html = html.replace(/href="https:\/\/help\.thepete\.io\//g, `href="/api/help-proxy?path=`);
     html = html.replace(/src="https:\/\/help\.thepete\.io\//g, `src="/api/help-proxy?path=`);
     
-    // Add some basic styling to make it look better in iframe
+    // Add styling and JavaScript to handle navigation properly
     html = html.replace(
       '<head>',
       `<head>
+        <base href="${HELP_CENTER_URL}" target="_self">
         <style>
           body { margin: 0; padding: 20px; }
           .iframe-container { max-width: 100%; }
-        </style>`
+        </style>
+        <script>
+          // Intercept link clicks to handle navigation within iframe
+          document.addEventListener('DOMContentLoaded', function() {
+            // Override all anchor clicks to use our proxy
+            document.addEventListener('click', function(e) {
+              const target = e.target.closest('a');
+              if (target && target.href) {
+                try {
+                  const url = new URL(target.href);
+
+                  // If it's a help.thepete.io link or relative link, route through proxy
+                  if (url.hostname === 'help.thepete.io' || url.hostname === window.location.hostname) {
+                    e.preventDefault();
+                    const path = url.pathname + url.search + url.hash;
+                    const proxyUrl = '/api/help-proxy?path=' + encodeURIComponent(path);
+                    console.log('Navigating to:', path, 'via', proxyUrl);
+                    window.location.href = proxyUrl;
+
+                    // Notify parent about navigation
+                    window.parent.postMessage({
+                      type: 'navigation',
+                      url: proxyUrl
+                    }, '*');
+                  }
+                } catch (err) {
+                  console.error('Link navigation error:', err);
+                }
+              }
+            }, true);
+
+            // Track history state changes
+            const originalPushState = history.pushState;
+            history.pushState = function() {
+              originalPushState.apply(this, arguments);
+              window.parent.postMessage({
+                type: 'navigation',
+                url: window.location.href
+              }, '*');
+            };
+          });
+        </script>`
     );
 
     // Return the modified HTML
