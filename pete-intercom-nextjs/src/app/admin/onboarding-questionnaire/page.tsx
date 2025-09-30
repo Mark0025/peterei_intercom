@@ -187,7 +187,7 @@ export default function OnboardingQuestionnairePage() {
     }
   }
 
-  async function handleFileProcessed(data: ParsedData) {
+  async function handleFileProcessed(data: ParsedData, fileName: string) {
     setParsedData(data);
     setAnalyzing(true);
 
@@ -201,6 +201,28 @@ export default function OnboardingQuestionnairePage() {
       console.error('Analysis failed:', error);
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  async function handleAllFilesProcessed(allData: Array<{ data: ParsedData; fileName: string }>) {
+    // For multiple files, analyze the first one for now
+    // In the future, could merge data or analyze separately
+    if (allData.length > 0) {
+      const firstFile = allData[0];
+      setParsedData(firstFile.data);
+      setAnalyzing(true);
+
+      try {
+        const result = await analyzeUploadedData(firstFile.data);
+        if (result.success && result.data) {
+          setAnalysis(result.data);
+          setShowUpload(false);
+        }
+      } catch (error) {
+        console.error('Analysis failed:', error);
+      } finally {
+        setAnalyzing(false);
+      }
     }
   }
 
@@ -235,7 +257,11 @@ export default function OnboardingQuestionnairePage() {
             </CardContent>
           </Card>
         ) : (
-          <FileUpload onFileProcessed={handleFileProcessed} />
+          <FileUpload
+            multiple={true}
+            onFileProcessed={handleFileProcessed}
+            onAllFilesProcessed={handleAllFilesProcessed}
+          />
         )}
 
         <div className="mt-8 bg-slate-50 dark:bg-slate-900 p-6 rounded-lg">
