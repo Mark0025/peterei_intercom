@@ -1,5 +1,6 @@
 import { getAllConversations, getConversationStats } from '@/actions/conversations';
 import ConversationsPageClient from '@/components/conversations/ConversationsPageClient';
+import ConversationInsightsChat from '@/components/conversations/ConversationInsightsChat';
 import RefreshCacheButton from '@/components/conversations/RefreshCacheButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,11 @@ export default async function ConversationsPage() {
 
       {/* Client Component with Global Filters */}
       <ConversationsPageClient conversations={conversations} stats={stats} />
+
+      {/* AI Conversation Insights */}
+      <div className="px-6 pb-6 mt-6">
+        <ConversationInsightsChat totalConversations={stats.total} />
+      </div>
 
       {/* Additional Info */}
       <div className="px-6 pb-6 mt-6">
