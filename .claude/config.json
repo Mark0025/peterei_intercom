@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "projectName": "Pete Intercom Next.js",
+  "hooks": {
+    "enabled": true,
+    "pre-commit": ".claude/hooks/pre-commit.sh",
+    "post-commit": ".claude/hooks/post-commit.sh",
+    "pre-push": ".claude/hooks/pre-push.sh",
+    "post-push": ".claude/hooks/post-push.sh"
+  },
+  "protocol": {
+    "requireIssueReference": true,
+    "autoCommentOnPush": true,
+    "autoCloseOnCompletion": true,
+    "enforceIssueFirst": true
+  },
+  "github": {
+    "repo": "Mark0025/peterei_intercom",
+    "defaultBranch": "Next-refactor",
+    "issueLabels": {
+      "feature": "enhancement",
+      "bug": "bug",
+      "documentation": "documentation"
+    }
+  },
+  "ai": {
+    "provider": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "requireIssueForFeatures": true
+  }
+}
