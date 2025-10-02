@@ -62,8 +62,18 @@ export async function initializeCanvasKit(): Promise<ActionResult<CanvasKitRespo
                 url: 'https://app.thepete.io'
               }
             },
-            createButtonComponent('pete_user_training', '⚙️ Change Training Topic', 'secondary'),
-            createButtonComponent('start_onboarding', '📝 Start Onboarding', 'secondary')
+            {
+              type: 'button',
+              id: 'open_pete_intercom',
+              label: '🔗 Open Pete-Intercom App',
+              style: 'primary',
+              action: {
+                type: 'url',
+                url: 'https://peterei-intercom.onrender.com'
+              }
+            },
+            createButtonComponent('start_new_onboarding', '🎯 Start Onboarding Process', 'secondary'),
+            createButtonComponent('pete_user_training', '⚙️ Change Training Topic', 'secondary')
           ]
         }
       }
@@ -86,6 +96,29 @@ export async function handleCanvasKitSubmit(formData: CanvasKitFormData): Promis
     const { componentId, inputValues, storedData, userId } = formData;
 
     switch (componentId) {
+      case 'start_new_onboarding': {
+        // New Canvas Kit onboarding module - Coming Soon
+        const response: CanvasKitResponse = {
+          canvas: {
+            content: {
+              components: [
+                createTextComponent('coming_soon_header', '🎯 Canvas Kit Onboarding', 'header'),
+                createTextComponent('coming_soon_body', 'Our new interactive onboarding experience is coming soon! This will guide you through Pete setup step-by-step, right here in Intercom.'),
+                createTextComponent('features_header', 'What to expect:', 'muted'),
+                createTextComponent('feature_1', '✨ Interactive step-by-step guidance'),
+                createTextComponent('feature_2', '📊 Real-time progress tracking'),
+                createTextComponent('feature_3', '🤖 AI-powered recommendations'),
+                createTextComponent('feature_4', '🔔 Smart notifications and reminders'),
+                createButtonComponent('back_to_menu', 'Back to Main Menu', 'secondary')
+              ]
+            },
+            stored_data: { ...storedData, userId }
+          }
+        };
+
+        return { success: true, data: response };
+      }
+
       case 'start_onboarding': {
         // Start the onboarding questionnaire
         const firstQuestion = getQuestionByIndex(0, 0);
