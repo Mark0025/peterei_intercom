@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Bot, Send, TrendingUp, AlertTriangle, Target } from 'lucide-react';
-import MermaidDiagram from '@/components/MermaidDiagram';
+import { MermaidDiagram } from '@/components/mermaid-diagram';
 
 interface Message {
   role: 'user' | 'ai';
