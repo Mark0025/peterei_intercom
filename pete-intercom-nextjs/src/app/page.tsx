@@ -61,7 +61,7 @@ export default function Home() {
             <CardDescription className="text-base">
               Complete guides and resources for using Pete
             </CardDescription>
-          </CardContent>
+          </CardHeader>
           <CardContent>
             <Link href="/help">
               <Button className="w-full h-11 text-base" variant="outline">Browse Docs</Button>
