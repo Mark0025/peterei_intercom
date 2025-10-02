@@ -1,7 +1,11 @@
 import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const isProtectedRoute = createRouteMatcher(['/admin(.*)', '/api/admin(.*)']);
+const isProtectedRoute = createRouteMatcher([
+  '/admin(.*)',
+  '/api/admin(.*)',
+  '/whatsworking(.*)'  // Protected: admin-only documentation dashboard
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
