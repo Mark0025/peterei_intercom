@@ -34,6 +34,16 @@ const adminTools = [
       { label: '🎯 What\'s Working', href: '/whatsworking' }
     ]
   },
+  {
+    title: '📞 Pete-Vapi',
+    desc: 'Voice AI system with Next.js frontend & Python Docker backend',
+    href: 'https://peterental-nextjs-p0prsa0ei-mark-carpenters-projects.vercel.app/',
+    links: [
+      { label: '🎨 Frontend (Next.js)', href: 'https://peterental-nextjs-p0prsa0ei-mark-carpenters-projects.vercel.app/' },
+      { label: '🐍 Backend (Python/Docker)', href: 'https://peterentalvapi-latest.onrender.com' },
+      { label: '🎙️ Vapi Dashboard', href: 'https://dashboard.vapi.ai/?_gl=1*150thrw*_gcl_au*NTIxMTk5NDc4LjE3NTg4MjIxNTM.' }
+    ]
+  },
   { title: '🏥 Health Check', desc: 'Monitor application health and endpoint status', href: '/admin/health' },
   { title: '📊 Logs', desc: 'View application logs and debugging information', href: '/admin/logs' },
   { title: '🤖 PeteAI', desc: 'AI assistant and training management', href: '/admin/peteai' },
