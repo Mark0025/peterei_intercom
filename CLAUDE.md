@@ -17,17 +17,17 @@ See `DEV_MAN/git-safety-rules.md` for full details and recovery procedures.
 
 ### Start the Application
 ```bash
-# Local development with auto-reload
+# Local development with auto-reload (uses Turbopack for faster builds)
 cd pete-intercom-nextjs && npm run dev
-# or
-cd pete-intercom-nextjs && pnpm dev
 
-# Production build
+# Production build and start
 cd pete-intercom-nextjs && npm run build && npm start
 
-# Type checking
-cd pete-intercom-nextjs && npm run type-check
+# Linting
+cd pete-intercom-nextjs && npm run lint
 ```
+
+**Note:** The project uses pnpm but npm works as well. Turbopack is enabled for faster builds in development and production.
 
 ### Testing & Health Checks
 ```bash
@@ -40,9 +40,10 @@ cd pete-intercom-nextjs/src/scripts && ./get_admins.sh
 ```
 
 ### Package Management
-- Application dependencies are in `pete-intercom-nextjs/package.json`
-- Uses pnpm for package management
+- Application dependencies: `pete-intercom-nextjs/package.json`
 - All new dependencies should be added to `pete-intercom-nextjs/package.json`
+- Uses npm/pnpm for package management
+- Path aliases configured in `tsconfig.json`: `@/*` maps to `src/*`, `@/types` to `types/`
 
 ## Architecture Overview
 
@@ -101,14 +102,28 @@ This project strictly follows Intercom Canvas Kit guidelines. **ALL UI changes m
 
 ### Required Environment Variables (pete-intercom-nextjs/.env)
 ```bash
+# Intercom API & Webhooks
 INTERCOM_CLIENT_SECRET=your_intercom_client_secret
 INTERCOM_ACCESS_TOKEN=your_intercom_access_token
 INTERCOM_CLIENT_ID=your_intercom_client_id
+
+# Email Configuration
 EMAIL_USER=your_gmail_address
 EMAIL_PASS=your_gmail_app_password
+
+# Server Configuration
 PORT=4000
 PUBLIC_URL=http://localhost:4000  # or production URL
-OPENROUTER_API_KEY=your_openrouter_key  # For PeteAI endpoint
+NODE_ENV=development  # or production
+
+# AI & Analytics
+OPENROUTER_API_KEY=your_openrouter_key  # For PeteAI endpoint (LangGraph)
+
+# Clerk Authentication (Admin Dashboard)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 ```
 
 ### Development vs Production
@@ -323,6 +338,12 @@ See `DEV_MAN/nextjs-migration-plan.md` for complete details.
 
 ### Local Development
 - Use ngrok for webhook testing with Intercom
-- Environment variables must be in `intercomApp/.env`
-- Run health checks to verify API connectivity
-- 20 is completed it is now showing in our intercom app
+- Environment variables must be in `pete-intercom-nextjs/.env`
+- Run health check scripts to verify API connectivity: `./src/scripts/endpoint_health_check.sh`
+- Admin dashboard accessible at `http://localhost:4000/admin` (requires @peterei.com Clerk auth)
+
+### Build Configuration Notes
+- Next.js config (`next.config.ts`) currently has `ignoreBuildErrors: true` for TypeScript
+- ESLint is set to `ignoreDuringBuilds: true`
+- This allows builds to succeed while type issues are being resolved incrementally
+- Always check console warnings during development

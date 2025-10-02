@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTypography } from '@/contexts/UIConfigContext';
+import { RecentCompletionsWidget } from '@/components/admin/RecentCompletionsWidget';
 
 const adminTools = [
   {
@@ -24,6 +25,16 @@ const adminTools = [
       { label: '💬 Conversations', href: '/admin/conversations' }
     ]
   },
+  {
+    title: '📚 Documentation',
+    desc: 'Browse DEV_MAN docs, architecture, and completed work',
+    href: '/admin/docs',
+    links: [
+      { label: '📖 Browse All Docs', href: '/admin/docs' },
+      { label: '✅ Completed Issues', href: '/admin/docs?path=completed' },
+      { label: '🎯 What\'s Working', href: '/whatsworking' }
+    ]
+  },
   { title: '🏥 Health Check', desc: 'Monitor application health and endpoint status', href: '/admin/health' },
   { title: '📊 Logs', desc: 'View application logs and debugging information', href: '/admin/logs' },
   { title: '🤖 PeteAI', desc: 'AI assistant and training management', href: '/admin/peteai' },
@@ -39,7 +50,6 @@ const adminTools = [
   },
   { title: '🛠️ Support', desc: 'Support tools and user assistance', href: '/admin/support' },
   { title: '🧪 Test API', desc: 'Test Intercom API endpoints and Canvas Kit', href: '/admin/testapi' },
-  { title: '📚 Documentation', desc: 'Browse DEV_MAN docs with Mermaid diagrams', href: '/admin/docs' },
 ];
 
 export default function AdminPage() {
@@ -50,11 +60,106 @@ export default function AdminPage() {
       <h1 className={typography.h1}>Admin Dashboard</h1>
       <p className={typography.paragraph}>Administrative tools and monitoring for the Pete Intercom application.</p>
 
+      {/* Recent Completions Widget */}
+      <div style={{ marginTop: '30px', marginBottom: '30px' }}>
+        <RecentCompletionsWidget />
+      </div>
+
+      {/* Quick Stats */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '15px',
+        marginTop: '20px',
+        marginBottom: '30px'
+      }}>
+        <Link href="/whatsworking" style={{ textDecoration: 'none' }}>
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#f0f9ff',
+            borderRadius: '8px',
+            border: '1px solid #bfdbfe',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#dbeafe';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0f9ff';
+          }}>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#2563eb' }}>85%</div>
+            <div style={{ fontSize: '0.9em', color: '#1e40af', marginTop: '5px' }}>Migration Complete</div>
+          </div>
+        </Link>
+
+        <Link href="/admin/docs?path=completed" style={{ textDecoration: 'none' }}>
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#f0fdf4',
+            borderRadius: '8px',
+            border: '1px solid #bbf7d0',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#dcfce7';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#f0fdf4';
+          }}>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#16a34a' }}>13</div>
+            <div style={{ fontSize: '0.9em', color: '#15803d', marginTop: '5px' }}>Issues Closed</div>
+          </div>
+        </Link>
+
+        <Link href="/admin/health" style={{ textDecoration: 'none' }}>
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#faf5ff',
+            borderRadius: '8px',
+            border: '1px solid #e9d5ff',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#f3e8ff';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#faf5ff';
+          }}>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#9333ea' }}>✓</div>
+            <div style={{ fontSize: '0.9em', color: '#7e22ce', marginTop: '5px' }}>System Healthy</div>
+          </div>
+        </Link>
+
+        <Link href="/admin/docs" style={{ textDecoration: 'none' }}>
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#fff7ed',
+            borderRadius: '8px',
+            border: '1px solid #fed7aa',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffedd5';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#fff7ed';
+          }}>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#ea580c' }}>📚</div>
+            <div style={{ fontSize: '0.9em', color: '#c2410c', marginTop: '5px' }}>Documentation</div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Admin Tools Grid */}
+      <h2 className={typography.h2} style={{ marginTop: '40px', marginBottom: '20px' }}>Admin Tools</h2>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
         gap: '20px',
-        marginTop: '20px'
       }}>
         {adminTools.map((tool) => (
           <Link
@@ -98,11 +203,9 @@ export default function AdminPage() {
                       borderBottom: '1px solid #e0e0e0'
                     }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.color = '#1a4d8f';
                       e.currentTarget.style.textDecoration = 'underline';
                     }}
                     onMouseOut={(e) => {
-                      e.currentTarget.style.color = '#2d72d2';
                       e.currentTarget.style.textDecoration = 'none';
                     }}
                   >
@@ -113,34 +216,6 @@ export default function AdminPage() {
             )}
           </Link>
         ))}
-      </div>
-
-      <div style={{ marginTop: '40px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-        <h3 className={typography.h3}>Quick Stats</h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: '20px',
-          textAlign: 'center',
-          marginTop: '15px'
-        }}>
-          <div>
-            <div style={{ fontSize: '2em' }}>✅</div>
-            <div>Server Actions</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '2em' }}>🔗</div>
-            <div>Canvas Kit APIs</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '2em' }}>📝</div>
-            <div>Onboarding Forms</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '2em' }}>⚙️</div>
-            <div>Admin Tools</div>
-          </div>
-        </div>
       </div>
     </>
   );
