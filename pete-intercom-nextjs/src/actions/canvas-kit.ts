@@ -120,6 +120,9 @@ export async function handleCanvasKitSubmit(formData: CanvasKitFormData): Promis
         const questionIndex = Number(storedData?.questionIndex ?? 0);
         const answer = inputValues.answer;
 
+        console.log(`[Canvas Kit] submit_answer: sectionIndex=${sectionIndex}, questionIndex=${questionIndex}, answer="${answer}"`);
+        console.log(`[Canvas Kit] storedData:`, JSON.stringify(storedData, null, 2));
+
         if (!answer?.trim()) {
           const response: CanvasKitResponse = storedData
             ? {
@@ -153,14 +156,18 @@ export async function handleCanvasKitSubmit(formData: CanvasKitFormData): Promis
         let nextSectionIndex = sectionIndex;
         let nextQuestionIndex = questionIndex + 1;
 
+        console.log(`[Canvas Kit] Looking for next question: section=${nextSectionIndex}, question=${nextQuestionIndex}`);
         let nextQuestion = getQuestionByIndex(nextSectionIndex, nextQuestionIndex);
-        
+
         // If no more questions in current section, move to next section
         if (!nextQuestion) {
           nextSectionIndex = sectionIndex + 1;
           nextQuestionIndex = 0;
+          console.log(`[Canvas Kit] No more questions in section, moving to section=${nextSectionIndex}, question=${nextQuestionIndex}`);
           nextQuestion = getQuestionByIndex(nextSectionIndex, nextQuestionIndex);
         }
+
+        console.log(`[Canvas Kit] Next question found:`, nextQuestion ? `"${nextQuestion.shorthand}"` : 'NONE');
 
         // If no more questions at all, show completion
         if (!nextQuestion) {
