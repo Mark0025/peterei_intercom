@@ -18,16 +18,16 @@ See `DEV_MAN/git-safety-rules.md` for full details and recovery procedures.
 ### Start the Application
 ```bash
 # Local development with auto-reload (uses Turbopack for faster builds)
-cd pete-intercom-nextjs && npm run dev
+cd pete-intercom-nextjs && pnpm dev
 
 # Production build and start
-cd pete-intercom-nextjs && npm run build && npm start
+cd pete-intercom-nextjs && pnpm build && pnpm start
 
 # Linting
-cd pete-intercom-nextjs && npm run lint
+cd pete-intercom-nextjs && pnpm lint
 ```
 
-**Note:** The project uses pnpm but npm works as well. Turbopack is enabled for faster builds in development and production.
+**IMPORTANT:** This project **MUST use pnpm**, not npm or yarn. Always use `pnpm` for all package management commands. Turbopack is enabled for faster builds in development and production.
 
 ### Testing & Health Checks
 ```bash
@@ -41,8 +41,10 @@ cd pete-intercom-nextjs/src/scripts && ./get_admins.sh
 
 ### Package Management
 - Application dependencies: `pete-intercom-nextjs/package.json`
-- All new dependencies should be added to `pete-intercom-nextjs/package.json`
-- Uses npm/pnpm for package management
+- **CRITICAL: ALWAYS use `pnpm` for package management, NEVER use npm or yarn**
+- Add dependencies: `pnpm add <package>`
+- Remove dependencies: `pnpm remove <package>`
+- Install all: `pnpm install`
 - Path aliases configured in `tsconfig.json`: `@/*` maps to `src/*`, `@/types` to `types/`
 
 ## Architecture Overview

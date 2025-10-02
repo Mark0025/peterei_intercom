@@ -50,8 +50,8 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
         );
       }
 
-      // Add Mermaid diagram
-      const mermaidCode = match[1];
+      // Add Mermaid diagram (sanitize syntax)
+      const mermaidCode = sanitizeMermaidCode(match[1]);
       sections.push(
         <div key={`mermaid-${keyCounter++}`} className="mermaid-container my-6 p-4 bg-white rounded-lg border">
           <div className="mermaid">{mermaidCode}</div>
@@ -196,6 +196,26 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
       `}</style>
     </div>
   );
+}
+
+/**
+ * Sanitizes Mermaid diagram code to fix common syntax issues
+ */
+function sanitizeMermaidCode(code: string): string {
+  // Fix 1: Replace HTML <br/> tags with <br> (Mermaid syntax)
+  code = code.replace(/<br\/>/g, '<br>');
+
+  // Fix 2: Remove self-closing slashes from other tags if present
+  code = code.replace(/<([^>]+)\/>/g, '<$1>');
+
+  // Fix 3: Escape special characters in node labels that might break parsing
+  // (Mermaid is sensitive to certain characters in labels)
+
+  // Fix 4: Ensure proper spacing around arrows
+  code = code.replace(/([A-Z])\s*-->\s*\|/g, '$1 -->|');
+  code = code.replace(/\|\s*([A-Z])/g, '| $1');
+
+  return code.trim();
 }
 
 /**

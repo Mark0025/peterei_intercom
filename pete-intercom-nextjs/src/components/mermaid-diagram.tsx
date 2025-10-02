@@ -7,6 +7,23 @@ interface MermaidDiagramProps {
   className?: string;
 }
 
+/**
+ * Sanitizes Mermaid diagram code to fix common syntax issues
+ */
+function sanitizeMermaidCode(code: string): string {
+  // Fix 1: Replace HTML <br/> tags with <br> (Mermaid syntax)
+  code = code.replace(/<br\/>/g, '<br>');
+
+  // Fix 2: Remove self-closing slashes from other tags if present
+  code = code.replace(/<([^>]+)\/>/g, '<$1>');
+
+  // Fix 3: Ensure proper spacing around arrows
+  code = code.replace(/([A-Z])\s*-->\s*\|/g, '$1 -->|');
+  code = code.replace(/\|\s*([A-Z])/g, '| $1');
+
+  return code.trim();
+}
+
 export function MermaidDiagram({ chart, className = '' }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -31,8 +48,11 @@ export function MermaidDiagram({ chart, className = '' }: MermaidDiagramProps) {
 
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
 
+        // Sanitize Mermaid code to fix common syntax issues
+        const sanitizedChart = sanitizeMermaidCode(chart);
+
         try {
-          const { svg } = await mermaid.render(id, chart);
+          const { svg } = await mermaid.render(id, sanitizedChart);
           if (containerRef.current) {
             containerRef.current.innerHTML = svg;
           }
