@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTypography } from '@/contexts/UIConfigContext';
+import { RecentCompletionsWidget } from '@/components/admin/RecentCompletionsWidget';
 
 const adminTools = [
   {
@@ -58,6 +59,11 @@ export default function AdminPage() {
     <>
       <h1 className={typography.h1}>Admin Dashboard</h1>
       <p className={typography.paragraph}>Administrative tools and monitoring for the Pete Intercom application.</p>
+
+      {/* Recent Completions Widget */}
+      <div style={{ marginTop: '30px', marginBottom: '30px' }}>
+        <RecentCompletionsWidget />
+      </div>
 
       {/* Quick Stats */}
       <div style={{
