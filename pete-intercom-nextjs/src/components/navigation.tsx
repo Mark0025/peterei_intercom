@@ -50,19 +50,21 @@ export default function Navigation() {
       >
         PeteAI
       </Link>
-      <Link
-        href="/whatsworking"
-        style={pathname.startsWith('/whatsworking') ? activeLinkStyle : linkStyle}
-      >
-        What&apos;s Working
-      </Link>
       {isAdmin && (
-        <Link
-          href="/admin"
-          style={pathname.startsWith('/admin') ? activeLinkStyle : linkStyle}
-        >
-          Admin
-        </Link>
+        <>
+          <Link
+            href="/admin"
+            style={pathname.startsWith('/admin') ? activeLinkStyle : linkStyle}
+          >
+            Admin
+          </Link>
+          <Link
+            href="/whatsworking"
+            style={pathname.startsWith('/whatsworking') ? activeLinkStyle : linkStyle}
+          >
+            What&apos;s Working
+          </Link>
+        </>
       )}
       <Link
         href="/help"

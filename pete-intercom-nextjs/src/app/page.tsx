@@ -5,158 +5,82 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-3 pb-4">
-        <h1 className="text-4xl font-bold tracking-tight">Pete Admin Dashboard</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Manage your Intercom workspace, users, and training topics
+      <div className="text-center space-y-4 pb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-full text-purple-700 text-sm font-medium mb-4">
+          ✨ Coming Soon
+        </div>
+        <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Pete Intercom App
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          Intelligent onboarding and customer success automation for Intercom
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Training Management */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+        {/* Intelligent Onboarding */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
-              📚 Training Management
+              🎯 Smart Onboarding
             </CardTitle>
             <CardDescription className="text-base">
-              View and update user training topics across all Intercom users
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/admin/training">
-              <Button className="w-full h-11 text-base">Manage Training Topics</Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* API Testing */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              🔌 API Testing
-            </CardTitle>
-            <CardDescription className="text-base">
-              Test Intercom API endpoints and view responses
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/admin/testapi">
-              <Button className="w-full h-11 text-base" variant="outline">Test API</Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* System Logs */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              📊 System Logs
-            </CardTitle>
-            <CardDescription className="text-base">
-              View application logs and debug information
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/admin/logs">
-              <Button className="w-full h-11 text-base" variant="outline">View Logs</Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* Onboarding Form */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              📋 Onboarding
-            </CardTitle>
-            <CardDescription className="text-base">
-              Full onboarding form for browser testing
+              7-levels deep discovery questionnaire for understanding customer needs
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/popout">
-              <Button className="w-full h-11 text-base" variant="outline">Open Form</Button>
+              <Button className="w-full h-11 text-base">Try Demo</Button>
             </Link>
           </CardContent>
         </Card>
 
-        {/* What's Working */}
+        {/* AI Assistant */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
-              ✅ What&apos;s Working
+              🤖 PeteAI Helper
             </CardTitle>
             <CardDescription className="text-base">
-              View successful features and system status
+              AI-powered assistance for Intercom data queries and help docs
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/whatsworking">
-              <Button className="w-full h-11 text-base" variant="outline">View Status</Button>
+            <Link href="/help">
+              <Button className="w-full h-11 text-base" variant="outline">Get Help</Button>
             </Link>
           </CardContent>
         </Card>
 
-        {/* PeteAI */}
+        {/* Help Center */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
-              🤖 PeteAI
+              📚 Documentation
             </CardTitle>
             <CardDescription className="text-base">
-              AI-powered assistance and automation
+              Complete guides and resources for using Pete
             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/peteai">
-              <Button className="w-full h-11 text-base" variant="outline">Open PeteAI</Button>
-            </Link>
           </CardContent>
-        </Card>
-
-        {/* Conversation History */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              💬 Conversation History
-            </CardTitle>
-            <CardDescription className="text-base">
-              View analytics, trends, and search all Intercom conversations
-            </CardDescription>
-          </CardHeader>
           <CardContent>
-            <Link href="/admin/conversations">
-              <Button className="w-full h-11 text-base">View Conversations</Button>
+            <Link href="/help">
+              <Button className="w-full h-11 text-base" variant="outline">Browse Docs</Button>
             </Link>
           </CardContent>
         </Card>
       </div>
 
-      {/* System Info */}
-      <Card className="mt-8">
+      {/* Coming Soon Message */}
+      <Card className="mt-12 max-w-3xl mx-auto border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
         <CardHeader>
-          <CardTitle className="text-xl">🚀 System Information</CardTitle>
+          <CardTitle className="text-2xl text-center">🚀 Launching Soon</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 text-base">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Status:</span>
-              <span className="text-green-600">✅ Running</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Environment:</span>
-              <span className="text-muted-foreground">Development</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Stack:</span>
-              <span className="text-muted-foreground">Next.js 15 + React 19 + TypeScript</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">UI:</span>
-              <span className="text-muted-foreground">shadcn/ui + Tailwind CSS v4</span>
-            </div>
-          </div>
+          <p className="text-center text-muted-foreground">
+            We're currently in private beta. Pete will transform how you onboard and support customers in Intercom.
+            <br /><br />
+            <span className="text-sm">Built with Next.js 15, React 19, and AI-powered insights</span>
+          </p>
         </CardContent>
       </Card>
     </div>
