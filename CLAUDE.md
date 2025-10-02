@@ -17,57 +17,59 @@ See `DEV_MAN/git-safety-rules.md` for full details and recovery procedures.
 
 ### Start the Application
 ```bash
-# Production/cloud deployment
-./start.sh
-
 # Local development with auto-reload
-cd intercomApp && npm run dev
+cd pete-intercom-nextjs && npm run dev
 # or
-cd intercomApp && pnpm dev
+cd pete-intercom-nextjs && pnpm dev
 
-# Development with health check
-cd intercomApp && npm run dev:checked
+# Production build
+cd pete-intercom-nextjs && npm run build && npm start
+
+# Type checking
+cd pete-intercom-nextjs && npm run type-check
 ```
 
 ### Testing & Health Checks
 ```bash
-# Run endpoint health check
-cd intercomApp/src/scripts && ./endpoint_health_check.sh
+# Health check scripts (bash, still functional)
+cd pete-intercom-nextjs/src/scripts && ./endpoint_health_check.sh
 
 # Test specific Intercom API endpoints
-cd intercomApp/src/scripts && ./get_me.sh
-cd intercomApp/src/scripts && ./get_admins.sh
+cd pete-intercom-nextjs/src/scripts && ./get_me.sh
+cd pete-intercom-nextjs/src/scripts && ./get_admins.sh
 ```
 
 ### Package Management
-- Main application dependencies are in `intercomApp/package.json`
-- Root `package.json` is minimal and only contains OpenAI dependency
-- Always add dependencies to `intercomApp/package.json` for app-related code
+- Application dependencies are in `pete-intercom-nextjs/package.json`
+- Uses pnpm for package management
+- All new dependencies should be added to `pete-intercom-nextjs/package.json`
 
 ## Architecture Overview
 
 This is an **Intercom Canvas Kit application** that provides structured onboarding and user training management within Intercom Messenger. The app follows a strict Canvas Kit component model and integrates deeply with Intercom's REST API.
 
 ### Core Components
-- **Express.js Backend** (`intercomApp/src/index.js`) - Main server with Canvas Kit endpoints
-- **Canvas Kit UI Logic** (`intercomApp/src/intercom/canvasKit.js`) - Component builders and UI helpers
-- **Intercom API Integration** (`intercomApp/src/api/intercom.js`) - REST API wrapper and caching
-- **Onboarding System** (`intercomApp/src/onboarding_questions.json`) - 7-level questionnaire system
-- **Admin Scripts** (`intercomApp/src/scripts/`) - Bash utilities for Intercom API management
+- **Next.js 15 Backend** (`pete-intercom-nextjs/src/app/api/`) - App Router API routes with Canvas Kit endpoints
+- **Canvas Kit Server Actions** (`pete-intercom-nextjs/src/actions/canvas-kit.ts`) - React Server Actions for Canvas Kit logic
+- **Intercom API Integration** (`pete-intercom-nextjs/src/lib/intercom-api.ts`) - REST API wrapper with caching
+- **Onboarding System** (`pete-intercom-nextjs/src/services/onboarding-data.ts`) - Questionnaire service
+- **Admin Dashboard** (`pete-intercom-nextjs/src/app/admin/`) - Protected admin routes with analytics
+- **LangGraph AI Agent** (`pete-intercom-nextjs/src/lib/langgraph-agent.ts`) - AI-powered conversation analysis
 
 ### Request Flow
-1. **Canvas Kit Initialize**: `POST /initialize` → Returns onboarding card with action buttons
-2. **Canvas Kit Submit**: `POST /submit` → Processes user actions, branches by `component_id`
-3. **Intercom API Updates**: Backend updates user/company attributes via REST API
+1. **Canvas Kit Initialize**: `POST /api/initialize` → Server Action returns onboarding card
+2. **Canvas Kit Submit**: `POST /api/submit` → Server Action processes user actions by `component_id`
+3. **Intercom API Updates**: Server Actions update user/company attributes via REST API
 4. **Response**: Canvas Kit JSON response with success/error feedback
 
 ### Key Endpoints
-- `POST /initialize` - Canvas Kit initialization endpoint
-- `POST /submit` - Canvas Kit form submission handler
-- `GET /popout` - Full onboarding form in browser window
-- `POST /popout-submit` - Processes full form submissions
+- `POST /api/initialize` - Canvas Kit initialization endpoint (Next.js API route)
+- `POST /api/submit` - Canvas Kit form submission handler (Next.js API route)
+- `POST /api/intercom-webhook` - Webhook handler for Intercom events
+- `GET /popout` - Full onboarding form in browser window (Next.js page)
+- `POST /api/popout-submit` - Processes full form submissions
 - `GET /api/intercom/*` - Intercom API proxy endpoints
-- `POST /PeteAI/` - AI helper using OpenRouter Llama 3.2 3B
+- `POST /api/PeteAI` - AI helper using OpenRouter Llama 3.2 3B (LangGraph)
 
 ## Canvas Kit Rules (CRITICAL)
 
@@ -86,7 +88,8 @@ This project strictly follows Intercom Canvas Kit guidelines. **ALL UI changes m
 ### Security Requirements
 - **Validate X-Body-Signature header** using INTERCOM_CLIENT_SECRET (HMAC-SHA256)
 - **Never process requests without signature validation**
-- Environment variables in `intercomApp/.env` for all secrets
+- Environment variables in `pete-intercom-nextjs/.env` for all secrets
+- **Clerk Auth** protects admin routes - only @peterei.com users allowed
 
 ### UI/UX Guidelines
 - Keep flows simple with clear text, minimal steps, actionable buttons
@@ -96,7 +99,7 @@ This project strictly follows Intercom Canvas Kit guidelines. **ALL UI changes m
 
 ## Environment Configuration
 
-### Required Environment Variables (intercomApp/.env)
+### Required Environment Variables (pete-intercom-nextjs/.env)
 ```bash
 INTERCOM_CLIENT_SECRET=your_intercom_client_secret
 INTERCOM_ACCESS_TOKEN=your_intercom_access_token
@@ -116,27 +119,38 @@ OPENROUTER_API_KEY=your_openrouter_key  # For PeteAI endpoint
 
 ### Directory Structure
 ```
-intercomApp/
+pete-intercom-nextjs/
 ├── src/
-│   ├── index.js                 # Main Express app
-│   ├── intercom/canvasKit.js    # Canvas Kit component builders
-│   ├── api/intercom.js          # Intercom REST API wrapper
-│   ├── api/intercomCache.js     # API response caching
-│   ├── scripts/                 # Bash utilities for Intercom API
-│   ├── utils/                   # Node.js utilities and helpers
-│   ├── ai/peteai.js            # OpenRouter AI integration
-│   └── onboarding_questions.json # Questionnaire configuration
-├── package.json                 # App dependencies
-└── README.md                   # Detailed setup guide
+│   ├── app/                     # Next.js App Router
+│   │   ├── api/                # API routes (webhooks, Canvas Kit)
+│   │   ├── admin/              # Protected admin dashboard
+│   │   └── ...                 # Public pages
+│   ├── actions/                # Server Actions (React 19)
+│   │   ├── canvas-kit.ts       # Canvas Kit logic
+│   │   ├── peteai.ts          # AI agent actions
+│   │   └── ...
+│   ├── components/             # React components
+│   ├── lib/                    # Utilities and integrations
+│   │   ├── intercom-api.ts    # Intercom REST API wrapper
+│   │   ├── langgraph-agent.ts # LangGraph AI agent
+│   │   └── ...
+│   ├── services/               # Business logic
+│   ├── middleware/             # Signature validation
+│   ├── types/                  # TypeScript definitions
+│   └── scripts/                # Bash utilities (legacy)
+├── package.json                # App dependencies
+└── DEV_MAN/                    # Documentation & planning
 ```
 
 ### Intercom API Scripts
-Located in `intercomApp/src/scripts/`, these bash scripts provide direct API access:
+Located in `pete-intercom-nextjs/src/scripts/`, these bash scripts provide direct API access:
 - `update_user_training_topic.sh` - Update user custom attributes
 - `get_contact_id_by_email.sh` - Lookup contact IDs
 - `update_company_petetraining.sh` - Update company attributes
 - `get_company_id_by_name.sh` - Lookup company IDs
 - `get_all_pete_user_training_topics.sh` - Debug custom objects
+
+**Note:** These bash scripts are functional but will be converted to TypeScript server actions (Issues #6, #7)
 
 ## Development Workflow
 
@@ -154,10 +168,11 @@ Located in `intercomApp/src/scripts/`, these bash scripts provide direct API acc
 5. Test in both Messenger and Inbox contexts
 
 ### Debugging
-- Application logs: `intercomApp/src/logs/app.log`
-- API logs: `intercomApp/src/logs/api.log`
-- Canvas Kit responses are logged with `[DEBUG] CanvasKit response`
+- Application logs: `pete-intercom-nextjs/logs/app.log`
+- API logs: `pete-intercom-nextjs/logs/api.log`
+- Canvas Kit responses are logged with `[Canvas Kit]` prefix
 - Use health check scripts to verify API connectivity
+- Render deployment logs available at https://dashboard.render.com
 
 ## Next.js Migration Status
 
@@ -310,3 +325,4 @@ See `DEV_MAN/nextjs-migration-plan.md` for complete details.
 - Use ngrok for webhook testing with Intercom
 - Environment variables must be in `intercomApp/.env`
 - Run health checks to verify API connectivity
+- 20 is completed it is now showing in our intercom app
