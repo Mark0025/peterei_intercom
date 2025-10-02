@@ -37,9 +37,9 @@ const adminTools = [
   {
     title: '📞 Pete-Vapi',
     desc: 'Voice AI system with Next.js frontend & Python Docker backend',
-    href: 'https://peterental-nextjs-p0prsa0ei-mark-carpenters-projects.vercel.app/',
+    href: 'https://peterental-nextjs.vercel.app/',
     links: [
-      { label: '🎨 Frontend (Next.js)', href: 'https://peterental-nextjs-p0prsa0ei-mark-carpenters-projects.vercel.app/' },
+      { label: '🎨 Frontend (Next.js)', href: 'https://peterental-nextjs.vercel.app/' },
       { label: '🐍 Backend (Python/Docker)', href: 'https://peterentalvapi-latest.onrender.com' },
       { label: '🎙️ Vapi Dashboard', href: 'https://dashboard.vapi.ai/?_gl=1*150thrw*_gcl_au*NTIxMTk5NDc4LjE3NTg4MjIxNTM.' }
     ]
