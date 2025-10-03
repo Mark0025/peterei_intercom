@@ -10,8 +10,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOnboardingEmail, isEmailConfigured } from '@/services/email';
 import { logInfo, logError } from '@/services/logger';
+import { writeFile, mkdir } from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+const SUBMISSIONS_DIR = path.join(process.cwd(), 'data', 'form-submissions');
+
+/**
+ * Save form submission to JSON file
+ */
+async function saveSubmission(answers: Record<string, string>): Promise<string> {
+  // Ensure directory exists
+  if (!existsSync(SUBMISSIONS_DIR)) {
+    await mkdir(SUBMISSIONS_DIR, { recursive: true });
+  }
+
+  // Create submission object
+  const submission = {
+    id: `submission-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    submittedAt: new Date().toISOString(),
+    timestamp: Date.now(),
+    answers,
+  };
+
+  // Save to file
+  const filename = path.join(SUBMISSIONS_DIR, `${submission.id}.json`);
+  await writeFile(filename, JSON.stringify(submission, null, 2));
+
+  logInfo(`[API] Submission saved: ${filename}`);
+
+  return submission.id;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,42 +61,34 @@ export async function POST(request: NextRequest) {
 
     logInfo(`[API] Form data parsed: ${Object.keys(answers).length} fields`);
 
-    // Check if email is configured
-    if (!isEmailConfigured()) {
-      logError('[API] Email not configured - cannot send notification');
+    // ALWAYS save submission to disk (whether email works or not)
+    const submissionId = await saveSubmission(answers);
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Email notifications are not configured',
-        },
-        { status: 500 }
-      );
+    // Try to send email if configured (optional)
+    let emailSent = false;
+    let messageId: string | undefined;
+
+    if (isEmailConfigured()) {
+      const emailResult = await sendOnboardingEmail(answers);
+
+      if (emailResult.success) {
+        emailSent = true;
+        messageId = emailResult.messageId;
+        logInfo(`[API] Email sent successfully. Message ID: ${emailResult.messageId}`);
+      } else {
+        logError(`[API] Email sending failed: ${emailResult.error}`);
+        // Don't fail the whole submission - just log it
+      }
+    } else {
+      logInfo('[API] Email not configured - skipping email notification');
     }
-
-    // Send email notification
-    const emailResult = await sendOnboardingEmail(answers);
-
-    if (!emailResult.success) {
-      logError(`[API] Failed to send email: ${emailResult.error}`);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Failed to send email notification',
-          details: emailResult.error,
-        },
-        { status: 500 }
-      );
-    }
-
-    logInfo(`[API] Email sent successfully. Message ID: ${emailResult.messageId}`);
 
     return NextResponse.json({
       success: true,
       message: 'Onboarding form submitted successfully',
-      emailSent: true,
-      messageId: emailResult.messageId,
+      submissionId,
+      emailSent,
+      messageId,
     });
   } catch (error) {
     logError(`[API] Popout submit error: ${error instanceof Error ? error.message : error}`);
