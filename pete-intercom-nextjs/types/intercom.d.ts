@@ -78,3 +78,55 @@ export interface IntercomSearchRequest {
     starting_after?: string;
   };
 }
+
+// Event & Activity Tracking Types
+export interface IntercomEvent {
+  id: string;
+  event_name: string;
+  created_at: number;
+  user_id?: string;
+  intercom_user_id?: string;
+  email?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface IntercomPageView {
+  id: string;
+  url: string;
+  title?: string;
+  created_at: number;
+  user_id?: string;
+  intercom_user_id?: string;
+  email?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface IntercomEventSummary {
+  name: string;
+  count: number;
+  first: number;
+  last: number;
+}
+
+export interface IntercomEventsResponse {
+  type: 'event.list';
+  events: IntercomEvent[];
+  pages?: {
+    next?: string;
+    per_page?: number;
+    total_pages?: number;
+  };
+}
+
+// Archived Activity Data (for long-term storage)
+export interface ArchivedUserActivity {
+  contact_id: string;
+  email?: string;
+  name?: string;
+  archived_at: number;
+  data_period_start: number;
+  data_period_end: number;
+  events: IntercomEvent[];
+  page_views: IntercomPageView[];
+  event_summaries: IntercomEventSummary[];
+}
