@@ -24,7 +24,7 @@ export default function ConversationInsightsChat({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // Expanded by default for immediate visibility
   const [mermaidDiagram, setMermaidDiagram] = useState<string>('');
   const chatLogRef = useRef<HTMLDivElement>(null);
 
