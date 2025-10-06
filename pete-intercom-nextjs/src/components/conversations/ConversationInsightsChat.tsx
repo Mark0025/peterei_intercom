@@ -74,16 +74,14 @@ export default function ConversationInsightsChat({
     setMessages(prev => [...prev, thinkingMessage]);
 
     try {
-      // Call conversation analysis API endpoint
-      const response = await fetch('/api/conversation-chat', {
+      // Call general PeteAI API endpoint for conversational assistance
+      const response = await fetch('/api/PeteAI', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message,
-          category,
-          conversationHistory: messages
         }),
       });
 
@@ -100,15 +98,21 @@ export default function ConversationInsightsChat({
         const newMessages = prev.slice(0, -1); // Remove thinking message
         const aiMessage: Message = {
           role: 'ai',
-          content: data.message || data.error || 'No response received',
+          content: data.reply || data.message || data.error || 'No response received',
           timestamp: new Date()
         };
         return [...newMessages, aiMessage];
       });
 
-      // Update Mermaid diagram if provided
+      // Update Mermaid diagram if provided (PeteAI may include diagrams)
       if (data.mermaidDiagram) {
         setMermaidDiagram(data.mermaidDiagram);
+      }
+
+      // Extract Mermaid from reply text if embedded
+      const mermaidMatch = data.reply?.match(/```mermaid\n([\s\S]*?)\n```/);
+      if (mermaidMatch) {
+        setMermaidDiagram(mermaidMatch[0]);
       }
 
     } catch (error) {
