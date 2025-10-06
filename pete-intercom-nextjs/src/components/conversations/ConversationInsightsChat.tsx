@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Bot, Send, TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { MermaidDiagram } from '@/components/mermaid-diagram';
+import { marked } from 'marked';
 
 interface Message {
   role: 'user' | 'ai';
@@ -37,6 +38,24 @@ export default function ConversationInsightsChat({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Configure marked for better rendering
+  useEffect(() => {
+    marked.setOptions({
+      breaks: true, // Convert \n to <br>
+      gfm: true, // GitHub Flavored Markdown
+    });
+  }, []);
+
+  // Render markdown content safely
+  const renderMarkdown = (content: string): string => {
+    try {
+      return marked.parse(content) as string;
+    } catch (error) {
+      console.error('Markdown rendering error:', error);
+      return content; // Fallback to plain text
+    }
+  };
 
   // Suggested prompts for conversation analysis
   const suggestedPrompts = [
@@ -236,18 +255,25 @@ export default function ConversationInsightsChat({
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`text-sm ${
+                className={`text-sm p-3 rounded-lg ${
                   message.role === 'user'
-                    ? 'text-blue-700 dark:text-blue-400 font-medium'
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium'
                     : message.content.includes('...analyzing...')
                     ? 'text-muted-foreground italic'
-                    : 'text-green-700 dark:text-green-400'
+                    : 'bg-white dark:bg-slate-800 text-foreground'
                 }`}
               >
-                <span className="font-semibold">
-                  {message.role === 'user' ? 'You: ' : 'PeteAI: '}
-                </span>
-                <span dangerouslySetInnerHTML={{ __html: message.content }} />
+                <div className="font-semibold mb-1">
+                  {message.role === 'user' ? '👤 You' : '🤖 PeteAI'}
+                </div>
+                {message.role === 'ai' && !message.content.includes('...analyzing...') ? (
+                  <div
+                    className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-p:my-2 prose-ul:my-2 prose-li:my-1"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+                  />
+                ) : (
+                  <span>{message.content}</span>
+                )}
               </div>
             ))}
           </div>
