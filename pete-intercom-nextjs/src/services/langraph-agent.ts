@@ -21,13 +21,14 @@ const SYSTEM_PROMPT = `You are PeteAI, an expert Intercom assistant with access 
 🎯 CRITICAL: You MUST use tools when asked about companies, contacts, conversations, or help documentation.
 
 Available Tools:
-1. **fuzzy_search_company** - Find companies by name (handles typos like "strycam" → "Strycam")
-2. **get_company_timeline** - Get full conversation history for a company
-3. **extract_company_attributes** - Get all company metadata in JSON
-4. **search_contacts** - Find contacts by email or name
-5. **search_companies** - Search companies by name
-6. **analyze_conversations** - Get conversation insights and stats
-7. **get_cache_info** - Get cache status and sample data
+1. **search_conversation_content** - Search through actual conversation messages/content (use this for "porting", "twilio", etc.)
+2. **fuzzy_search_company** - Find companies by name (handles typos like "strycam" → "Strycam")
+3. **get_company_timeline** - Get full conversation history for a company
+4. **extract_company_attributes** - Get all company metadata in JSON
+5. **search_contacts** - Find contacts by email or name
+6. **search_companies** - Search companies by name
+7. **analyze_conversations** - Get conversation insights and stats
+8. **get_cache_info** - Get cache status and sample data
 8. **fetch_help_doc** - Fetch and analyze help documentation from Pete help center URL
 9. **generate_process_map** - Generate Mermaid flowchart from step-by-step instructions
 10. **recommend_help_doc** - Recommend relevant help documentation based on user's question
@@ -36,6 +37,9 @@ Available Tools:
 13. **map_pete_app_route** - Map user actions to actual Pete app URLs (e.g., "upload data" → https://app.thepete.io/settings/general/import)
 
 📋 Examples of REQUIRED tool usage:
+- "how do we handle porting?" → MUST call search_conversation_content("porting")
+- "what did we say about twilio?" → MUST call search_conversation_content("twilio")
+- "find conversations about onboarding" → MUST call search_conversation_content("onboarding")
 - "what company id is strycam?" → MUST call fuzzy_search_company("strycam")
 - "show timeline for Stkcam" → MUST call get_company_timeline(company_id)
 - "find john@example.com" → MUST call search_contacts(email="john@example.com")
@@ -295,6 +299,84 @@ const analyzeConversationsTool = tool(
     schema: z.object({
       status: z.string().optional().describe("Filter by conversation status: open, closed, snoozed"),
       timeframe: z.string().optional().default("all").describe("Time frame to analyze: all, recent, week, month")
+    }),
+  }
+);
+
+// Semantic conversation content search tool
+const searchConversationContentTool = tool(
+  async ({ searchTerm, limit = 10 }: { searchTerm: string; limit?: number }) => {
+    try {
+      logInfo(`[LANGGRAPH] Searching conversation content for: ${searchTerm}`);
+      const cache = getSmartCache();
+      const searchLower = searchTerm.toLowerCase();
+
+      // Search through conversation parts (messages) for the search term
+      const matches: Array<{
+        conversationId: string;
+        snippet: string;
+        tags: string[];
+        created: string;
+        state: string;
+      }> = [];
+
+      cache.conversations.forEach(conv => {
+        // Search in conversation parts if available
+        const parts = (conv as any).conversation_parts?.conversation_parts || [];
+
+        parts.forEach((part: any) => {
+          const body = part.body || '';
+          if (body.toLowerCase().includes(searchLower)) {
+            // Extract snippet around the match
+            const index = body.toLowerCase().indexOf(searchLower);
+            const start = Math.max(0, index - 100);
+            const end = Math.min(body.length, index + 150);
+            const snippet = body.substring(start, end);
+
+            matches.push({
+              conversationId: conv.id,
+              snippet: `...${snippet}...`,
+              tags: conv.tags?.tags?.map((t: any) => t.name) || [],
+              created: new Date(conv.created_at * 1000).toLocaleDateString(),
+              state: conv.state
+            });
+          }
+        });
+
+        // Also search in title/subject if available
+        const title = (conv as any).title || (conv as any).source?.subject || '';
+        if (title.toLowerCase().includes(searchLower)) {
+          matches.push({
+            conversationId: conv.id,
+            snippet: title,
+            tags: conv.tags?.tags?.map((t: any) => t.name) || [],
+            created: new Date(conv.created_at * 1000).toLocaleDateString(),
+            state: conv.state
+          });
+        }
+      });
+
+      return {
+        success: true,
+        totalMatches: matches.length,
+        conversations: matches.slice(0, limit),
+        message: matches.length > 0
+          ? `Found ${matches.length} conversations mentioning "${searchTerm}"`
+          : `No conversations found mentioning "${searchTerm}"`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  },
+  {
+    name: "search_conversation_content",
+    description: "Search through actual conversation messages/content for specific terms or topics. Use this for semantic search when users ask about specific topics like 'porting', 'twilio', 'onboarding', etc. Searches through message bodies, not just tags.",
+    schema: z.object({
+      searchTerm: z.string().describe("The term or phrase to search for in conversation content"),
+      limit: z.number().optional().default(10).describe("Maximum number of results to return (default: 10)")
     }),
   }
 );
@@ -824,6 +906,7 @@ const tools = [
   searchCompaniesTool,
   getCacheInfoTool,
   analyzeConversationsTool,
+  searchConversationContentTool, // NEW: Semantic search through conversation messages
   fuzzySearchCompanyTool,
   getCompanyTimelineTool,
   extractCompanyAttributesTool,
