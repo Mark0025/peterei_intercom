@@ -39,12 +39,8 @@ export async function POST(request: NextRequest) {
     console.log('[PeteAI API] Reply preview (first 300 chars):', result.data?.reply?.substring(0, 300));
     console.log('[PeteAI API] Contains ```mermaid?', result.data?.reply?.includes('```mermaid'));
 
-    // Return in the format expected by the original frontend
-    return NextResponse.json({
-      reply: {
-        content: result.data?.reply
-      }
-    });
+    // Return data directly - reply should be a string for .match() to work
+    return NextResponse.json(result.data);
 
   } catch (error) {
     console.error('[PeteAI API] Error:', error);
