@@ -87,6 +87,12 @@ export default function ConversationInsightsChat({
         }),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[ConversationChat] API error:', response.status, errorText);
+        throw new Error(`API error (${response.status}): ${errorText.substring(0, 200)}`);
+      }
+
       const data = await response.json();
 
       // Remove thinking message and add real response
