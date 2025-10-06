@@ -70,13 +70,13 @@ export default async function ConversationsPage() {
         </div>
       </div>
 
-      {/* Client Component with Global Filters */}
-      <ConversationsPageClient conversations={conversations} stats={stats} />
-
-      {/* AI Conversation Insights */}
-      <div className="px-6 pb-6 mt-6">
+      {/* AI Conversation Insights - Moved to top for immediate visibility */}
+      <div className="px-6 pb-6">
         <ConversationInsightsChat totalConversations={stats.total} />
       </div>
+
+      {/* Client Component with Global Filters */}
+      <ConversationsPageClient conversations={conversations} stats={stats} />
 
       {/* Additional Info */}
       <div className="px-6 pb-6 mt-6">
