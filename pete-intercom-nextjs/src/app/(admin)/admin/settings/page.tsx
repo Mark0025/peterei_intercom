@@ -8,10 +8,12 @@
  */
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { getIntercomFieldsConfig, updateFieldEnabledStatus } from '@/actions/settings';
 import { type IntercomFieldConfig } from '@/config/intercom-fields';
 
@@ -213,11 +215,48 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-3 pb-4">
-        <h1 className="text-4xl font-bold tracking-tight">Intercom Data Settings</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Configure which fields we fetch from Intercom and see where they&apos;re used
+          Configure application behavior and data management
         </p>
       </div>
+
+      {/* Settings Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Link href="/admin/settings">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-primary">
+            <CardHeader>
+              <CardTitle>📧 Intercom Data Fields</CardTitle>
+              <CardDescription>
+                Configure which fields we fetch from Intercom API
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Current page - Manage contact and company fields
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/settings/ai">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle>🤖 AI Settings</CardTitle>
+              <CardDescription>
+                Configure AI conversation history and logging
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Manage AI agent behavior, history retention, and cleanup policies
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      <h2 className="text-2xl font-bold">Intercom Data Settings</h2>
 
       {/* Success/Error Messages */}
       {successMessage && (
