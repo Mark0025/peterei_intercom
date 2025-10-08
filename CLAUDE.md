@@ -100,6 +100,179 @@ This project strictly follows Intercom Canvas Kit guidelines. **ALL UI changes m
 - Use `style: "error"` for error messages with actionable next steps
 - Support both Messenger and Inbox contexts
 
+## Next.js 15.3+ Routing Rules (CRITICAL)
+
+This project uses **Next.js 15.3+ App Router** with strict routing conventions. **ALL routes must follow these rules:**
+
+### Dynamic Route Patterns
+
+**Use `[[...slug]]` for optional catch-all routes:**
+```typescript
+// ✅ CORRECT: pete-intercom-nextjs/src/app/(admin)/admin/docs/[[...slug]]/page.tsx
+export default function DocsPage({ params }: { params: Promise<{ slug?: string[] }> }) {
+  // Handle async params with Promise unwrapping
+}
+```
+
+**Key Rules:**
+1. **Async Params**: All route params are Promises in Next.js 15.3+ and must be unwrapped
+2. **useEffect Dependencies**: Include BOTH `params` AND `pathname` when watching route changes
+3. **Client Components**: Use `'use client'` for interactive pages with navigation
+4. **Server Actions**: Prefer server actions over API routes for data mutations
+
+### Async Params Handling
+
+**Always unwrap params Promise correctly:**
+```typescript
+'use client';
+
+import { usePathname } from 'next/navigation';
+
+export default function Page({ params }: PageProps) {
+  const pathname = usePathname();
+  const [currentSlug, setCurrentSlug] = useState<string[]>([]);
+
+  // ✅ CORRECT: Unwrap params and watch pathname
+  useEffect(() => {
+    params.then(resolvedParams => {
+      console.log('[Page] Params resolved:', resolvedParams);
+      setCurrentSlug(resolvedParams.slug || []);
+    });
+  }, [params, pathname]); // Both dependencies required!
+
+  // ❌ WRONG: Missing pathname dependency
+  useEffect(() => {
+    params.then(resolvedParams => {
+      setCurrentSlug(resolvedParams.slug || []);
+    });
+  }, [params]); // Navigation won't trigger re-render!
+}
+```
+
+### Fragment Links & Header IDs
+
+**All markdown parsers must generate header IDs for fragment navigation:**
+```typescript
+// ✅ CORRECT: Generate IDs from headers
+function generateHeaderId(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+// Parse headers with IDs
+text = text.replace(/^## (.*$)/gim, (match, headerText) => {
+  const id = generateHeaderId(headerText);
+  return `<h2 id="${id}">${headerText}</h2>`;
+});
+
+// Fragment links work natively
+if (url.startsWith('#')) {
+  return `<a href="${url}">${linkText}</a>`; // Native browser scrolling
+}
+```
+
+### Link Handling
+
+**Distinguish between file links, fragment links, and external links:**
+```typescript
+// Fragment link (same-page) - native behavior
+if (url.startsWith('#')) {
+  return `<a href="${url}">${linkText}</a>`;
+}
+
+// Internal .md file - custom navigation
+if (url.endsWith('.md')) {
+  const cleanUrl = url.replace(/^\.\//, '');
+  return `<a href="#" class="internal-doc-link" data-doc-path="${cleanUrl}">${linkText}</a>`;
+}
+
+// External link - new tab
+return `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+```
+
+### Navigation Best Practices
+
+**Use Next.js navigation hooks correctly:**
+```typescript
+import { useRouter, usePathname } from 'next/navigation';
+
+// ✅ CORRECT: Programmatic navigation
+const router = useRouter();
+router.push(`/admin/docs/${resolvedPath}`);
+
+// ✅ CORRECT: Get current pathname
+const pathname = usePathname(); // Returns: "/admin/docs/AI_Architecture"
+
+// ✅ CORRECT: Static links with Next.js Link
+import Link from 'next/link';
+<Link href={`/admin/docs/${file.path}`}>Navigate</Link>
+```
+
+### Route Structure Examples
+
+**This app follows these patterns:**
+```
+/                              → app/page.tsx (home)
+/admin                         → app/(admin)/admin/page.tsx
+/admin/docs                    → app/(admin)/admin/docs/[[...slug]]/page.tsx (root)
+/admin/docs/AI_Architecture    → app/(admin)/admin/docs/[[...slug]]/page.tsx (folder)
+/admin/docs/AI_Architecture/README.md → app/(admin)/admin/docs/[[...slug]]/page.tsx (file)
+/api/docs                      → app/api/docs/route.ts (API endpoint)
+```
+
+### Testing Checklist
+
+Before committing route changes, verify:
+1. ✅ **Folder navigation works** - Clicking folders opens contents
+2. ✅ **File navigation works** - Clicking files displays content
+3. ✅ **Fragment links work** - Table of contents scrolls to sections
+4. ✅ **URL updates** - Browser URL changes with navigation
+5. ✅ **Back button works** - Browser history functions correctly
+6. ✅ **Console clean** - No errors in browser console
+
+### Common Mistakes to Avoid
+
+❌ **Missing pathname dependency** - Routes won't update
+```typescript
+useEffect(() => { ... }, [params]); // WRONG
+```
+
+✅ **Include pathname dependency**
+```typescript
+useEffect(() => { ... }, [params, pathname]); // CORRECT
+```
+
+❌ **Treating fragments as file links**
+```typescript
+if (url.endsWith('.md') || url.startsWith('#')) { ... } // WRONG
+```
+
+✅ **Handle fragments separately**
+```typescript
+if (url.startsWith('#')) { return `<a href="${url}">`; } // CORRECT
+```
+
+❌ **Not generating header IDs**
+```typescript
+text.replace(/^## (.*$)/g, '<h2>$1</h2>'); // Fragment links won't work
+```
+
+✅ **Always add IDs to headers**
+```typescript
+text.replace(/^## (.*$)/g, (m, h) => `<h2 id="${generateHeaderId(h)}">${h}</h2>`);
+```
+
+### Reference Documentation
+
+See also:
+- [Next.js 15 Routing](https://nextjs.org/docs/app/getting-started/layouts-and-pages)
+- [Dynamic Routes](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes)
+- [DEV_MAN Linking Methodology](pete-intercom-nextjs/.claude/DEV_MAN/Rules/markdown-linking-methodology.md)
+
 ## Environment Configuration
 
 ### Required Environment Variables (pete-intercom-nextjs/.env)
