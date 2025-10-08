@@ -1,0 +1,17 @@
+# Ignore all JSON files (conversation history and logs)
+*.json
+
+# Keep directory structure
+!.gitkeep
+
+# Ignore user-specific directories
+conversations/*/
+ai-logs/*/
+
+# Keep agent type directories
+!conversations/langraph/
+!conversations/conversation/
+!conversations/onboarding/
+!ai-logs/langraph/
+!ai-logs/conversation/
+!ai-logs/onboarding/
