@@ -286,13 +286,16 @@ export async function sendMessageToPeteAIJson(
     logInfo(`[PeteAI] Using LangGraph agent with session: ${sessionId}`);
 
     try {
-      // Import conversation history functions
+      // Import conversation history and logging functions
       const { saveMessage } = await import('@/lib/conversation-history');
+      const { logAIConversation } = await import('@/lib/ai-conversation-logs');
       const { processWithLangGraph } = await import('@/services/langraph-agent');
 
       // Extract userId from sessionId (format: help-timestamp-random or api-timestamp)
       // Use a generic userId for now - in the future, integrate with auth
       const userId = sessionId.startsWith('help-') ? 'help-user' : 'api-user';
+
+      const startTime = Date.now();
 
       // Save user message to persistent storage
       await saveMessage(
@@ -309,6 +312,8 @@ export async function sendMessageToPeteAIJson(
 
       // Process with LangGraph agent
       const reply = await processWithLangGraph(message.trim(), sessionId);
+
+      const responseTime = Date.now() - startTime;
 
       // Check if response contains Mermaid diagram
       const hasMermaid = reply.includes('```mermaid');
@@ -327,8 +332,26 @@ export async function sendMessageToPeteAIJson(
         'langraph'
       );
 
+      // Log to admin analytics (async, non-blocking)
+      logAIConversation({
+        sessionId,
+        userId,
+        agentType: 'langraph',
+        request: {
+          message: message.trim(),
+          toolsUsed: [], // TODO: Extract from LangGraph response
+        },
+        response: {
+          content: reply,
+          latencyMs: responseTime,
+        },
+      }).catch(err => {
+        logError(`[PeteAI] Failed to log conversation: ${err.message}`);
+      });
+
       logInfo(`[PeteAI] Success (session: ${sessionId}) - ${reply.length} chars`);
       logInfo(`[PeteAI] Contains Mermaid: ${hasMermaid}`);
+      logInfo(`[PeteAI] Response time: ${responseTime}ms`);
       logInfo(`[PeteAI] Response preview: ${reply.substring(0, 150)}...`);
       logInfo(`[PeteAI] ✅ Saved to conversation history: ${sessionId}`);
 
@@ -346,6 +369,27 @@ export async function sendMessageToPeteAIJson(
       if (langGraphError instanceof Error && langGraphError.stack) {
         logError(`[PeteAI] Stack trace: ${langGraphError.stack}`);
       }
+
+      // Log error to admin analytics
+      const { logAIConversation } = await import('@/lib/ai-conversation-logs');
+      const userId = sessionId.startsWith('help-') ? 'help-user' : 'api-user';
+
+      logAIConversation({
+        sessionId,
+        userId,
+        agentType: 'langraph',
+        request: {
+          message: message.trim(),
+          toolsUsed: [],
+        },
+        response: {
+          content: '',
+          latencyMs: 0,
+        },
+        error: langGraphError instanceof Error ? langGraphError.message : 'Unknown error',
+      }).catch(err => {
+        logError(`[PeteAI] Failed to log error: ${err.message}`);
+      });
 
       // Return clean error to frontend
       return {
