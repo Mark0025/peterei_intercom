@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import mermaid from 'mermaid';
 import { getRandomLoadingMessage, getSequentialLoadingMessage } from '@/utils/loading-messages';
+import { ConversationHistory } from './ConversationHistory';
 
 // Simple markdown parser for chat messages
 function parseMarkdown(text: string): string {
@@ -53,12 +54,13 @@ interface Message {
 
 export function PeteAIChat() {
     // Generate session ID once on mount for conversation history
-    const [sessionId] = useState(() => `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+    const [sessionId, setSessionId] = useState(() => `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [loadingMessage, setLoadingMessage] = useState(getRandomLoadingMessage());
     const [loadingStartTime, setLoadingStartTime] = useState(Date.now());
+    const [showHistory, setShowHistory] = useState(false);
     const chatLogRef = useRef<HTMLDivElement>(null);
 
     // Initialize Mermaid
@@ -104,6 +106,50 @@ export function PeteAIChat() {
         if (chatLogRef.current) {
             chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
         }
+    };
+
+    const loadSession = async (loadSessionId: string) => {
+        try {
+            setIsLoading(true);
+            const userId = loadSessionId.startsWith('help-') ? 'help-user' : 'api-user';
+
+            const response = await fetch(`/api/conversations/${loadSessionId}?userId=${userId}&agentType=langraph`);
+
+            if (!response.ok) {
+                throw new Error('Failed to load session');
+            }
+
+            const data = await response.json();
+
+            if (data.success && data.session) {
+                // Convert session messages to Message format
+                const loadedMessages: Message[] = data.session.messages.map((msg: any) => ({
+                    role: msg.role,
+                    content: msg.content,
+                    timestamp: new Date(msg.timestamp),
+                    hasMermaid: msg.hasMermaid
+                }));
+
+                setMessages(loadedMessages);
+                setSessionId(loadSessionId);
+                setShowHistory(false);
+
+                console.log(`[PeteAI] Loaded session ${loadSessionId} with ${loadedMessages.length} messages`);
+            }
+        } catch (error) {
+            console.error('[PeteAI] Failed to load session:', error);
+            alert('Failed to load conversation history. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const startNewSession = () => {
+        const newSessionId = `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        setSessionId(newSessionId);
+        setMessages([]);
+        setShowHistory(false);
+        console.log(`[PeteAI] Started new session: ${newSessionId}`);
     };
 
     // Rotate loading messages every 2 seconds
@@ -244,16 +290,49 @@ export function PeteAIChat() {
     };
 
     return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    🤖 PeteAI Assistant
-                </CardTitle>
-                <CardDescription>
-                    Ask PeteAI anything about Pete, Intercom, or your business automation needs
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Conversation History Sidebar - Optional Toggle */}
+            {showHistory && (
+                <div className="md:col-span-1">
+                    <ConversationHistory
+                        currentSessionId={sessionId}
+                        onLoadSession={loadSession}
+                    />
+                </div>
+            )}
+
+            {/* Main Chat Interface */}
+            <Card className={showHistory ? 'md:col-span-3' : 'md:col-span-4'}>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="flex items-center gap-2">
+                                🤖 PeteAI Assistant
+                            </CardTitle>
+                            <CardDescription>
+                                Ask PeteAI anything about Pete, Intercom, or your business automation needs
+                            </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowHistory(!showHistory)}
+                            >
+                                {showHistory ? 'Hide' : 'Show'} History
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={startNewSession}
+                                disabled={messages.length === 0}
+                            >
+                                + New Chat
+                            </Button>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
                 {/* Chat Messages */}
                 <div
                     ref={chatLogRef}
@@ -347,11 +426,12 @@ export function PeteAIChat() {
                     </Button>
                 </form>
 
-                {/* Features */}
-                <div className="text-xs text-muted-foreground">
-                    <strong>Features:</strong> Real-time AI chat • Intercom expertise • Canvas Kit assistance • Business automation
-                </div>
-            </CardContent>
-        </Card>
+                    {/* Features */}
+                    <div className="text-xs text-muted-foreground">
+                        <strong>Features:</strong> Real-time AI chat • Intercom expertise • Canvas Kit assistance • Business automation • Persistent conversation history
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     );
 }

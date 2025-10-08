@@ -286,12 +286,51 @@ export async function sendMessageToPeteAIJson(
     logInfo(`[PeteAI] Using LangGraph agent with session: ${sessionId}`);
 
     try {
+      // Import conversation history functions
+      const { saveMessage } = await import('@/lib/conversation-history');
       const { processWithLangGraph } = await import('@/services/langraph-agent');
+
+      // Extract userId from sessionId (format: help-timestamp-random or api-timestamp)
+      // Use a generic userId for now - in the future, integrate with auth
+      const userId = sessionId.startsWith('help-') ? 'help-user' : 'api-user';
+
+      // Save user message to persistent storage
+      await saveMessage(
+        sessionId,
+        userId,
+        {
+          role: 'user',
+          content: message.trim(),
+          timestamp: new Date().toISOString(),
+          agentType: 'langraph'
+        },
+        'langraph'
+      );
+
+      // Process with LangGraph agent
       const reply = await processWithLangGraph(message.trim(), sessionId);
 
+      // Check if response contains Mermaid diagram
+      const hasMermaid = reply.includes('```mermaid');
+
+      // Save AI response to persistent storage
+      await saveMessage(
+        sessionId,
+        userId,
+        {
+          role: 'ai',
+          content: reply,
+          timestamp: new Date().toISOString(),
+          agentType: 'langraph',
+          hasMermaid
+        },
+        'langraph'
+      );
+
       logInfo(`[PeteAI] Success (session: ${sessionId}) - ${reply.length} chars`);
-      logInfo(`[PeteAI] Contains Mermaid: ${reply.includes('```mermaid')}`);
+      logInfo(`[PeteAI] Contains Mermaid: ${hasMermaid}`);
       logInfo(`[PeteAI] Response preview: ${reply.substring(0, 150)}...`);
+      logInfo(`[PeteAI] ✅ Saved to conversation history: ${sessionId}`);
 
       return {
         success: true,
