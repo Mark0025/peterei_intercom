@@ -7,6 +7,34 @@ import { Input } from '@/components/ui/input';
 import mermaid from 'mermaid';
 import { getRandomLoadingMessage, getSequentialLoadingMessage } from '@/utils/loading-messages';
 
+// Simple markdown parser for chat messages
+function parseMarkdown(text: string): string {
+    // Headers
+    text = text.replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-3 mb-2">$1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>');
+    text = text.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-4 mb-2">$1</h1>');
+
+    // Bold
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
+    text = text.replace(/\_\_(.*?)\_\_/g, '<strong class="font-bold">$1</strong>');
+
+    // Italic
+    text = text.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+    text = text.replace(/\_(.*?)\_/g, '<em class="italic">$1</em>');
+
+    // Links - make them blue and clickable
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+
+    // Inline code
+    text = text.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">$1</code>');
+
+    // Line breaks
+    text = text.replace(/\n\n/g, '<br/><br/>');
+    text = text.replace(/\n/g, '<br/>');
+
+    return text;
+}
+
 interface Message {
     role: 'user' | 'ai';
     content: string;
@@ -29,8 +57,38 @@ export function PeteAIChat() {
         mermaid.initialize({
             startOnLoad: true,
             theme: 'default',
-            securityLevel: 'loose',
+            securityLevel: 'loose', // Allow clicks and hyperlinks in diagrams
+            flowchart: {
+                htmlLabels: true,
+                useMaxWidth: true
+            }
         });
+
+        // Add global CSS for Mermaid diagram links
+        const style = document.createElement('style');
+        style.textContent = `
+            .mermaid a,
+            .mermaid .clickable {
+                cursor: pointer;
+                fill: #2563eb !important;
+                color: #2563eb !important;
+                text-decoration: underline;
+            }
+            .mermaid a:hover,
+            .mermaid .clickable:hover {
+                fill: #1d4ed8 !important;
+                color: #1d4ed8 !important;
+            }
+            .mermaid .edgeLabel a {
+                color: #2563eb !important;
+                text-decoration: underline;
+            }
+        `;
+        document.head.appendChild(style);
+
+        return () => {
+            document.head.removeChild(style);
+        };
     }, []);
 
     const scrollToBottom = () => {
@@ -245,7 +303,7 @@ export function PeteAIChat() {
                                 {textContent && (
                                     <div
                                         className="text-sm mb-2 prose prose-sm max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: textContent }}
+                                        dangerouslySetInnerHTML={{ __html: parseMarkdown(textContent) }}
                                     />
                                 )}
                                 {mermaidCode && (

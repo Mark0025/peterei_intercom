@@ -13,11 +13,15 @@ export function MarkdownRenderer({ content, className = '', onLinkClick }: Markd
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initialize Mermaid
+    // Initialize Mermaid with support for hyperlinks
     mermaid.initialize({
       startOnLoad: true,
       theme: 'default',
-      securityLevel: 'loose',
+      securityLevel: 'loose', // Allow clicks and hyperlinks in diagrams
+      flowchart: {
+        htmlLabels: true,
+        useMaxWidth: true
+      }
     });
   }, []);
 
@@ -223,6 +227,25 @@ export function MarkdownRenderer({ content, className = '', onLinkClick }: Markd
           display: flex;
           justify-content: center;
           min-height: 100px;
+        }
+
+        .mermaid a,
+        .mermaid .clickable {
+          cursor: pointer;
+          fill: #2563eb !important;
+          color: #2563eb !important;
+          text-decoration: underline;
+        }
+
+        .mermaid a:hover,
+        .mermaid .clickable:hover {
+          fill: #1d4ed8 !important;
+          color: #1d4ed8 !important;
+        }
+
+        .mermaid .edgeLabel a {
+          color: #2563eb !important;
+          text-decoration: underline;
         }
       `}</style>
     </div>
