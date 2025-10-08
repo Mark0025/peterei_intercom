@@ -111,7 +111,8 @@ export function PeteAIChat() {
     const loadSession = async (loadSessionId: string) => {
         try {
             setIsLoading(true);
-            const userId = loadSessionId.startsWith('help-') ? 'help-user' : 'api-user';
+            // TODO: Future Clerk Auth Integration
+            const userId = `guest-${loadSessionId}`;
 
             const response = await fetch(`/api/conversations/${loadSessionId}?userId=${userId}&agentType=langraph`);
 

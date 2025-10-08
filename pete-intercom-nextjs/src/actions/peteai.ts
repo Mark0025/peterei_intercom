@@ -291,9 +291,11 @@ export async function sendMessageToPeteAIJson(
       const { logAIConversation } = await import('@/lib/ai-conversation-logs');
       const { processWithLangGraph } = await import('@/services/langraph-agent');
 
-      // Extract userId from sessionId (format: help-timestamp-random or api-timestamp)
-      // Use a generic userId for now - in the future, integrate with auth
-      const userId = sessionId.startsWith('help-') ? 'help-user' : 'api-user';
+      // TODO: Future Clerk Auth Integration
+      // For admin users: const userId = user?.id || `guest-${sessionId}`
+      // For now, use unique guest IDs based on sessionId
+      // This allows us to track conversations per-session without requiring auth
+      const userId = `guest-${sessionId}`;
 
       const startTime = Date.now();
 
@@ -372,7 +374,8 @@ export async function sendMessageToPeteAIJson(
 
       // Log error to admin analytics
       const { logAIConversation } = await import('@/lib/ai-conversation-logs');
-      const userId = sessionId.startsWith('help-') ? 'help-user' : 'api-user';
+      // TODO: Future Clerk Auth Integration - same as above
+      const userId = `guest-${sessionId}`;
 
       logAIConversation({
         sessionId,

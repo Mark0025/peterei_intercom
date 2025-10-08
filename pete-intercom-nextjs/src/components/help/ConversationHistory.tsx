@@ -25,8 +25,10 @@ export function ConversationHistory({ currentSessionId, onLoadSession }: Convers
       setLoading(true);
       setError(null);
 
-      // Fetch sessions for the generic help user
-      const userId = currentSessionId.startsWith('help-') ? 'help-user' : 'api-user';
+      // TODO: Future Clerk Auth Integration
+      // For authenticated users, fetch by user.id
+      // For now, fetch sessions for the current guest user
+      const userId = `guest-${currentSessionId}`;
       const response = await fetch(`/api/conversations/user/${userId}?agentType=langraph`);
 
       if (!response.ok) {
