@@ -12,6 +12,7 @@ interface PeteAIResponse {
 
 interface PeteAIRequest {
   message: string;
+  sessionId?: string;
 }
 
 // Initialize OpenAI client
@@ -261,8 +262,8 @@ export async function sendMessageToPeteAIJson(
   request: PeteAIRequest
 ): Promise<ActionResult<PeteAIResponse>> {
   try {
-    const { message } = request;
-    
+    const { message, sessionId = `session-${Date.now()}` } = request;
+
     if (!message || !message.trim()) {
       return {
         success: false,
@@ -270,51 +271,57 @@ export async function sendMessageToPeteAIJson(
       };
     }
 
-    logInfo(`PeteAI JSON request: ${message.substring(0, 100)}...`);
+    logInfo(`[PeteAI] Request (session: ${sessionId}): ${message.substring(0, 100)}...`);
 
-    // Try LangGraph first, fallback to cache-only response
-    let reply: string;
-
-    if (process.env.OPENROUTER_API_KEY) {
-      logInfo('[PeteAI] OPENROUTER_API_KEY found, using LangGraph agent');
-      try {
-        // Use the intelligent LangGraph agent
-        const { processWithLangGraph } = await import('@/services/langraph-agent');
-        reply = await processWithLangGraph(message.trim());
-        logInfo(`[PeteAI] LangGraph success - response length: ${reply.length} chars`);
-        logInfo(`[PeteAI] Contains Mermaid? ${reply.includes('```mermaid')}`);
-      } catch (error) {
-        logError(`[PeteAI] LangGraph error, falling back to cache: ${error instanceof Error ? error.message : error}`);
-        if (error instanceof Error && error.stack) {
-          logError(`[PeteAI] Stack trace: ${error.stack}`);
-        }
-        // Fallback to cache-only response
-        reply = await getCacheOnlyResponse(message.trim());
-        logInfo('[PeteAI] Using cache-only fallback response');
-      }
-    } else {
-      logError('[PeteAI] OPENROUTER_API_KEY is not configured, using cache-only mode');
-      // Use cache-only response
-      reply = await getCacheOnlyResponse(message.trim());
+    // Check API key first - fail fast with clear error
+    if (!process.env.OPENROUTER_API_KEY) {
+      logError('[PeteAI] OPENROUTER_API_KEY not configured');
+      return {
+        success: false,
+        error: 'AI service not configured. Please contact support.'
+      };
     }
-    
-    logInfo(`PeteAI JSON response: ${reply.substring(0, 100)}...`);
 
-    return {
-      success: true,
-      data: {
-        reply,
-        timestamp: new Date().toISOString()
+    // Use LangGraph agent with session support - NO fallback
+    logInfo(`[PeteAI] Using LangGraph agent with session: ${sessionId}`);
+
+    try {
+      const { processWithLangGraph } = await import('@/services/langraph-agent');
+      const reply = await processWithLangGraph(message.trim(), sessionId);
+
+      logInfo(`[PeteAI] Success (session: ${sessionId}) - ${reply.length} chars`);
+      logInfo(`[PeteAI] Contains Mermaid: ${reply.includes('```mermaid')}`);
+      logInfo(`[PeteAI] Response preview: ${reply.substring(0, 150)}...`);
+
+      return {
+        success: true,
+        data: {
+          reply,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+    } catch (langGraphError) {
+      // Log full error details for debugging
+      logError(`[PeteAI] LangGraph error (session: ${sessionId}): ${langGraphError instanceof Error ? langGraphError.message : langGraphError}`);
+      if (langGraphError instanceof Error && langGraphError.stack) {
+        logError(`[PeteAI] Stack trace: ${langGraphError.stack}`);
       }
-    };
+
+      // Return clean error to frontend
+      return {
+        success: false,
+        error: 'AI service temporarily unavailable. Please try again.'
+      };
+    }
 
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
-    logError(`PeteAI JSON error: ${errorMsg}`);
-    
+    logError(`[PeteAI] Unexpected error: ${errorMsg}`);
+
     return {
       success: false,
-      error: `PeteAI error: ${errorMsg}`
+      error: 'An unexpected error occurred. Please try again.'
     };
   }
 }

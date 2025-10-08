@@ -15,6 +15,8 @@ interface Message {
 }
 
 export function PeteAIChat() {
+    // Generate session ID once on mount for conversation history
+    const [sessionId] = useState(() => `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -100,38 +102,74 @@ export function PeteAIChat() {
         setMessages(prev => [...prev, thinkingMessage]);
 
         try {
-            // Use the original API endpoint for compatibility
+            // Send request with session ID for conversation history
             const response = await fetch('/api/PeteAI', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message }),
+                body: JSON.stringify({
+                    message,
+                    sessionId  // Enables conversation history tracking
+                }),
             });
 
             const data = await response.json();
 
-            // Remove thinking message and add real response
+            // Handle error response
+            if (!response.ok || data.error) {
+                console.error('[PeteAI Help] API error:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    error: data.error,
+                    sessionId,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Show generic error to user
+                setMessages(prev => {
+                    const newMessages = prev.slice(0, -1);
+                    return [...newMessages, {
+                        role: 'ai',
+                        content: 'Sorry, I\'m having trouble right now. Please try again in a moment.',
+                        timestamp: new Date()
+                    }];
+                });
+                return;
+            }
+
+            // Success - add response
             setMessages(prev => {
                 const newMessages = prev.slice(0, -1); // Remove thinking message
                 const aiMessage: Message = {
                     role: 'ai',
-                    content: data.reply || data.error || 'No response received',
+                    content: data.reply || 'No response received',
                     timestamp: new Date()
                 };
                 return [...newMessages, aiMessage];
             });
 
+            console.log('[PeteAI Help] Response received:', {
+                length: data.reply?.length || 0,
+                hasMermaid: data.reply?.includes('```mermaid') || false,
+                sessionId
+            });
+
         } catch (error) {
-            // Remove thinking message and add error
+            console.error('[PeteAI Help] Network error:', {
+                error: error instanceof Error ? error.message : error,
+                sessionId,
+                timestamp: new Date().toISOString()
+            });
+
+            // Show generic error to user
             setMessages(prev => {
                 const newMessages = prev.slice(0, -1);
-                const errorMessage: Message = {
+                return [...newMessages, {
                     role: 'ai',
-                    content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    content: 'Connection error. Please check your internet and try again.',
                     timestamp: new Date()
-                };
-                return [...newMessages, errorMessage];
+                }];
             });
         } finally {
             setIsLoading(false);

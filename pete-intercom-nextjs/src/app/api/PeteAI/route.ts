@@ -5,47 +5,47 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check API key availability
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    console.log('[PeteAI API] API Key status:', apiKey ? `Present (length: ${apiKey.length})` : 'Missing');
-    
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'OpenRouter API key not configured' },
-        { status: 500 }
-      );
-    }
-    
     const body = await request.json();
-    const { message } = body;
+    const { message, sessionId } = body;
 
-    if (!message) {
+    // Validate request
+    if (!message || typeof message !== 'string') {
+      console.error('[PeteAI API] Invalid message in request');
       return NextResponse.json(
-        { error: 'Missing message in request body' },
+        { error: 'Invalid request: message is required' },
         { status: 400 }
       );
     }
 
-    const result = await sendMessageToPeteAIJson({ message });
+    console.log(`[PeteAI API] Request received (session: ${sessionId || 'none'})`);
+
+    // Call action with session support
+    const result = await sendMessageToPeteAIJson({
+      message,
+      sessionId: sessionId || `api-${Date.now()}`
+    });
 
     if (!result.success) {
+      // Log error details on server
+      console.error('[PeteAI API] Action failed:', result.error);
+
       return NextResponse.json(
         { error: result.error },
         { status: 500 }
       );
     }
 
-    // Debug: Log the reply content to see if backticks are present
-    console.log('[PeteAI API] Reply preview (first 300 chars):', result.data?.reply?.substring(0, 300));
-    console.log('[PeteAI API] Contains ```mermaid?', result.data?.reply?.includes('```mermaid'));
+    // Log success
+    console.log(`[PeteAI API] Success - ${result.data?.reply?.length || 0} chars`);
+    console.log(`[PeteAI API] Contains Mermaid: ${result.data?.reply?.includes('```mermaid') || false}`);
 
-    // Return data directly - reply should be a string for .match() to work
+    // Return data directly
     return NextResponse.json(result.data);
 
   } catch (error) {
-    console.error('[PeteAI API] Error:', error);
+    console.error('[PeteAI API] Unexpected error:', error);
     return NextResponse.json(
-      { error: 'AI agent error' },
+      { error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }
     );
   }

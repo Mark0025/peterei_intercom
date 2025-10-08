@@ -10,6 +10,7 @@ interface Message {
 }
 
 export default function PeteAIPage() {
+  const [sessionId] = useState(() => `page-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -51,39 +52,39 @@ export default function PeteAIPage() {
     setMessages(prev => [...prev, thinkingMessage]);
 
     try {
-      // Use the original API endpoint for compatibility
       const response = await fetch('/api/PeteAI', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, sessionId }),
       });
 
       const data = await response.json();
-      
-      // Remove thinking message and add real response
-      setMessages(prev => {
-        const newMessages = prev.slice(0, -1); // Remove thinking message
-        const aiMessage: Message = {
+
+      if (!response.ok || data.error) {
+        console.error('[PeteAI Page] Error:', { error: data.error, sessionId });
+        setMessages(prev => [...prev.slice(0, -1), {
           role: 'ai',
-          content: data.reply || data.error || 'No response received',
+          content: 'Sorry, I\'m having trouble right now. Please try again.',
           timestamp: new Date()
-        };
-        return [...newMessages, aiMessage];
-      });
+        }]);
+        return;
+      }
+
+      setMessages(prev => [...prev.slice(0, -1), {
+        role: 'ai',
+        content: data.reply || 'No response received',
+        timestamp: new Date()
+      }]);
 
     } catch (error) {
-      // Remove thinking message and add error
-      setMessages(prev => {
-        const newMessages = prev.slice(0, -1);
-        const errorMessage: Message = {
-          role: 'ai',
-          content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          timestamp: new Date()
-        };
-        return [...newMessages, errorMessage];
-      });
+      console.error('[PeteAI Page] Network error:', { error, sessionId });
+      setMessages(prev => [...prev.slice(0, -1), {
+        role: 'ai',
+        content: 'Connection error. Please try again.',
+        timestamp: new Date()
+      }]);
     } finally {
       setIsLoading(false);
     }

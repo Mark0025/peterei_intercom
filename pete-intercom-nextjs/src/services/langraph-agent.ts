@@ -1,5 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { StateGraph, END, START } from "@langchain/langgraph";
+import { StateGraph, END, START, MemorySaver } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from "@langchain/core/messages";
 import { ToolMessage } from "@langchain/core/messages";
 import { tool } from "@langchain/core/tools";
@@ -1027,35 +1027,48 @@ workflow.addConditionalEdges("agent", shouldContinue, {
 });
 workflow.addEdge("tools", "agent");
 
-// Compile the graph
-const app = workflow.compile();
+// Create checkpointer for conversation history (in-memory)
+const checkpointer = new MemorySaver();
 
-// Main function to process messages
-export async function processWithLangGraph(message: string): Promise<string> {
+// Compile the graph with checkpointer for session management
+const app = workflow.compile({ checkpointer });
+
+// Main function to process messages with session support
+export async function processWithLangGraph(
+  message: string,
+  threadId: string = `default-${Date.now()}`
+): Promise<string> {
   try {
-    logInfo(`[LANGGRAPH] Processing message: ${message.substring(0, 100)}...`);
-    
+    logInfo(`[LANGGRAPH] Processing message (thread: ${threadId}): ${message.substring(0, 100)}...`);
+
     // Check if we have access to OpenRouter API
     if (!process.env.OPENROUTER_API_KEY) {
       logError('[LANGGRAPH] No OpenRouter API key found, cannot use LangGraph');
       throw new Error('OpenRouter API key not configured');
     }
-    
-    const finalState = await app.invoke({
-      messages: [new HumanMessage({ content: message })],
-      next: ""
-    });
-    
+
+    // Invoke with thread ID for conversation history
+    const finalState = await app.invoke(
+      {
+        messages: [new HumanMessage({ content: message })],
+        next: ""
+      },
+      {
+        configurable: { thread_id: threadId }  // Enables conversation history!
+      }
+    );
+
     const lastMessage = finalState.messages[finalState.messages.length - 1];
-    const response = lastMessage && lastMessage._getType() === 'ai' 
-      ? (lastMessage as AIMessage).content as string 
+    const response = lastMessage && lastMessage._getType() === 'ai'
+      ? (lastMessage as AIMessage).content as string
       : "I'm sorry, I couldn't process that request.";
-    
-    logInfo(`[LANGGRAPH] Response generated: ${response.substring(0, 100)}...`);
+
+    logInfo(`[LANGGRAPH] Response generated (${response.length} chars, thread: ${threadId})`);
+    logInfo(`[LANGGRAPH] Total messages in thread: ${finalState.messages.length}`);
     return response;
-    
+
   } catch (error) {
-    logError(`[LANGGRAPH] Error processing message: ${error instanceof Error ? error.message : error}`);
-    throw error; // Re-throw so the fallback can handle it
+    logError(`[LANGGRAPH] Error processing message (thread: ${threadId}): ${error instanceof Error ? error.message : error}`);
+    throw error; // Re-throw for proper error handling upstream
   }
 }
