@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MarkdownRenderer } from '@/components/docs/MarkdownRenderer';
@@ -22,19 +24,35 @@ interface DocContent {
   modified: string;
 }
 
-export default function DocsPage() {
+interface PageProps {
+  params: Promise<{ slug?: string[] }>;
+}
+
+export default function DocsPage({ params }: PageProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [files, setFiles] = useState<DocFile[]>([]);
-  const [currentPath, setCurrentPath] = useState<string>('');
   const [selectedFile, setSelectedFile] = useState<DocContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentSlug, setCurrentSlug] = useState<string[]>([]);
 
-  // Load files on mount and when path changes
+  // Unwrap params promise (Next.js 15+)
   useEffect(() => {
-    loadFiles(currentPath);
+    params.then(resolvedParams => {
+      setCurrentSlug(resolvedParams.slug || []);
+    });
+  }, [params]);
+
+  // Compute current path from slug
+  const currentPath = currentSlug.join('/');
+
+  // Load files when slug changes
+  useEffect(() => {
+    loadContent(currentPath);
   }, [currentPath]);
 
-  const loadFiles = async (path: string) => {
+  const loadContent = async (path: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -44,109 +62,62 @@ export default function DocsPage() {
 
       if (data.success) {
         if (data.files) {
+          // Directory listing
           setFiles(data.files);
           setSelectedFile(null);
         } else if (data.file) {
-          // This shouldn't happen with directory listings, but handle it
+          // Single file
           setSelectedFile(data.file);
+          setFiles([]);
         }
       } else {
-        setError(data.error || 'Failed to load files');
+        setError(data.error || 'Failed to load content');
       }
     } catch (err) {
-      setError('Error loading files: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      setError('Error loading content: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadFile = async (path: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/docs?path=${encodeURIComponent(path)}`);
-      const data = await response.json();
-
-      if (data.success && data.file) {
-        setSelectedFile(data.file);
-      } else {
-        setError(data.error || 'Failed to load file');
-      }
-    } catch (err) {
-      setError('Error loading file: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileClick = (file: DocFile) => {
-    if (file.type === 'directory') {
-      setCurrentPath(file.path);
-    } else {
-      loadFile(file.path);
-    }
-  };
-
-  const handleBackClick = () => {
-    if (selectedFile) {
-      // Close file view, go back to directory listing
-      setSelectedFile(null);
-    } else if (currentPath) {
-      // Go to parent directory
-      const parentPath = currentPath.split('/').slice(0, -1).join('/');
-      setCurrentPath(parentPath);
     }
   };
 
   const handleLinkClick = (docPath: string) => {
-    console.log('[DocsPage] Link clicked:', { docPath, currentFile: selectedFile?.path });
+    console.log('[DocsPage] Link clicked:', { docPath, currentPath });
 
-    // Resolve relative paths based on current file location
+    // Resolve relative paths based on current location
     let resolvedPath = docPath;
 
-    // If we have a currently selected file, resolve relative to its directory
-    if (selectedFile) {
-      // Get the directory of the current file
-      const currentDir = selectedFile.path.split('/').slice(0, -1).join('/');
+    if (docPath.startsWith('./') || docPath.startsWith('../')) {
+      // Explicit relative path
+      const pathParts = currentPath ? currentPath.split('/') : [];
+      const docParts = docPath.split('/');
 
-      if (docPath.startsWith('./') || docPath.startsWith('../')) {
-        // Explicit relative path
-        const pathParts = currentDir ? currentDir.split('/') : [];
-        const docParts = docPath.split('/');
-
-        for (const part of docParts) {
-          if (part === '..') {
-            pathParts.pop();
-          } else if (part !== '.') {
-            pathParts.push(part);
-          }
+      for (const part of docParts) {
+        if (part === '..') {
+          pathParts.pop();
+        } else if (part !== '.') {
+          pathParts.push(part);
         }
-
-        resolvedPath = pathParts.join('/');
-        console.log('[DocsPage] Resolved relative path:', { from: docPath, to: resolvedPath, currentDir });
-      } else if (!docPath.startsWith('/')) {
-        // Implicit relative path (no ./ or ../ prefix) - resolve relative to current file's directory
-        resolvedPath = currentDir ? `${currentDir}/${docPath}` : docPath;
-        console.log('[DocsPage] Resolved implicit relative path:', { from: docPath, to: resolvedPath, currentDir });
       }
-    } else {
-      console.log('[DocsPage] No current file, using path as-is:', resolvedPath);
+
+      resolvedPath = pathParts.join('/');
+    } else if (!docPath.startsWith('/') && currentPath) {
+      // Implicit relative path - resolve relative to current directory
+      const currentDir = selectedFile
+        ? currentPath.split('/').slice(0, -1).join('/')
+        : currentPath;
+      resolvedPath = currentDir ? `${currentDir}/${docPath}` : docPath;
     }
 
-    // Load the linked file
-    console.log('[DocsPage] Loading file:', resolvedPath);
-    loadFile(resolvedPath);
+    console.log('[DocsPage] Navigating to:', resolvedPath);
+
+    // Use Next.js router for navigation
+    router.push(`/admin/docs/${resolvedPath}`);
   };
 
   const getBreadcrumbs = () => {
-    if (!currentPath && !selectedFile) return ['DEV_MAN'];
-
     const parts = ['DEV_MAN'];
-    if (currentPath) {
-      parts.push(...currentPath.split('/'));
-    }
-    if (selectedFile) {
-      parts.push(selectedFile.name);
+    if (currentSlug.length > 0) {
+      parts.push(...currentSlug);
     }
     return parts;
   };
@@ -185,16 +156,11 @@ export default function DocsPage() {
 
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setCurrentPath('');
-            setSelectedFile(null);
-          }}
-        >
-          <Home className="h-4 w-4" />
-        </Button>
+        <Link href="/admin/docs">
+          <Button variant="ghost" size="sm">
+            <Home className="h-4 w-4" />
+          </Button>
+        </Link>
         {getBreadcrumbs().map((part, index) => (
           <div key={index} className="flex items-center gap-2">
             {index > 0 && <ChevronRight className="h-4 w-4" />}
@@ -206,8 +172,14 @@ export default function DocsPage() {
       </div>
 
       {/* Back Button */}
-      {(currentPath || selectedFile) && (
-        <Button variant="outline" onClick={handleBackClick}>
+      {currentSlug.length > 0 && (
+        <Button
+          variant="outline"
+          onClick={() => {
+            const parentPath = currentSlug.slice(0, -1).join('/');
+            router.push(parentPath ? `/admin/docs/${parentPath}` : '/admin/docs');
+          }}
+        >
           ← Back
         </Button>
       )}
@@ -257,7 +229,7 @@ export default function DocsPage() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {currentPath ? currentPath.split('/').pop() : 'Documentation Files'}
+              {currentSlug.length > 0 ? currentSlug[currentSlug.length - 1] : 'Documentation Files'}
             </CardTitle>
             <CardDescription>
               {files.filter(f => f.type === 'directory').length} folders,
@@ -267,10 +239,10 @@ export default function DocsPage() {
           <CardContent>
             <div className="space-y-2">
               {files.map((file) => (
-                <button
+                <Link
                   key={file.path}
-                  onClick={() => handleFileClick(file)}
-                  className="w-full flex items-center justify-between p-3 hover:bg-muted rounded-lg transition-colors text-left"
+                  href={`/admin/docs/${file.path}`}
+                  className="w-full flex items-center justify-between p-3 hover:bg-muted rounded-lg transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     {file.type === 'directory' ? (
@@ -290,7 +262,7 @@ export default function DocsPage() {
                   <div className="text-sm text-muted-foreground">
                     {formatDate(file.modified)}
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           </CardContent>
