@@ -9,12 +9,16 @@ import { getRandomLoadingMessage, getSequentialLoadingMessage } from '@/utils/lo
 
 // Simple markdown parser for chat messages
 function parseMarkdown(text: string): string {
+    // First, preserve double line breaks as paragraph markers
+    text = text.replace(/\n\n/g, '___PARAGRAPH___');
+
     // Headers
     text = text.replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-3 mb-2">$1</h3>');
     text = text.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>');
     text = text.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-4 mb-2">$1</h1>');
 
-    // Bold
+    // Bold - handle Step patterns specially with line breaks
+    text = text.replace(/\*\*(Step \d+:)\*\*/g, '<br/><strong class="font-bold block mt-3">$1</strong>');
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
     text = text.replace(/\_\_(.*?)\_\_/g, '<strong class="font-bold">$1</strong>');
 
@@ -28,9 +32,14 @@ function parseMarkdown(text: string): string {
     // Inline code
     text = text.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">$1</code>');
 
-    // Line breaks
-    text = text.replace(/\n\n/g, '<br/><br/>');
+    // Replace paragraph markers
+    text = text.replace(/___PARAGRAPH___/g, '<br/><br/>');
+
+    // Single line breaks
     text = text.replace(/\n/g, '<br/>');
+
+    // Clean up leading line breaks
+    text = text.replace(/^(<br\/>)+/, '');
 
     return text;
 }
