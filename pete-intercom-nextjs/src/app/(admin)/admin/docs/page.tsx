@@ -98,6 +98,33 @@ export default function DocsPage() {
     }
   };
 
+  const handleLinkClick = (docPath: string) => {
+    // Resolve relative paths based on current file location
+    let resolvedPath = docPath;
+
+    if (selectedFile && (docPath.startsWith('./') || docPath.startsWith('../'))) {
+      // Get the directory of the current file
+      const currentDir = selectedFile.path.split('/').slice(0, -1).join('/');
+
+      // Resolve relative path
+      const pathParts = currentDir ? currentDir.split('/') : [];
+      const docParts = docPath.split('/');
+
+      for (const part of docParts) {
+        if (part === '..') {
+          pathParts.pop();
+        } else if (part !== '.') {
+          pathParts.push(part);
+        }
+      }
+
+      resolvedPath = pathParts.join('/');
+    }
+
+    // Load the linked file
+    loadFile(resolvedPath);
+  };
+
   const getBreadcrumbs = () => {
     if (!currentPath && !selectedFile) return ['DEV_MAN'];
 
@@ -203,7 +230,11 @@ export default function DocsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MarkdownRenderer content={selectedFile.content} className="max-w-none" />
+            <MarkdownRenderer
+              content={selectedFile.content}
+              className="max-w-none"
+              onLinkClick={handleLinkClick}
+            />
           </CardContent>
         </Card>
       )}

@@ -6,9 +6,10 @@ import mermaid from 'mermaid';
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  onLinkClick?: (path: string) => void;
 }
 
-export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = '', onLinkClick }: MarkdownRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,6 +27,26 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
       mermaid.contentLoaded();
     }
   }, [content]);
+
+  // Handle internal doc link clicks
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('internal-doc-link')) {
+        e.preventDefault();
+        const docPath = target.getAttribute('data-doc-path');
+        if (docPath && onLinkClick) {
+          onLinkClick(docPath);
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('click', handleClick);
+      return () => container.removeEventListener('click', handleClick);
+    }
+  }, [onLinkClick]);
 
   // Parse markdown and extract Mermaid diagrams
   const renderContent = () => {
@@ -160,6 +181,16 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           text-decoration: underline;
         }
 
+        .markdown-content .internal-doc-link {
+          color: #0066cc;
+          cursor: pointer;
+        }
+
+        .markdown-content .internal-doc-link:hover {
+          text-decoration: underline;
+          color: #0052a3;
+        }
+
         .markdown-content table {
           border-collapse: collapse;
           width: 100%;
@@ -243,8 +274,17 @@ function parseMarkdown(text: string): string {
   // Inline code
   text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
 
-  // Links
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  // Links - handle internal .md links differently from external links
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    // Check if it's an internal doc link (.md file)
+    if (url.endsWith('.md')) {
+      // Remove leading ./ if present and add data attribute for click handling
+      const cleanUrl = url.replace(/^\.\//, '');
+      return `<a href="#" class="internal-doc-link" data-doc-path="${cleanUrl}">${linkText}</a>`;
+    }
+    // External link - open in new tab
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+  });
 
   // Lists
   text = text.replace(/^\* (.*$)/gim, '<li>$1</li>');
