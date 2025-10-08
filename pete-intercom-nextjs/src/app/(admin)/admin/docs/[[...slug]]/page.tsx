@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,12 +49,8 @@ export default function DocsPage({ params }: PageProps) {
   // Compute current path from slug
   const currentPath = currentSlug.join('/');
 
-  // Load files when slug changes
-  useEffect(() => {
-    loadContent(currentPath);
-  }, [currentPath]);
-
-  const loadContent = async (path: string) => {
+  // Memoized load content function
+  const loadContent = useCallback(async (path: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -80,7 +76,12 @@ export default function DocsPage({ params }: PageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Load files when slug changes
+  useEffect(() => {
+    loadContent(currentPath);
+  }, [currentPath, loadContent]);
 
   const handleLinkClick = (docPath: string) => {
     console.log('[DocsPage] Link clicked:', { docPath, currentPath });
