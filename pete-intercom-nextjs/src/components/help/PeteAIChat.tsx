@@ -54,7 +54,18 @@ interface Message {
 
 export function PeteAIChat() {
     // Generate session ID once on mount for conversation history
-    const [sessionId, setSessionId] = useState(() => `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+    // Persists in localStorage to survive page reloads
+    const [sessionId, setSessionId] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('peteai-session-id');
+            if (stored) return stored;
+        }
+        const newId = `help-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('peteai-session-id', newId);
+        }
+        return newId;
+    });
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -150,6 +161,10 @@ export function PeteAIChat() {
         setSessionId(newSessionId);
         setMessages([]);
         setShowHistory(false);
+        // Update localStorage with new session
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('peteai-session-id', newSessionId);
+        }
         console.log(`[PeteAI] Started new session: ${newSessionId}`);
     };
 
