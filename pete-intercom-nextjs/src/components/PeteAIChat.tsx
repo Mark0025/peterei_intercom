@@ -74,7 +74,7 @@ export default function PeteAIChat({ contextHint }: PeteAIChatProps) {
         const newMessages = prev.slice(0, -1); // Remove thinking message
         const aiMessage: Message = {
           role: 'ai',
-          content: data.reply?.content || data.error || 'No response received',
+          content: data.reply || data.error || 'No response received',
           timestamp: new Date()
         };
         return [...newMessages, aiMessage];
