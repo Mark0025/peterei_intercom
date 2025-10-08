@@ -169,6 +169,114 @@ Located in `pete-intercom-nextjs/src/scripts/`, these bash scripts provide direc
 
 **Note:** These bash scripts are functional but will be converted to TypeScript server actions (Issues #6, #7)
 
+## AI Architecture
+
+Pete uses a **multi-agent LangGraph system** with three specialized AI agents working together to provide intelligent assistance across different domains.
+
+### Three Specialized Agents
+
+1. **LangGraph Agent (General Purpose)** 📚
+   - **File:** `pete-intercom-nextjs/src/services/langraph-agent.ts`
+   - **Purpose:** User-facing help & data queries
+   - **Features:** ✅ Conversation history, Help docs, Mermaid diagrams, Real-time Intercom data
+   - **Tools:** 15+ (contacts, companies, help docs, process maps)
+   - **Used in:** `/help`, `/peteai`, admin locations
+
+2. **Conversation Agent (Pattern Analysis)** 📊
+   - **File:** `pete-intercom-nextjs/src/services/conversation-agent.ts`
+   - **Purpose:** Admin conversation analytics
+   - **Features:** Pattern recognition, escalation analysis, success/failure patterns
+   - **Tools:** 8 (analysis, patterns, escalations, flow diagrams)
+   - **Used in:** `/admin/conversations/insights`
+
+3. **Onboarding Agent (Strategic Discovery)** 🚀
+   - **File:** `pete-intercom-nextjs/src/services/onboarding-agent.ts`
+   - **Purpose:** Questionnaire analysis & strategy
+   - **Features:** Pain points, breakthrough ideas, strategic recommendations
+   - **Tools:** 7 (discovery, recommendations, effort estimation)
+   - **Used in:** `/admin/onboarding-insights`
+
+### Key Features (as of 2025-10-08)
+
+**✅ Conversation History (NEW)**
+- LangGraph Agent supports multi-turn conversations
+- MemorySaver checkpointing with thread-based sessions
+- Follow-up questions maintain context
+- Session IDs: `help-{timestamp}-{random}`
+
+**🚀 Session Management**
+```typescript
+// Frontend generates session ID
+const [sessionId] = useState(() => `help-${Date.now()}-${random()}`);
+
+// Sent to API
+body: JSON.stringify({ message, sessionId })
+
+// Agent uses for threading
+await app.invoke(
+  { messages: [...] },
+  { configurable: { thread_id: sessionId } }
+);
+```
+
+**🎯 Smart Error Handling**
+- No silent fallbacks (removed cache fallback as of Issue #39)
+- Generic user messages on frontend
+- Detailed API/console logging for debugging
+- Full-stack error handling
+
+**🎨 Mermaid Diagrams**
+- Process maps with clickable navigation (LangGraph Agent)
+- Flow charts for resolution/escalation paths (Conversation Agent)
+- Chart data for dashboards (Onboarding Agent)
+
+### Integration Points
+
+**API Route:** `POST /api/PeteAI`
+- Routes to `sendMessageToPeteAIJson()` in `src/actions/peteai.ts`
+- Uses LangGraph Agent (general purpose)
+- Supports sessionId for conversation history
+
+**Frontend Components:**
+- `src/components/help/PeteAIChat.tsx` - Help center chat
+- `src/components/PeteAIChat.tsx` - General purpose chat
+- `src/app/peteai/page.tsx` - Standalone chat page
+- `src/components/conversations/ConversationInsightsChat.tsx` - Admin analytics
+
+### Configuration
+
+**Required Environment Variable:**
+```bash
+OPENROUTER_API_KEY=your_openrouter_key  # For all AI agents
+```
+
+**Model Configuration:**
+- Provider: OpenRouter (https://openrouter.ai)
+- Model: `openai/gpt-4o-mini`
+- Temperature: 0.7
+- Max Tokens: 4000
+
+### Documentation
+
+**Comprehensive AI architecture docs:**
+- **📁 Location:** `pete-intercom-nextjs/DEV_MAN/AI_Architecture/`
+- **⭐ Start Here:** [00-AI-ARCHITECTURE-OVERVIEW.md](pete-intercom-nextjs/DEV_MAN/AI_Architecture/00-AI-ARCHITECTURE-OVERVIEW.md)
+- **📖 Quick Reference:** [README.md](pete-intercom-nextjs/DEV_MAN/AI_Architecture/README.md)
+
+**Key Topics Covered:**
+- Agent comparison matrix
+- Core similarities & key differences
+- Detailed agent profiles
+- Architecture patterns
+- Session management
+- Integration points
+- Best practices
+
+**Recent Issues:**
+- [#39 - Conversation History Implementation](https://github.com/Mark0025/peterei_intercom/issues/39)
+- [#38 - Agent Fallback Debugging](https://github.com/Mark0025/peterei_intercom/issues/38)
+- [#37 - Response Parsing Fix](https://github.com/Mark0025/peterei_intercom/issues/37)
+
 ## Development Workflow
 
 ### Before Making Changes
