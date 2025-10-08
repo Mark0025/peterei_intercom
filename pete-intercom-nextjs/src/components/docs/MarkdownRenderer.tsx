@@ -280,13 +280,34 @@ function sanitizeMermaidCode(code: string): string {
 }
 
 /**
+ * Convert header text to URL-friendly ID
+ */
+function generateHeaderId(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')     // Replace spaces with hyphens
+    .replace(/-+/g, '-');     // Replace multiple hyphens with single hyphen
+}
+
+/**
  * Basic markdown parser (supports common syntax)
  */
 function parseMarkdown(text: string): string {
-  // Headers
-  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  // Headers with IDs for fragment linking
+  text = text.replace(/^### (.*$)/gim, (match, headerText) => {
+    const id = generateHeaderId(headerText);
+    return `<h3 id="${id}">${headerText}</h3>`;
+  });
+  text = text.replace(/^## (.*$)/gim, (match, headerText) => {
+    const id = generateHeaderId(headerText);
+    return `<h2 id="${id}">${headerText}</h2>`;
+  });
+  text = text.replace(/^# (.*$)/gim, (match, headerText) => {
+    const id = generateHeaderId(headerText);
+    return `<h1 id="${id}">${headerText}</h1>`;
+  });
 
   // Bold
   text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -306,6 +327,10 @@ function parseMarkdown(text: string): string {
 
   // Links - handle internal .md links differently from external links
   text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    // Fragment link (same-page anchor) - let it work natively
+    if (url.startsWith('#')) {
+      return `<a href="${url}">${linkText}</a>`;
+    }
     // Check if it's an internal doc link (.md file)
     if (url.endsWith('.md')) {
       // Remove leading ./ if present and add data attribute for click handling
