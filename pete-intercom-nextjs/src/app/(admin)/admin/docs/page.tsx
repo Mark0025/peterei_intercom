@@ -99,29 +99,42 @@ export default function DocsPage() {
   };
 
   const handleLinkClick = (docPath: string) => {
+    console.log('[DocsPage] Link clicked:', { docPath, currentFile: selectedFile?.path });
+
     // Resolve relative paths based on current file location
     let resolvedPath = docPath;
 
-    if (selectedFile && (docPath.startsWith('./') || docPath.startsWith('../'))) {
+    // If we have a currently selected file, resolve relative to its directory
+    if (selectedFile) {
       // Get the directory of the current file
       const currentDir = selectedFile.path.split('/').slice(0, -1).join('/');
 
-      // Resolve relative path
-      const pathParts = currentDir ? currentDir.split('/') : [];
-      const docParts = docPath.split('/');
+      if (docPath.startsWith('./') || docPath.startsWith('../')) {
+        // Explicit relative path
+        const pathParts = currentDir ? currentDir.split('/') : [];
+        const docParts = docPath.split('/');
 
-      for (const part of docParts) {
-        if (part === '..') {
-          pathParts.pop();
-        } else if (part !== '.') {
-          pathParts.push(part);
+        for (const part of docParts) {
+          if (part === '..') {
+            pathParts.pop();
+          } else if (part !== '.') {
+            pathParts.push(part);
+          }
         }
-      }
 
-      resolvedPath = pathParts.join('/');
+        resolvedPath = pathParts.join('/');
+        console.log('[DocsPage] Resolved relative path:', { from: docPath, to: resolvedPath, currentDir });
+      } else if (!docPath.startsWith('/')) {
+        // Implicit relative path (no ./ or ../ prefix) - resolve relative to current file's directory
+        resolvedPath = currentDir ? `${currentDir}/${docPath}` : docPath;
+        console.log('[DocsPage] Resolved implicit relative path:', { from: docPath, to: resolvedPath, currentDir });
+      }
+    } else {
+      console.log('[DocsPage] No current file, using path as-is:', resolvedPath);
     }
 
     // Load the linked file
+    console.log('[DocsPage] Loading file:', resolvedPath);
     loadFile(resolvedPath);
   };
 

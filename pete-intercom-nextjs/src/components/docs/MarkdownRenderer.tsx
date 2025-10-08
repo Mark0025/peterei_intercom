@@ -35,13 +35,20 @@ export function MarkdownRenderer({ content, className = '', onLinkClick }: Markd
   // Handle internal doc link clicks
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains('internal-doc-link')) {
-        e.preventDefault();
-        const docPath = target.getAttribute('data-doc-path');
-        if (docPath && onLinkClick) {
-          onLinkClick(docPath);
+      let target = e.target as HTMLElement;
+
+      // Traverse up to find the link element (in case user clicked on child element like <strong>)
+      while (target && target !== containerRef.current) {
+        if (target.classList && target.classList.contains('internal-doc-link')) {
+          e.preventDefault();
+          const docPath = target.getAttribute('data-doc-path');
+          if (docPath && onLinkClick) {
+            console.log('[MarkdownRenderer] Internal link clicked:', docPath);
+            onLinkClick(docPath);
+          }
+          return;
         }
+        target = target.parentElement as HTMLElement;
       }
     };
 
