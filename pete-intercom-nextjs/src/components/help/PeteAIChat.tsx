@@ -60,7 +60,7 @@ export function PeteAIChat() {
     const [inputValue, setInputValue] = useState('');
     const [loadingMessage, setLoadingMessage] = useState(getRandomLoadingMessage());
     const [loadingStartTime, setLoadingStartTime] = useState(Date.now());
-    const [showHistory, setShowHistory] = useState(false);
+    const [showHistory, setShowHistory] = useState(true); // Show history sidebar by default
     const chatLogRef = useRef<HTMLDivElement>(null);
 
     // Initialize Mermaid
