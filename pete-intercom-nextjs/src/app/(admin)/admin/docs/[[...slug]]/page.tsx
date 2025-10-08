@@ -38,11 +38,13 @@ export default function DocsPage({ params }: PageProps) {
   const [currentSlug, setCurrentSlug] = useState<string[]>([]);
 
   // Unwrap params promise (Next.js 15+)
+  // Use pathname as dependency to ensure it updates when route changes
   useEffect(() => {
     params.then(resolvedParams => {
+      console.log('[DocsPage] Params resolved:', resolvedParams);
       setCurrentSlug(resolvedParams.slug || []);
     });
-  }, [params]);
+  }, [params, pathname]);
 
   // Compute current path from slug
   const currentPath = currentSlug.join('/');
