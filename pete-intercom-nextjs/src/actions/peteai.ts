@@ -274,19 +274,26 @@ export async function sendMessageToPeteAIJson(
 
     // Try LangGraph first, fallback to cache-only response
     let reply: string;
-    
+
     if (process.env.OPENROUTER_API_KEY) {
+      logInfo('[PeteAI] OPENROUTER_API_KEY found, using LangGraph agent');
       try {
         // Use the intelligent LangGraph agent
         const { processWithLangGraph } = await import('@/services/langraph-agent');
         reply = await processWithLangGraph(message.trim());
+        logInfo(`[PeteAI] LangGraph success - response length: ${reply.length} chars`);
+        logInfo(`[PeteAI] Contains Mermaid? ${reply.includes('```mermaid')}`);
       } catch (error) {
-        logError(`LangGraph error: ${error instanceof Error ? error.message : error}`);
+        logError(`[PeteAI] LangGraph error, falling back to cache: ${error instanceof Error ? error.message : error}`);
+        if (error instanceof Error && error.stack) {
+          logError(`[PeteAI] Stack trace: ${error.stack}`);
+        }
         // Fallback to cache-only response
         reply = await getCacheOnlyResponse(message.trim());
+        logInfo('[PeteAI] Using cache-only fallback response');
       }
     } else {
-      logError('OPENROUTER_API_KEY is not configured, using cache-only mode');
+      logError('[PeteAI] OPENROUTER_API_KEY is not configured, using cache-only mode');
       // Use cache-only response
       reply = await getCacheOnlyResponse(message.trim());
     }
