@@ -6,49 +6,91 @@ FOR UPDATING PETE TRAINING
 
 ## Quick Start (Local Development)
 
+**IMPORTANT:** This project uses Next.js 15 and is located in `pete-intercom-nextjs/` directory.
+
 From the project root, run:
 
 ```sh
-./start.sh
+cd pete-intercom-nextjs && pnpm dev
 ```
 
 This will:
+- Start the Next.js development server on `http://localhost:4000`
+- Enable Turbopack for faster builds
+- Auto-reload on file changes
 
-- Install dependencies (if needed)
-- Start the Node.js app
-- Start ngrok and fetch the public URL
-- Write webhook endpoints to `webhook.txt`
-
-## Using pnpm (Optional)
-
-You can also run:
-
-```sh
-pnpm start
-```
-
-This will do the same as `./start.sh` (see below for setup).
+**CRITICAL:** Always use `pnpm`, never npm or yarn.
 
 ## Production/Cloud Deployment
 
-- The app is in the `intercomApp/` directory.
-- In production, set the `NODE_ENV=production` and provide a `PUBLIC_URL` if needed.
-- The app will skip ngrok and use the provided public URL for webhooks.
+The app is deployed on Render:
+- **Production URL:** https://pete-intercom.onrender.com
+- Set `NODE_ENV=production` in environment
+- Configure all required environment variables (see CLAUDE.md)
+- Admin routes protected by Clerk authentication (@peterei.com only)
 
 ## Project Structure
 
-- `intercomApp/` — Main app code, scripts, and dependencies
-- `start.sh` — Root-level launcher (runs everything from the right place)
-- `webhook.txt` — Auto-generated with the latest webhook endpoints
+```
+pete-intercom-app/
+├── pete-intercom-nextjs/          # Next.js 15 application (CURRENT)
+│   ├── src/
+│   │   ├── app/                  # App Router pages & API routes
+│   │   ├── components/           # React components
+│   │   ├── actions/              # Server Actions
+│   │   ├── services/             # Three AI agents
+│   │   ├── lib/                  # Utilities & integrations
+│   │   └── types/                # TypeScript definitions
+│   ├── DEV_MAN/                  # Documentation
+│   └── package.json              # Dependencies (pnpm)
+├── CLAUDE.md                     # Main documentation file
+└── README.md                     # This file
+```
+
+**Legacy directories removed:**
+- `intercomApp/` - Old Express app (migrated to Next.js, deleted)
+- `start.sh` - No longer needed
+
+## Key Features (October 2025)
+
+### Three AI Agents
+- **LangGraph Agent** - General help & data queries with conversation history
+- **Conversation Agent** - Support conversation pattern analysis
+- **Onboarding Agent** - Strategic questionnaire discovery
+
+### Persistent Conversation History
+- localStorage-based frontend persistence
+- Unique guest user tracking
+- Admin logging system with CRUD operations
+- History sidebar with session resume
+- Backend file-based logging
+
+### Admin Dashboard
+- 19+ protected admin routes (Clerk auth required)
+- AI conversation management at `/admin/settings/ai`
+- Logs viewer at `/admin/logs`
+- Onboarding insights and questionnaire tools
+- Contact/company management
+
+### Canvas Kit Integration
+- Intercom Messenger & Inbox support
+- Strict Canvas Kit component compliance
+- HMAC-SHA256 signature validation
+- Server Actions for all Canvas Kit logic
 
 ## Troubleshooting
 
-- Always run from the root directory using `./start.sh` or `pnpm start`.
-- If you see errors about missing scripts or files, check that you have the latest code and are in the correct directory.
+- Always use `pnpm dev` from `pete-intercom-nextjs/` directory
+- Check `.env` file has all required environment variables
+- Admin routes require @peterei.com Clerk authentication
+- For health checks: `cd pete-intercom-nextjs/src/scripts && ./endpoint_health_check.sh`
 
 ---
 
-For more details, see `intercomApp/README.md` and `intercomApp/plan.md`.
+For complete documentation, see:
+- **CLAUDE.md** - Main documentation file (comprehensive)
+- **pete-intercom-nextjs/DEV_MAN/** - Detailed technical docs
+- **pete-intercom-nextjs/DEV_MAN/AI_Architecture/** - AI agents documentation
 
 # peterei_intercom
 

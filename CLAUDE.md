@@ -56,8 +56,8 @@ This is an **Intercom Canvas Kit application** that provides structured onboardi
 - **Canvas Kit Server Actions** (`pete-intercom-nextjs/src/actions/canvas-kit.ts`) - React Server Actions for Canvas Kit logic
 - **Intercom API Integration** (`pete-intercom-nextjs/src/lib/intercom-api.ts`) - REST API wrapper with caching
 - **Onboarding System** (`pete-intercom-nextjs/src/services/onboarding-data.ts`) - Questionnaire service
-- **Admin Dashboard** (`pete-intercom-nextjs/src/app/admin/`) - Protected admin routes with analytics
-- **LangGraph AI Agent** (`pete-intercom-nextjs/src/lib/langgraph-agent.ts`) - AI-powered conversation analysis
+- **Admin Dashboard** (`pete-intercom-nextjs/src/app/(admin)/admin/`) - 19+ protected admin routes with analytics
+- **Three AI Agents** (`pete-intercom-nextjs/src/services/*-agent.ts`) - LangGraph, Conversation, and Onboarding agents
 
 ### Request Flow
 1. **Canvas Kit Initialize**: `POST /api/initialize` → Server Action returns onboarding card
@@ -66,13 +66,41 @@ This is an **Intercom Canvas Kit application** that provides structured onboardi
 4. **Response**: Canvas Kit JSON response with success/error feedback
 
 ### Key Endpoints
-- `POST /api/initialize` - Canvas Kit initialization endpoint (Next.js API route)
-- `POST /api/submit` - Canvas Kit form submission handler (Next.js API route)
+
+**Canvas Kit & Public:**
+- `POST /api/initialize` - Canvas Kit initialization endpoint
+- `POST /api/submit` - Canvas Kit form submission handler
 - `POST /api/intercom-webhook` - Webhook handler for Intercom events
-- `GET /popout` - Full onboarding form in browser window (Next.js page)
+- `GET /popout` - Full onboarding form in browser window
 - `POST /api/popout-submit` - Processes full form submissions
+- `GET /help` - Help center with PeteAI chat
+- `GET /peteai` - Standalone AI chat interface
+
+**AI & Data:**
+- `POST /api/PeteAI` - AI chat endpoint (LangGraph Agent with history)
 - `GET /api/intercom/*` - Intercom API proxy endpoints
-- `POST /api/PeteAI` - AI helper using OpenRouter Llama 3.2 3B (LangGraph)
+- `GET /api/docs` - Documentation browser API
+
+**Admin Routes** (Protected by Clerk - @peterei.com only):
+- `/admin` - Dashboard home
+- `/admin/settings` - General settings
+- `/admin/settings/ai` - AI conversation history management (NEW)
+- `/admin/settings/ui` - UI customization
+- `/admin/logs` - AI conversation logs viewer (NEW)
+- `/admin/conversations` - Intercom conversation browser
+- `/admin/onboarding-insights` - Onboarding analysis dashboard
+- `/admin/onboarding-questionnaire` - 7-levels deep questionnaire
+- `/admin/onboarding-responses` - Questionnaire responses viewer
+- `/admin/contacts` - Contact management
+- `/admin/companies` - Company management
+- `/admin/training` - Training topic management
+- `/admin/user-activity` - User activity tracker
+- `/admin/support` - Support interface
+- `/admin/submissions` - Form submissions
+- `/admin/health` - System health checks
+- `/admin/testapi` - API testing interface
+- `/admin/docs/[[...slug]]` - Internal documentation browser
+- `/admin/peteai` - Admin AI chat interface
 
 ## Canvas Kit Rules (CRITICAL)
 
@@ -369,13 +397,16 @@ Pete uses a **multi-agent LangGraph system** with three specialized AI agents wo
    - **Tools:** 7 (discovery, recommendations, effort estimation)
    - **Used in:** `/admin/onboarding-insights`
 
-### Key Features (as of 2025-10-08)
+### Key Features (as of 2025-10-09)
 
-**✅ Conversation History (NEW)**
-- LangGraph Agent supports multi-turn conversations
+**✅ Conversation History & Session Management (NEW)**
+- LangGraph Agent supports multi-turn conversations with persistent history
 - MemorySaver checkpointing with thread-based sessions
-- Follow-up questions maintain context
-- Session IDs: `help-{timestamp}-{random}`
+- localStorage-based session persistence across page reloads
+- Unique guest user IDs for conversation tracking
+- Admin logging system tracks all AI conversations
+- Full CRUD operations for conversation history management
+- Session IDs: `help-{timestamp}-{random}` or guest-specific IDs
 
 **🚀 Session Management**
 ```typescript
@@ -411,10 +442,74 @@ await app.invoke(
 - Supports sessionId for conversation history
 
 **Frontend Components:**
-- `src/components/help/PeteAIChat.tsx` - Help center chat
+- `src/components/help/PeteAIChat.tsx` - Help center chat with history
 - `src/components/PeteAIChat.tsx` - General purpose chat
 - `src/app/peteai/page.tsx` - Standalone chat page
 - `src/components/conversations/ConversationInsightsChat.tsx` - Admin analytics
+
+### Conversation History & Persistence (NEW - 2025-10-09)
+
+**Overview:**
+Pete now includes a complete conversation history system with localStorage persistence, guest user tracking, and admin management capabilities.
+
+**Key Commits:**
+- `90cc969` - localStorage persistence for conversation sessions
+- `324dde4` - Unique guest IDs for conversation tracking
+- `6cb7b29` - Admin logging system connected
+- `91efb20` - Conversation history sidebar shown by default
+- `6ca51f9` - PeteAI connected to persistent conversation history
+- `5be1dce` - Complete conversation history settings with CRUD
+
+**Frontend Features:**
+- **Persistent Sessions**: Conversations saved to localStorage, survive page reloads
+- **Guest User Tracking**: Each user gets unique guest ID (`guest-{timestamp}-{random}`)
+- **History Sidebar**: Displays past conversations with filtering and search
+- **Session Resume**: Click any past conversation to continue where you left off
+- **Multi-Agent Support**: Works with LangGraph Agent (other agents pending)
+
+**Admin Management:**
+- **Settings Page**: `/admin/settings/ai` - Full CRUD for conversation history
+- **Logs Viewer**: `/admin/logs` - View all AI conversation logs
+- **Analytics**: Track conversation patterns, user engagement, topics
+- **Export**: Download conversation data for analysis
+- **Privacy Controls**: Delete individual conversations or bulk cleanup
+
+**Technical Implementation:**
+```typescript
+// Frontend: Generate unique guest ID
+const guestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// Store in localStorage
+localStorage.setItem('pete_guest_id', guestId);
+localStorage.setItem('pete_conversations', JSON.stringify(conversations));
+
+// API: Pass sessionId with every message
+const response = await fetch('/api/PeteAI', {
+  method: 'POST',
+  body: JSON.stringify({
+    message,
+    sessionId: currentSessionId
+  })
+});
+
+// Agent: Use sessionId for threading
+await app.invoke(
+  { messages: [...] },
+  { configurable: { thread_id: sessionId } }
+);
+```
+
+**Storage Locations:**
+- **Frontend**: `localStorage` keys: `pete_guest_id`, `pete_conversations`
+- **Backend**: File-based JSON in `data/conversation-logs/` (via server actions)
+- **Agent State**: LangGraph MemorySaver checkpointing
+
+**Related Files:**
+- `src/actions/peteai.ts` - Session-aware AI actions
+- `src/app/(admin)/admin/settings/ai/page.tsx` - Admin CRUD interface
+- `src/app/(admin)/admin/logs/page.tsx` - Logs viewer
+- `src/components/help/PeteAIChat.tsx` - Chat component with history
+- `src/services/langraph-agent.ts` - Agent with MemorySaver
 
 ### Configuration
 
