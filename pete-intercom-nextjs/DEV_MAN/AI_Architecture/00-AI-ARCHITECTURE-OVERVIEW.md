@@ -1,7 +1,7 @@
 # AI Architecture Overview - Pete Intercom App
 
-**Last Updated:** 2025-10-08
-**Status:** ✅ Production Active (with conversation history)
+**Last Updated:** 2025-10-09
+**Status:** ✅ Production Active (with persistent conversation history)
 
 ---
 
@@ -9,7 +9,12 @@
 
 Pete uses a multi-agent LangGraph architecture with **three specialized AI agents** working together to provide intelligent assistance across different domains. All agents share common infrastructure (LangGraph, OpenRouter, session management) but are optimized for specific use cases.
 
-**Key Achievement:** As of 2025-10-08, all agents support **conversation history** via LangGraph MemorySaver checkpointing.
+**Key Achievements (October 2025):**
+- ✅ **LangGraph Agent**: MemorySaver checkpointing for multi-turn conversations
+- ✅ **localStorage Persistence**: Conversation history survives page reloads (commits 90cc969, 6ca51f9)
+- ✅ **Guest User Tracking**: Unique IDs for conversation identity (commit 324dde4)
+- ✅ **Admin Logging System**: All AI conversations tracked and manageable (commit 6cb7b29, 5be1dce)
+- ✅ **History Sidebar**: Visual conversation history with session resume (commit 91efb20)
 
 ---
 
@@ -38,8 +43,10 @@ Pete uses a multi-agent LangGraph architecture with **three specialized AI agent
 | **Tool Count** | 15+ tools | 8 tools | 7 tools |
 | **Data Source** | Intercom API + Help Docs | Intercom Conversations | Questionnaire + Conversations |
 | **Conversation History** | ✅ Yes (MemorySaver) | ❌ No (stateless) | ❌ No (stateless) |
+| **Persistent Storage** | ✅ localStorage + logging | ✅ Logging only | ✅ Logging only |
+| **Guest User Tracking** | ✅ Yes (unique IDs) | ✅ Yes | ✅ Yes |
 | **Mermaid Diagrams** | ✅ Yes (process maps) | ✅ Yes (flow charts) | ⚠️ Limited (chart data) |
-| **Session Support** | ✅ threadId tracking | ❌ Stateless per request | ⚠️ sessionId but no history |
+| **Session Support** | ✅ threadId + localStorage | ❌ Stateless per request | ⚠️ sessionId but no history |
 | **Real-time Data** | ✅ Live Intercom API | ✅ Cached conversations | ✅ Cached + live |
 | **Frontend Integration** | Help center + multiple | Admin conversation insights | Admin onboarding insights |
 
@@ -452,6 +459,118 @@ await agentApp.invoke({
 
 ---
 
+## Persistent Storage & Logging (NEW - October 2025)
+
+### Overview
+
+Pete now includes a comprehensive conversation persistence system that works across all three agents, with localStorage for frontend persistence and file-based backend logging.
+
+### Frontend Persistence (All Agents)
+
+**Key Commits:**
+- `90cc969` - localStorage persistence for conversation sessions
+- `324dde4` - Unique guest IDs instead of generic user IDs
+- `91efb20` - Conversation history sidebar shown by default
+
+**Implementation:**
+```typescript
+// Generate unique guest ID (once per user)
+const guestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+localStorage.setItem('pete_guest_id', guestId);
+
+// Save conversations to localStorage
+const conversations = [
+  {
+    id: sessionId,
+    guestId: guestId,
+    messages: [...],
+    timestamp: Date.now(),
+    agent: 'langraph' // or 'conversation' or 'onboarding'
+  }
+];
+localStorage.setItem('pete_conversations', JSON.stringify(conversations));
+```
+
+**Features:**
+- ✅ Survive page reloads
+- ✅ Per-user conversation identity
+- ✅ History sidebar with search/filtering
+- ✅ Session resume (click to continue)
+- ✅ Works across all admin pages
+
+### Backend Logging (All Agents)
+
+**Key Commits:**
+- `6cb7b29` - Admin logging system connected
+- `5be1dce` - Complete conversation history settings with full CRUD
+
+**Storage Location:**
+```
+pete-intercom-nextjs/data/conversation-logs/
+├── langraph/
+│   ├── 2025-10-09-session-123.json
+│   └── 2025-10-09-session-456.json
+├── conversation/
+│   └── 2025-10-09-session-789.json
+└── onboarding/
+    └── 2025-10-09-session-abc.json
+```
+
+**Log Format:**
+```json
+{
+  "sessionId": "help-1728456789-xyz",
+  "guestId": "guest-1728456789-abc",
+  "agent": "langraph",
+  "messages": [
+    { "role": "user", "content": "How do I upload?", "timestamp": "..." },
+    { "role": "assistant", "content": "...", "timestamp": "..." }
+  ],
+  "metadata": {
+    "startTime": "2025-10-09T10:30:00Z",
+    "endTime": "2025-10-09T10:35:00Z",
+    "messageCount": 5,
+    "toolsUsed": ["search_contacts", "fetch_help_doc"]
+  }
+}
+```
+
+### Admin Management Interface
+
+**Settings Page:** `/admin/settings/ai`
+- View all conversation logs across all agents
+- Filter by agent, date range, guest ID
+- Delete individual conversations
+- Bulk cleanup operations
+- Export conversation data (JSON/CSV)
+
+**Logs Viewer:** `/admin/logs`
+- Real-time log streaming
+- Search and filter capabilities
+- View full conversation threads
+- Analytics: message counts, tool usage, response times
+
+**Related Files:**
+- `src/app/(admin)/admin/settings/ai/page.tsx` - Settings UI
+- `src/app/(admin)/admin/logs/page.tsx` - Logs viewer
+- `src/actions/conversation-logs.ts` - Server actions for CRUD
+- `src/lib/conversation-storage.ts` - File-based storage utilities
+
+### Privacy & Compliance
+
+**Data Retention:**
+- Default: 90 days
+- Configurable via admin settings
+- Auto-cleanup scheduled tasks
+
+**User Privacy:**
+- Guest IDs are anonymous
+- No PII stored in localStorage
+- Admin-only access to backend logs
+- GDPR-compliant deletion
+
+---
+
 ## Integration Points
 
 ### 1. API Routes
@@ -654,5 +773,5 @@ For AI architecture questions:
 
 ---
 
-**Last Updated:** 2025-10-08
-**Next Review:** 2025-11-08
+**Last Updated:** 2025-10-09
+**Next Review:** 2025-11-09

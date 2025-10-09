@@ -1,6 +1,6 @@
 # AI Architecture Documentation
 
-**Last Updated:** 2025-10-08
+**Last Updated:** 2025-10-09
 
 This folder contains comprehensive documentation for Pete's multi-agent LangGraph AI system.
 
@@ -52,11 +52,23 @@ This folder contains comprehensive documentation for Pete's multi-agent LangGrap
 
 ## 📊 Key Features
 
-### ✅ Conversation History (NEW - 2025-10-08)
-- LangGraph Agent supports multi-turn conversations
-- MemorySaver checkpointing
+### ✅ Conversation History & Persistence (NEW - Oct 2025)
+
+**LangGraph MemorySaver (Agent-level):**
+- Multi-turn conversation support
 - Thread-based session management
 - Follow-up questions maintain context
+
+**localStorage Persistence (Frontend):**
+- Conversation history survives page reloads (commit 90cc969)
+- Unique guest user IDs for identity (commit 324dde4)
+- History sidebar with session resume (commit 91efb20)
+
+**Admin Logging System (Backend):**
+- All AI conversations tracked (commit 6cb7b29)
+- Full CRUD operations for conversation management (commit 5be1dce)
+- File-based JSON logging in `data/conversation-logs/`
+- Admin interface at `/admin/settings/ai` and `/admin/logs`
 
 ### 🎯 Specialized Tools
 - **15+ tools** in LangGraph Agent (help docs, contacts, companies)
@@ -189,6 +201,6 @@ See "Best Practices" section in 00-AI-ARCHITECTURE-OVERVIEW.md
 
 ---
 
-**Status:** ✅ Production Active
-**Last Review:** 2025-10-08
-**Next Review:** 2025-11-08
+**Status:** ✅ Production Active (with persistent conversation history)
+**Last Review:** 2025-10-09
+**Next Review:** 2025-11-09

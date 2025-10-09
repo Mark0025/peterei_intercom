@@ -123,6 +123,61 @@ async function fetchFromIntercom(url: string): Promise<Record<string, unknown>> 
   return await response.json();
 }
 
+// Fetch a single full conversation with all conversation_parts
+async function fetchFullConversation(conversationId: string): Promise<IntercomConversation> {
+  try {
+    const url = `${INTERCOM_API_BASE}/conversations/${conversationId}`;
+    const data = await fetchFromIntercom(url);
+    return data as IntercomConversation;
+  } catch (error) {
+    logError(`[SMART_CACHE] Failed to fetch full conversation ${conversationId}: ${error instanceof Error ? error.message : error}`, 'cache.log');
+    throw error;
+  }
+}
+
+// Fetch multiple conversations with rate limiting
+async function fetchConversationsInBatches(
+  conversationIds: string[],
+  batchSize: number = 50,
+  delayMs: number = 6000 // 50 requests per 6 seconds = 500/min
+): Promise<IntercomConversation[]> {
+  const results: IntercomConversation[] = [];
+  const total = conversationIds.length;
+
+  logInfo(`[SMART_CACHE] Fetching ${total} full conversations in batches of ${batchSize}...`, 'cache.log');
+
+  for (let i = 0; i < conversationIds.length; i += batchSize) {
+    const batch = conversationIds.slice(i, i + batchSize);
+    const batchNum = Math.floor(i / batchSize) + 1;
+    const totalBatches = Math.ceil(conversationIds.length / batchSize);
+
+    logInfo(`[SMART_CACHE] Processing batch ${batchNum}/${totalBatches} (${batch.length} conversations)`, 'cache.log');
+
+    try {
+      // Fetch all conversations in this batch in parallel
+      const batchResults = await Promise.all(
+        batch.map(id => fetchFullConversation(id))
+      );
+
+      results.push(...batchResults);
+
+      logInfo(`[SMART_CACHE] Batch ${batchNum}/${totalBatches} complete. Total fetched: ${results.length}/${total}`, 'cache.log');
+
+      // Rate limiting: wait before next batch (except for last batch)
+      if (i + batchSize < conversationIds.length) {
+        logDebug(`[SMART_CACHE] Rate limiting: waiting ${delayMs}ms before next batch...`, 'cache.log');
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    } catch (error) {
+      logError(`[SMART_CACHE] Error in batch ${batchNum}: ${error instanceof Error ? error.message : error}`, 'cache.log');
+      // Continue with next batch even if this one fails
+    }
+  }
+
+  logInfo(`[SMART_CACHE] Completed fetching ${results.length}/${total} full conversations`, 'cache.log');
+  return results;
+}
+
 interface ActivityCounts {
   contacts: number;
   companies: number;
@@ -262,36 +317,44 @@ async function performIncrementalUpdate(activityCounts: ActivityCounts) {
 async function performFullRefresh() {
   try {
     logInfo('[SMART_CACHE] Performing full refresh...', 'cache.log');
-    
-    const [contacts, companies, admins, conversations] = await Promise.all([
+
+    // Step 1: Fetch basic lists (contacts, companies, admins, conversation list)
+    const [contacts, companies, admins, conversationList] = await Promise.all([
       getAllFromIntercom('/contacts', ['contacts', 'data']),
       getAllFromIntercom('/companies', ['companies', 'data']),
       getAllFromIntercom('/admins', ['admins', 'data']),
       getAllFromIntercom('/conversations', ['conversations', 'data'])
     ]);
 
+    logInfo(`[SMART_CACHE] Basic data fetched. Now fetching FULL conversation details for ${conversationList.length} conversations...`, 'cache.log');
+
+    // Step 2: Fetch full conversation details with all message history
+    const conversationIds = conversationList.map(c => c.id);
+    const fullConversations = await fetchConversationsInBatches(conversationIds);
+
+    // Update cache with full data
     cache.contacts = contacts;
     cache.companies = companies;
     cache.admins = admins;
-    cache.conversations = conversations;
+    cache.conversations = fullConversations; // Now includes conversation_parts!
     cache.lastRefreshed = new Date();
-    
+
     // Update metadata
     cache.metadata.lastFullRefresh = new Date().toISOString();
     cache.metadata.lastActivity = {
       contacts: contacts.length,
       companies: companies.length,
-      conversations: conversations.length
+      conversations: fullConversations.length
     };
     cache.metadata.cacheCounts = {
       contacts: contacts.length,
       companies: companies.length,
       admins: admins.length,
-      conversations: conversations.length
+      conversations: fullConversations.length
     };
 
-    logInfo(`[SMART_CACHE] Full refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}`, 'cache.log');
-    
+    logInfo(`[SMART_CACHE] Full refresh complete with full conversation data. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${fullConversations.length}`, 'cache.log');
+
     await saveCache();
   } catch (error) {
     logError(`[SMART_CACHE] Error in full refresh: ${error instanceof Error ? error.message : error}`, 'cache.log');
