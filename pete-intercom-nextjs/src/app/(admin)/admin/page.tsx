@@ -35,6 +35,15 @@ const adminTools = [
     ]
   },
   {
+    title: '📊 Help Desk Assessment',
+    desc: 'Analyze Intercom Help Center structure and compare to industry benchmarks',
+    href: '/admin/help-desk-assessment',
+    links: [
+      { label: '📊 Run Assessment', href: '/admin/help-desk-assessment' },
+      { label: '📖 Planning Docs', href: '/admin/docs/HelpDeskPlan' }
+    ]
+  },
+  {
     title: '📞 Pete-Vapi',
     desc: 'Voice AI system with Next.js frontend & Python Docker backend',
     href: 'https://peterental-nextjs.vercel.app/',
