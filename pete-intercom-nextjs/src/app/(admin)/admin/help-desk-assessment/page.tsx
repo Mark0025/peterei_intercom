@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getHelpDeskAssessment } from '@/actions/help-desk-analysis';
 import type { HelpDeskAssessment } from '@/types/help-desk-analysis';
 import { RESIMPLI_BENCHMARK } from '@/types/help-desk-analysis';
+import competitorData from '@/data/competitor-benchmark.json';
 
 export default function HelpDeskAssessmentPage() {
   const [assessment, setAssessment] = useState<HelpDeskAssessment | null>(null);
@@ -205,6 +206,177 @@ export default function HelpDeskAssessmentPage() {
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Comparison: REsimpli vs Pete */}
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">📊 Detailed Comparison: REsimpli vs Pete</h2>
+
+            {/* Organization Strategy */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="border-2 border-green-200 rounded-lg p-6 bg-green-50">
+                <h3 className="text-lg font-bold text-green-700 mb-3">✅ REsimpli Strategy</h3>
+                <p className="text-gray-700 mb-4 font-medium">{competitorData.resimpli.organizationStrategy}</p>
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-gray-800">Organizing Principles:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    {competitorData.resimpli.organizingPrinciples.map((principle, i) => (
+                      <li key={i} className="flex items-start">
+                        <span className="text-green-600 mr-2">•</span>
+                        <span>{principle}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="border-2 border-red-200 rounded-lg p-6 bg-red-50">
+                <h3 className="text-lg font-bold text-red-700 mb-3">❌ Pete Current State</h3>
+                <p className="text-gray-700 mb-4 font-medium">Unfocused organization with massive dumping ground</p>
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-gray-800">Critical Issues:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    {competitorData.pete_original_baseline.criticalIssues.slice(0, 6).map((issue, i) => (
+                      <li key={i} className="flex items-start">
+                        <span className="text-red-600 mr-2">⚠️</span>
+                        <span>{issue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Process Flow Comparison */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">🔄 User Journey: What Do Users Do First?</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* REsimpli Flow */}
+                <div className="border rounded-lg p-6">
+                  <h4 className="font-bold text-green-700 mb-4">REsimpli User Journey</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-3">1</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Getting Started (17 articles)</div>
+                        <div className="text-sm text-gray-600">Onboarding & initial setup</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-3">2</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Leads (32 articles)</div>
+                        <div className="text-sm text-gray-600">Core feature - everything about leads</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-3">3</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Communication & Automation</div>
+                        <div className="text-sm text-gray-600">Drip campaigns (8), Phone numbers (14)</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-3">4</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Disposition (21 articles)</div>
+                        <div className="text-sm text-gray-600">Advanced - selling properties</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pete Current Flow */}
+                <div className="border rounded-lg p-6 bg-red-50">
+                  <h4 className="font-bold text-red-700 mb-4">Pete Current Journey (Broken)</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">1</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Getting Started (9 articles)</div>
+                        <div className="text-sm text-red-600">❌ Wrong order, duplicates, missing core tasks</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">2</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">??? No Lead Management</div>
+                        <div className="text-sm text-red-600">❌ Missing entire collection - articles scattered</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">3</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Support (24 articles - 41%!)</div>
+                        <div className="text-sm text-red-600">❌ DUMPING GROUND - date-stamped titles, no organization</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">4</div>
+                      <div>
+                        <div className="font-semibold text-gray-800">User gets lost...</div>
+                        <div className="text-sm text-red-600">❌ Content scattered across Training, Properties, Tasks</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Collection Comparison Table */}
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">📚 Collection-by-Collection Comparison</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border p-3 text-left">Category</th>
+                      <th className="border p-3 text-left">REsimpli</th>
+                      <th className="border p-3 text-left">Pete Current</th>
+                      <th className="border p-3 text-left">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border p-3 font-semibold">Getting Started</td>
+                      <td className="border p-3">17 articles - onboarding focused</td>
+                      <td className="border p-3">9 articles - has duplicates</td>
+                      <td className="border p-3 text-yellow-600">⚠️ Needs work</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td className="border p-3 font-semibold">Lead Management</td>
+                      <td className="border p-3">32 articles - "Leads" collection</td>
+                      <td className="border p-3 text-red-600">MISSING - scattered in Properties</td>
+                      <td className="border p-3 text-red-600">❌ Critical gap</td>
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-semibold">Communication</td>
+                      <td className="border p-3">Phone (14), Drip (8) = 22 articles</td>
+                      <td className="border p-3">8 articles - email setup in Support!</td>
+                      <td className="border p-3 text-yellow-600">⚠️ Incomplete</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td className="border p-3 font-semibold">Workflows & Automation</td>
+                      <td className="border p-3">Status Automations in General</td>
+                      <td className="border p-3 text-red-600">1 article - wrong content!</td>
+                      <td className="border p-3 text-red-600">❌ Broken</td>
+                    </tr>
+                    <tr>
+                      <td className="border p-3 font-semibold">General/Cross-Module</td>
+                      <td className="border p-3">41 articles (10%) - well-organized</td>
+                      <td className="border p-3 text-red-600">24 articles (41%) - DUMPING GROUND</td>
+                      <td className="border p-3 text-red-600">❌ Major issue</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td className="border p-3 font-semibold">Integrations</td>
+                      <td className="border p-3">11 articles</td>
+                      <td className="border p-3">1 article</td>
+                      <td className="border p-3 text-red-600">❌ Severely lacking</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
