@@ -210,41 +210,62 @@ export default function HelpDeskAssessmentPage() {
             </div>
           </div>
 
-          {/* Detailed Comparison: REsimpli vs Pete */}
+          {/* Structural Comparison: REsimpli vs Pete CURRENT */}
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">📊 Detailed Comparison: REsimpli vs Pete</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">🏗️ Structure Comparison: REsimpli vs Pete (Current)</h2>
 
-            {/* Organization Strategy */}
+            {/* High-Level Structure */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="border-2 border-green-200 rounded-lg p-6 bg-green-50">
-                <h3 className="text-lg font-bold text-green-700 mb-3">✅ REsimpli Strategy</h3>
-                <p className="text-gray-700 mb-4 font-medium">{competitorData.resimpli.organizationStrategy}</p>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-800">Organizing Principles:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    {competitorData.resimpli.organizingPrinciples.map((principle, i) => (
-                      <li key={i} className="flex items-start">
-                        <span className="text-green-600 mr-2">•</span>
-                        <span>{principle}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <h3 className="text-lg font-bold text-green-700 mb-3">✅ REsimpli Structure</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Collections:</span>
+                    <span className="font-bold">{competitorData.resimpli.totalCollections}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Total Articles:</span>
+                    <span className="font-bold">{competitorData.resimpli.totalArticles}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Largest Collection:</span>
+                    <span className="font-bold text-green-600">{competitorData.resimpli.largestCollectionPercentage}%</span>
+                  </div>
+                  <div className="pt-3 border-t">
+                    <div className="font-semibold text-gray-800 mb-2">Organization:</div>
+                    <p className="text-sm text-gray-600">{competitorData.resimpli.organizationStrategy}</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="border-2 border-red-200 rounded-lg p-6 bg-red-50">
-                <h3 className="text-lg font-bold text-red-700 mb-3">❌ Pete Current State</h3>
-                <p className="text-gray-700 mb-4 font-medium">Unfocused organization with massive dumping ground</p>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-gray-800">Critical Issues:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    {competitorData.pete_original_baseline.criticalIssues.slice(0, 6).map((issue, i) => (
-                      <li key={i} className="flex items-start">
-                        <span className="text-red-600 mr-2">⚠️</span>
-                        <span>{issue}</span>
-                      </li>
-                    ))}
-                  </ul>
+              <div className="border-2 border-blue-200 rounded-lg p-6 bg-blue-50">
+                <h3 className="text-lg font-bold text-blue-700 mb-3">📊 Pete Current Structure</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Collections:</span>
+                    <span className="font-bold">{assessment.totalCollections}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Total Articles:</span>
+                    <span className="font-bold">{assessment.totalArticles}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Largest Collection:</span>
+                    <span className={`font-bold ${assessment.collections[0]?.percentage > 20 ? 'text-red-600' : 'text-green-600'}`}>
+                      {assessment.collections[0]?.percentage.toFixed(0) || 0}%
+                    </span>
+                  </div>
+                  <div className="pt-3 border-t">
+                    <div className="font-semibold text-gray-800 mb-2">Current Collections:</div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      {assessment.collections.slice(0, 5).map((c, i) => (
+                        <div key={i}>• {c.collection.name} ({c.articles.length})</div>
+                      ))}
+                      {assessment.collections.length > 5 && (
+                        <div className="text-gray-500">... and {assessment.collections.length - 5} more</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -288,92 +309,138 @@ export default function HelpDeskAssessmentPage() {
                   </div>
                 </div>
 
-                {/* Pete Current Flow */}
-                <div className="border rounded-lg p-6 bg-red-50">
-                  <h4 className="font-bold text-red-700 mb-4">Pete Current Journey (Broken)</h4>
+                {/* Pete Current Flow - LIVE DATA */}
+                <div className="border rounded-lg p-6 bg-blue-50">
+                  <h4 className="font-bold text-blue-700 mb-4">Pete Current Journey (Live)</h4>
                   <div className="space-y-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">1</div>
-                      <div>
-                        <div className="font-semibold text-gray-800">Getting Started (9 articles)</div>
-                        <div className="text-sm text-red-600">❌ Wrong order, duplicates, missing core tasks</div>
+                    {assessment.collections.slice(0, 4).map((collection, idx) => (
+                      <div key={collection.collection.id} className="flex items-start">
+                        <div className={`flex-shrink-0 w-8 h-8 ${collection.percentage > 20 ? 'bg-red-500' : 'bg-blue-500'} text-white rounded-full flex items-center justify-center font-bold mr-3`}>
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-800">
+                            {collection.collection.name} ({collection.articles.length} articles)
+                          </div>
+                          {collection.percentage > 20 && (
+                            <div className="text-sm text-red-600">⚠️ DUMPING GROUND - {collection.percentage.toFixed(0)}% of all content</div>
+                          )}
+                          {collection.issues.length > 0 && (
+                            <div className="text-sm text-yellow-600">⚠️ {collection.issues[0]}</div>
+                          )}
+                          {collection.percentage <= 20 && collection.issues.length === 0 && (
+                            <div className="text-sm text-gray-600">{collection.collection.description || 'No description'}</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">2</div>
-                      <div>
-                        <div className="font-semibold text-gray-800">??? No Lead Management</div>
-                        <div className="text-sm text-red-600">❌ Missing entire collection - articles scattered</div>
+                    ))}
+                    {assessment.collections.length > 4 && (
+                      <div className="text-sm text-gray-500 pl-11">
+                        ... and {assessment.collections.length - 4} more collections
                       </div>
-                    </div>
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">3</div>
-                      <div>
-                        <div className="font-semibold text-gray-800">Support (24 articles - 41%!)</div>
-                        <div className="text-sm text-red-600">❌ DUMPING GROUND - date-stamped titles, no organization</div>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold mr-3">4</div>
-                      <div>
-                        <div className="font-semibold text-gray-800">User gets lost...</div>
-                        <div className="text-sm text-red-600">❌ Content scattered across Training, Properties, Tasks</div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Collection Comparison Table */}
+            {/* Categorization Comparison - Live Pete Data */}
             <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4">📚 Collection-by-Collection Comparison</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">📚 Categorization Gap Analysis</h3>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border p-3 text-left">Category</th>
-                      <th className="border p-3 text-left">REsimpli</th>
-                      <th className="border p-3 text-left">Pete Current</th>
-                      <th className="border p-3 text-left">Status</th>
+                      <th className="border p-3 text-left">REsimpli Has</th>
+                      <th className="border p-3 text-left">Pete Current Has</th>
+                      <th className="border p-3 text-left">Gap Analysis</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td className="border p-3 font-semibold">Getting Started</td>
-                      <td className="border p-3">17 articles - onboarding focused</td>
-                      <td className="border p-3">9 articles - has duplicates</td>
-                      <td className="border p-3 text-yellow-600">⚠️ Needs work</td>
+                      <td className="border p-3">✅ 17 articles</td>
+                      <td className="border p-3">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('getting started') || c.collection.name.toLowerCase().includes('start'))
+                          ? `✅ ${assessment.collections.find(c => c.collection.name.toLowerCase().includes('getting started') || c.collection.name.toLowerCase().includes('start'))?.articles.length} articles`
+                          : '❌ Missing'}
+                      </td>
+                      <td className="border p-3 text-sm">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('getting started'))
+                          ? 'Has collection'
+                          : 'Need onboarding collection'}
+                      </td>
                     </tr>
                     <tr className="bg-gray-50">
                       <td className="border p-3 font-semibold">Lead Management</td>
-                      <td className="border p-3">32 articles - "Leads" collection</td>
-                      <td className="border p-3 text-red-600">MISSING - scattered in Properties</td>
-                      <td className="border p-3 text-red-600">❌ Critical gap</td>
+                      <td className="border p-3">✅ 32 articles ("Leads")</td>
+                      <td className="border p-3">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('lead'))
+                          ? `✅ ${assessment.collections.find(c => c.collection.name.toLowerCase().includes('lead'))?.articles.length} articles`
+                          : '❌ Missing'}
+                      </td>
+                      <td className="border p-3 text-sm text-red-600">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('lead'))
+                          ? 'Has collection'
+                          : 'CRITICAL GAP - need Lead Management'}
+                      </td>
                     </tr>
                     <tr>
                       <td className="border p-3 font-semibold">Communication</td>
-                      <td className="border p-3">Phone (14), Drip (8) = 22 articles</td>
-                      <td className="border p-3">8 articles - email setup in Support!</td>
-                      <td className="border p-3 text-yellow-600">⚠️ Incomplete</td>
+                      <td className="border p-3">✅ 22 articles (Phone 14 + Drip 8)</td>
+                      <td className="border p-3">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('communication') || c.collection.name.toLowerCase().includes('email') || c.collection.name.toLowerCase().includes('phone'))
+                          ? `✅ ${assessment.collections.find(c => c.collection.name.toLowerCase().includes('communication') || c.collection.name.toLowerCase().includes('email'))?.articles.length} articles`
+                          : '❌ Missing'}
+                      </td>
+                      <td className="border p-3 text-sm">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('communication'))
+                          ? 'Has collection'
+                          : 'Need Communication collection'}
+                      </td>
                     </tr>
                     <tr className="bg-gray-50">
                       <td className="border p-3 font-semibold">Workflows & Automation</td>
-                      <td className="border p-3">Status Automations in General</td>
-                      <td className="border p-3 text-red-600">1 article - wrong content!</td>
-                      <td className="border p-3 text-red-600">❌ Broken</td>
+                      <td className="border p-3">✅ Status Automations</td>
+                      <td className="border p-3">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('workflow') || c.collection.name.toLowerCase().includes('automation'))
+                          ? `✅ ${assessment.collections.find(c => c.collection.name.toLowerCase().includes('workflow'))?.articles.length} articles`
+                          : '❌ Missing'}
+                      </td>
+                      <td className="border p-3 text-sm">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('workflow'))
+                          ? 'Has collection'
+                          : 'Need Workflows collection'}
+                      </td>
                     </tr>
                     <tr>
-                      <td className="border p-3 font-semibold">General/Cross-Module</td>
-                      <td className="border p-3">41 articles (10%) - well-organized</td>
-                      <td className="border p-3 text-red-600">24 articles (41%) - DUMPING GROUND</td>
-                      <td className="border p-3 text-red-600">❌ Major issue</td>
+                      <td className="border p-3 font-semibold">Properties/Assets</td>
+                      <td className="border p-3">✅ Disposition (21)</td>
+                      <td className="border p-3">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('property') || c.collection.name.toLowerCase().includes('properties'))
+                          ? `✅ ${assessment.collections.find(c => c.collection.name.toLowerCase().includes('propert'))?.articles.length} articles`
+                          : '❌ Missing'}
+                      </td>
+                      <td className="border p-3 text-sm">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('propert'))
+                          ? 'Has collection'
+                          : 'Need Property Management'}
+                      </td>
                     </tr>
                     <tr className="bg-gray-50">
                       <td className="border p-3 font-semibold">Integrations</td>
-                      <td className="border p-3">11 articles</td>
-                      <td className="border p-3">1 article</td>
-                      <td className="border p-3 text-red-600">❌ Severely lacking</td>
+                      <td className="border p-3">✅ 11 articles</td>
+                      <td className="border p-3">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('integration'))
+                          ? `✅ ${assessment.collections.find(c => c.collection.name.toLowerCase().includes('integration'))?.articles.length} articles`
+                          : '❌ Missing'}
+                      </td>
+                      <td className="border p-3 text-sm text-yellow-600">
+                        {assessment.collections.find(c => c.collection.name.toLowerCase().includes('integration'))
+                          ? 'Has collection'
+                          : 'Need Integrations collection'}
+                      </td>
                     </tr>
                   </tbody>
                 </table>

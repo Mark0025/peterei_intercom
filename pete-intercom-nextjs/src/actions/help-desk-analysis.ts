@@ -172,55 +172,73 @@ function analyzeCollection(
 }
 
 /**
- * Generate recommendations based on assessment
+ * Analyze collection structure and categorization
+ */
+function analyzeCollectionStructure(collections: CollectionAnalysis[]): {
+  hasGettingStarted: boolean;
+  hasLeadManagement: boolean;
+  hasCommunication: boolean;
+  hasWorkflows: boolean;
+  hasIntegrations: boolean;
+  categoryGaps: string[];
+  structureIssues: string[];
+} {
+  const collectionNames = collections.map(c => c.collection.name.toLowerCase());
+
+  return {
+    hasGettingStarted: collectionNames.some(n => n.includes('getting started') || n.includes('onboarding')),
+    hasLeadManagement: collectionNames.some(n => n.includes('lead')),
+    hasCommunication: collectionNames.some(n => n.includes('communication') || n.includes('email') || n.includes('phone')),
+    hasWorkflows: collectionNames.some(n => n.includes('workflow') || n.includes('automation')),
+    hasIntegrations: collectionNames.some(n => n.includes('integration')),
+    categoryGaps: [
+      !collectionNames.some(n => n.includes('lead')) ? 'Lead Management' : null,
+      !collectionNames.some(n => n.includes('property') || n.includes('properties')) ? 'Property Management' : null,
+      !collectionNames.some(n => n.includes('company') || n.includes('team')) ? 'Company Management' : null,
+      !collectionNames.some(n => n.includes('analytics') || n.includes('report')) ? 'Analytics & Reporting' : null,
+      !collectionNames.some(n => n.includes('data') || n.includes('import') || n.includes('export')) ? 'Data Management' : null
+    ].filter(Boolean) as string[],
+    structureIssues: collections
+      .filter(c => c.issues.length > 0)
+      .map(c => `${c.collection.name}: ${c.issues[0]}`)
+  };
+}
+
+/**
+ * Generate structure-focused recommendations
  */
 function generateRecommendations(assessment: HelpDeskAssessment): string[] {
   const recommendations: string[] = [];
   const { totalCollections, totalArticles, collections, criticalIssues } = assessment;
 
-  // Dumping ground recommendations
+  const structure = analyzeCollectionStructure(collections);
+
+  // Structural recommendations
+  if (structure.categoryGaps.length > 0) {
+    recommendations.push(
+      `Create missing core collections: ${structure.categoryGaps.join(', ')}`
+    );
+  }
+
+  // Dumping ground fix
   if (criticalIssues.dumpingGroundCollections.length > 0) {
     const dumpingGroundCollection = collections.find(
       c => criticalIssues.dumpingGroundCollections.includes(c.collection.name)
     );
     recommendations.push(
-      `🚨 CRITICAL: Dismantle "${criticalIssues.dumpingGroundCollections[0]}" collection and redistribute ${
-        dumpingGroundCollection?.articles.length || 0
-      } articles to proper feature-based collections`
+      `Redistribute ${dumpingGroundCollection?.articles.length || 0} articles from "${criticalIssues.dumpingGroundCollections[0]}" to feature-specific collections`
     );
   }
 
-  // Compare to benchmark
-  const avgPerCollection = totalArticles / totalCollections;
-  if (avgPerCollection < RESIMPLI_BENCHMARK.averageArticlesPerCollection / 2) {
-    recommendations.push(
-      `Expand thin collections: Current average is ${avgPerCollection.toFixed(1)} articles/collection vs REsimpli's ${RESIMPLI_BENCHMARK.averageArticlesPerCollection}`
-    );
-  }
-
-  // Missing collections
-  const collectionNames = collections.map(c => c.collection.name.toLowerCase());
-  const suggestedCollections = [
-    'Lead Management',
-    'Company Management',
-    'Data Management',
-    'Analytics & Reporting'
-  ];
-
-  const missingCollections = suggestedCollections.filter(name =>
-    !collectionNames.some(existing => existing.includes(name.toLowerCase()))
-  );
-
-  if (missingCollections.length > 0) {
-    recommendations.push(
-      `Create missing feature collections: ${missingCollections.join(', ')}`
-    );
-  }
-
-  // Apply REsimpli's principle
+  // Feature-based organization
   recommendations.push(
-    `📚 Adopt REsimpli's organizing principle: "If it's about Feature X, it goes in Feature X collection"`
+    `Adopt feature-based organization: "If it's about Feature X, it goes in Feature X collection"`
   );
+
+  // Flow optimization
+  if (!structure.hasGettingStarted) {
+    recommendations.push('Create "Getting Started" as first collection for new users');
+  }
 
   return recommendations;
 }
