@@ -37,40 +37,58 @@ async function fetchHelpCenterCollections(): Promise<HelpCenterCollection[]> {
 
 /**
  * Fetch all articles for a specific collection
+ * Uses a try-catch approach to handle collections that may not have accessible sections
  */
-async function fetchCollectionArticles(collectionId: string): Promise<HelpCenterArticle[]> {
+async function fetchCollectionArticles(
+  collectionId: string,
+  collectionName: string
+): Promise<HelpCenterArticle[]> {
   if (!ACCESS_TOKEN) {
     throw new Error('INTERCOM_ACCESS_TOKEN is not configured');
   }
 
-  const response = await fetch(
-    `${INTERCOM_API_BASE}/help_center/collections/${collectionId}/sections`,
-    {
-      headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-        'Intercom-Version': '2.11',
-        'Accept': 'application/json'
+  try {
+    // Try to fetch sections first
+    const response = await fetch(
+      `${INTERCOM_API_BASE}/help_center/collections/${collectionId}/sections`,
+      {
+        headers: {
+          'Authorization': `Bearer ${ACCESS_TOKEN}`,
+          'Intercom-Version': '2.11',
+          'Accept': 'application/json'
+        }
+      }
+    );
+
+    // If 404, the collection might not have sections - return empty array
+    if (response.status === 404) {
+      console.log(`[Help Desk Analysis] Collection ${collectionName} (${collectionId}) has no accessible sections, skipping article fetch`);
+      return [];
+    }
+
+    if (!response.ok) {
+      console.error(`[Help Desk Analysis] Failed to fetch sections for ${collectionName}: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    const sections = data.data || [];
+
+    // Fetch articles from all sections in this collection
+    const allArticles: HelpCenterArticle[] = [];
+
+    for (const section of sections) {
+      if (section.articles) {
+        allArticles.push(...section.articles);
       }
     }
-  );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch articles for collection ${collectionId}: ${response.status}`);
+    return allArticles;
+  } catch (error) {
+    console.error(`[Help Desk Analysis] Error fetching articles for ${collectionName}:`, error);
+    // Return empty array on error - don't fail entire assessment
+    return [];
   }
-
-  const data = await response.json();
-  const sections = data.data || [];
-
-  // Fetch articles from all sections in this collection
-  const allArticles: HelpCenterArticle[] = [];
-
-  for (const section of sections) {
-    if (section.articles) {
-      allArticles.push(...section.articles);
-    }
-  }
-
-  return allArticles;
 }
 
 /**
@@ -321,7 +339,7 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
     const allArticles: HelpCenterArticle[] = [];
 
     for (const collection of collections) {
-      const articles = await fetchCollectionArticles(collection.id);
+      const articles = await fetchCollectionArticles(collection.id, collection.name);
 
       // Add collection name to each article
       const articlesWithCollection = articles.map(article => ({
