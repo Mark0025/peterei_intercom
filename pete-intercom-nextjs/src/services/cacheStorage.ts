@@ -20,10 +20,12 @@ export async function loadCacheFromDisk(): Promise<IntercomCache | null> {
       companies: diskCache.companies || [],
       admins: diskCache.admins || [],
       conversations: diskCache.conversations || [],
+      helpCenterCollections: diskCache.helpCenterCollections || [],
+      helpCenterArticles: diskCache.helpCenterArticles || [],
       lastRefreshed: diskCache.lastRefreshed ? new Date(diskCache.lastRefreshed) : null,
     };
 
-    logInfo(`[CACHE] Loaded from disk. Contacts: ${cache.contacts.length}, Companies: ${cache.companies.length}, Admins: ${cache.admins.length}, Conversations: ${cache.conversations.length}`, 'api.log');
+    logInfo(`[CACHE] Loaded from disk. Contacts: ${cache.contacts.length}, Companies: ${cache.companies.length}, Admins: ${cache.admins.length}, Conversations: ${cache.conversations.length}, Help Center Collections: ${cache.helpCenterCollections.length}, Help Center Articles: ${cache.helpCenterArticles.length}`, 'api.log');
     return cache;
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -48,6 +50,8 @@ export async function saveCacheToDisk(cache: IntercomCache): Promise<void> {
       companies: cache.companies,
       admins: cache.admins,
       conversations: cache.conversations,
+      helpCenterCollections: cache.helpCenterCollections,
+      helpCenterArticles: cache.helpCenterArticles,
       lastRefreshed: cache.lastRefreshed,
     };
 
