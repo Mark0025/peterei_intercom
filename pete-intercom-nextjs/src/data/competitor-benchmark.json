@@ -1,0 +1,348 @@
+{
+  "resimpli": {
+    "name": "REsimpli",
+    "totalCollections": 22,
+    "totalArticles": 400,
+    "averageArticlesPerCollection": 18.2,
+    "largestCollectionPercentage": 10,
+    "organizationStrategy": "Feature-based organization - If it's about Feature X, it goes in Feature X collection",
+    "collections": [
+      {
+        "name": "Getting Started",
+        "articleCount": 17,
+        "description": "Onboarding and initial setup",
+        "bestPractices": [
+          "Logical progression from basic to advanced",
+          "No duplicates",
+          "Covers essential onboarding topics"
+        ],
+        "issues": [
+          "Not in logical reading order",
+          "Mix of basic and advanced topics"
+        ]
+      },
+      {
+        "name": "General",
+        "articleCount": 41,
+        "percentage": 10,
+        "description": "Cross-module features and platform-wide tools",
+        "contents": [
+          "Account management (billing, users, settings)",
+          "Cross-module tools (templates, campaigns, exports)",
+          "Platform-wide features (dashboard, analytics, automations)",
+          "Regulatory/compliance"
+        ],
+        "bestPractices": [
+          "Only cross-module content",
+          "No feature-specific how-tos",
+          "Well-organized by theme"
+        ]
+      },
+      {
+        "name": "Leads",
+        "articleCount": 32,
+        "description": "Everything about the Leads module",
+        "organizationPrinciple": "If it touches the Leads module, it goes here",
+        "themes": [
+          "Lead creation and management (5 articles)",
+          "Lead communication and automation (3 articles)",
+          "Lead assignment and permissions (3 articles)",
+          "Lead tracking and organization (5 articles)",
+          "Lead disposition and workflow (4 articles)",
+          "Additional features (6 articles)"
+        ],
+        "bestPractices": [
+          "Clear scope - everything is about Leads module",
+          "Thematic organization within collection",
+          "Consistent naming (How to... or What is...)"
+        ]
+      },
+      {
+        "name": "Buyers & Disposition Management",
+        "articleCount": 21,
+        "description": "Everything about selling properties",
+        "themes": [
+          "Dispo website setup & management (6 articles)",
+          "Listing management (5 articles)",
+          "Buyers management (7 articles)",
+          "Permissions & marketing (3 articles)"
+        ],
+        "bestPractices": [
+          "Perfect scope - everything about disposition",
+          "Logical flow: Setup → Listing → Buyers → Advanced",
+          "Clear progression from beginner to advanced",
+          "Excellent categorization"
+        ]
+      },
+      {
+        "name": "Manage Numbers",
+        "articleCount": 14,
+        "description": "Everything about phone numbers",
+        "scope": "Porting, setup, configuration, usage"
+      },
+      {
+        "name": "Drip Campaign",
+        "articleCount": 8,
+        "description": "Email/SMS automation"
+      },
+      {
+        "name": "Integrations",
+        "articleCount": 11,
+        "description": "Third-party integrations"
+      },
+      {
+        "name": "Settings",
+        "articleCount": 20,
+        "description": "Platform settings and configuration"
+      },
+      {
+        "name": "Mastermind Calls",
+        "articleCount": 174,
+        "description": "Training library - recordings of live sessions",
+        "note": "Separate from documentation"
+      }
+    ],
+    "namingConvention": {
+      "actionOriented": "How to [action]",
+      "explanatory": "What is [feature] and how to utilize it",
+      "examples": [
+        "How to create a lead manually in REsimpli",
+        "How to add a new REsimpli Dispo Website",
+        "What is the Dispo Tab, and how do you utilize it"
+      ],
+      "benefits": [
+        "Scannable titles",
+        "Clear purpose of each article",
+        "Professional appearance",
+        "Good for SEO"
+      ]
+    },
+    "organizingPrinciples": [
+      "Feature-based organization (not topic-based)",
+      "Thematic sub-organization within collections",
+      "Consistent article naming",
+      "General collection for cross-module only",
+      "Minimal duplication",
+      "Clear scope per collection"
+    ]
+  },
+  "pete_original_baseline": {
+    "date": "2025-10-08",
+    "name": "Pete (Original Audit)",
+    "totalCollections": 9,
+    "totalArticles": 59,
+    "dumpingGroundCollection": "Support",
+    "dumpingGroundArticles": 24,
+    "dumpingGroundPercentage": 41,
+    "criticalIssues": [
+      "Support collection is a dumping ground (41% of content)",
+      "Duplicate articles (User Profile Setup appears 3 times)",
+      "Inconsistent article naming (mix of question-based and date-stamped)",
+      "Poor categorization (Leads in Properties collection)",
+      "Date-stamped support ticket titles (Pete Support 12/26/24)",
+      "Workflow content split across 3 collections",
+      "Missing core collections (Lead Management, Company Management, Analytics)"
+    ],
+    "collections": [
+      {
+        "name": "Getting Started",
+        "articleCount": 9,
+        "issues": [
+          "Duplicate article (User Profile Setup appears twice)",
+          "Wrong order (technical requirements last, not first)",
+          "Too advanced content (grid customization)",
+          "Missing: add first contact, add first lead, create first task"
+        ]
+      },
+      {
+        "name": "Workflows & Automation",
+        "articleCount": 1,
+        "issues": [
+          "COMPLETELY WRONG CONTENT - article is about team management, not workflows",
+          "Missing actual workflow content (in Training collection instead)"
+        ]
+      },
+      {
+        "name": "Tasks",
+        "articleCount": 3,
+        "issues": [
+          "Wrong order (printing tasks first, not overview)",
+          "Missing: what are tasks, creating tasks, task statuses, notifications"
+        ]
+      },
+      {
+        "name": "Communication",
+        "articleCount": 8,
+        "issues": [
+          "Chaotic flow - jumps between email, phone, campaigns",
+          "Email setup is in Support collection (not here)",
+          "Missing: email deliverability, SMS setup"
+        ]
+      },
+      {
+        "name": "Properties",
+        "articleCount": 6,
+        "issues": [
+          "LEADS IN PROPERTIES - 2 articles about leads (wrong collection)",
+          "Missing: creating properties, property search, bulk actions"
+        ]
+      },
+      {
+        "name": "Integrations",
+        "articleCount": 1,
+        "issues": [
+          "Only 1 integration documented (not scalable)",
+          "Missing: overview, generic how-to, Zapier, API access"
+        ]
+      },
+      {
+        "name": "Training",
+        "articleCount": 3,
+        "issues": [
+          "Date-stamped titles (not evergreen)",
+          "Workflow training HERE but Workflows collection has wrong content"
+        ]
+      },
+      {
+        "name": "Support",
+        "articleCount": 24,
+        "percentage": 41,
+        "issues": [
+          "DISASTER - 41% of all content in dumping ground",
+          "Date-stamped Pete Support titles",
+          "Content belongs in 6+ different collections",
+          "No organization",
+          "Duplicates email, phone, user setup articles"
+        ],
+        "shouldBeRedistributed": [
+          "User setup (4) → Company Management",
+          "Email/Phone (4) → Communication",
+          "Lead/Property (5) → Lead Management / Properties",
+          "Workflows/Tasks (3) → Workflows / Tasks",
+          "Analytics (4) → Analytics & Reporting",
+          "Data import (1) → Data Management"
+        ]
+      },
+      {
+        "name": "Update Notes",
+        "articleCount": 4,
+        "issues": [
+          "Future dates in titles",
+          "Emoji in titles (not searchable)"
+        ]
+      }
+    ]
+  },
+  "recommended_pete_structure": {
+    "name": "Pete (Recommended)",
+    "totalCollections": 14,
+    "totalArticles": "80-100",
+    "maxCollectionPercentage": 15,
+    "collections": [
+      {
+        "name": "Getting Started",
+        "targetArticles": 12,
+        "purpose": "First-time user onboarding",
+        "requiredArticles": [
+          "What is Pete?",
+          "Pete Terminology Glossary",
+          "Technical Requirements",
+          "Set Up Company Profile",
+          "Set Up User Profile",
+          "Configure Business Hours",
+          "Add First Contact",
+          "Add First Lead",
+          "Create First Task",
+          "View Notifications",
+          "Understand Notification Types",
+          "Your First Week with Pete"
+        ]
+      },
+      {
+        "name": "Lead Management",
+        "targetArticles": 10,
+        "purpose": "Everything about leads",
+        "requiredArticles": [
+          "What are Leads in Pete?",
+          "Manually Add a Lead",
+          "Import Leads from CSV",
+          "Lead Statuses Explained",
+          "Lead Temperature and Scoring",
+          "Effective Lead Management",
+          "Lead Routing and Assignment",
+          "Convert Lead to Property",
+          "Bulk Lead Actions",
+          "Delete a Lead"
+        ]
+      },
+      {
+        "name": "Property Management",
+        "targetArticles": 8,
+        "purpose": "Everything about properties (NOT leads)"
+      },
+      {
+        "name": "Communication",
+        "targetArticles": 12,
+        "subSections": ["Email (5)", "Phone (6)", "Call Recording (2)"]
+      },
+      {
+        "name": "Workflows & Automation",
+        "targetArticles": 8,
+        "purpose": "Automation features"
+      },
+      {
+        "name": "Task Management",
+        "targetArticles": 6
+      },
+      {
+        "name": "Company Management",
+        "targetArticles": 7,
+        "purpose": "Company-level settings"
+      },
+      {
+        "name": "Analytics & Reporting",
+        "targetArticles": 5,
+        "purpose": "Dashboard and KPIs"
+      },
+      {
+        "name": "Data Management",
+        "targetArticles": 6,
+        "purpose": "Import/export operations"
+      },
+      {
+        "name": "Integrations",
+        "targetArticles": 6
+      },
+      {
+        "name": "Training & Videos",
+        "targetArticles": 8
+      },
+      {
+        "name": "Customization",
+        "targetArticles": 5
+      },
+      {
+        "name": "Troubleshooting",
+        "targetArticles": 8
+      },
+      {
+        "name": "General",
+        "targetArticles": 15,
+        "maxPercentage": 15,
+        "purpose": "Cross-module features and account management only"
+      }
+    ]
+  },
+  "comparison_metrics": {
+    "dumping_ground_threshold": 20,
+    "recommended_max_percentage": 15,
+    "minimum_articles_per_collection": 3,
+    "recommended_avg_articles": 7,
+    "title_max_length": 80,
+    "naming_conventions": {
+      "good_patterns": ["How to", "What is", "Setting up", "Creating", "Managing"],
+      "bad_patterns": ["Pete Support \\d{1,2}/\\d{1,2}/\\d{2,4}", "Pete Training \\d{1,2}/\\d{1,2}/\\d{2,4}"],
+      "recommended_format": "[Action Verb] + [Object] + [Optional: Context]"
+    }
+  }
+}

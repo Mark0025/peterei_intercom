@@ -22,6 +22,7 @@ const cache: IntercomCache = {
   admins: [],
   conversations: [],
   helpCenterCollections: [],
+  helpCenterArticles: [],
   lastRefreshed: null,
 };
 
@@ -99,6 +100,41 @@ async function getAllFromIntercom(path: string, preferredKeys: string[] = []): P
   return results;
 }
 
+async function fetchAllHelpCenterArticles(collections: unknown[]): Promise<unknown[]> {
+  const articles: unknown[] = [];
+
+  for (const collection of collections) {
+    const collectionId = (collection as { id: string }).id;
+    const collectionName = (collection as { name: string }).name;
+
+    try {
+      logInfo(`[INTERCOM] Fetching articles for collection: ${collectionName} (${collectionId})`, 'api.log');
+
+      // Fetch articles for this collection
+      const collectionArticles = await getAllFromIntercom(
+        `/help_center/collections/${collectionId}/articles`,
+        ['articles', 'data']
+      );
+
+      // Add collection info to each article
+      const articlesWithCollection = collectionArticles.map(article => ({
+        ...article,
+        collection_id: collectionId,
+        collection_name: collectionName
+      }));
+
+      articles.push(...articlesWithCollection);
+      logInfo(`[INTERCOM] Fetched ${collectionArticles.length} articles from ${collectionName}`, 'api.log');
+    } catch (err) {
+      // Gracefully handle errors (some collections might not have accessible articles)
+      logError(`[INTERCOM] Failed to fetch articles for collection ${collectionId}: ${err instanceof Error ? err.message : err}`, 'api.log');
+      // Continue with next collection
+    }
+  }
+
+  return articles;
+}
+
 export async function refreshIntercomCache(): Promise<void> {
   // If already initializing, wait for that to complete
   if (isInitializing && initializationPromise) {
@@ -119,14 +155,19 @@ export async function refreshIntercomCache(): Promise<void> {
         getAllFromIntercom('/help_center/collections', ['data']),
       ]);
 
+      // Fetch all articles for all collections (sequential to avoid rate limiting)
+      logInfo('[INTERCOM] Fetching help center articles...', 'api.log');
+      const helpCenterArticles = await fetchAllHelpCenterArticles(helpCenterCollections);
+
       cache.contacts = contacts;
       cache.companies = companies;
       cache.admins = admins;
       cache.conversations = conversations;
       cache.helpCenterCollections = helpCenterCollections;
+      cache.helpCenterArticles = helpCenterArticles;
       cache.lastRefreshed = new Date();
 
-      logInfo(`[INTERCOM] Cache refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}, Help Center Collections: ${helpCenterCollections.length}`, 'api.log');
+      logInfo(`[INTERCOM] Cache refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}, Help Center Collections: ${helpCenterCollections.length}, Help Center Articles: ${helpCenterArticles.length}`, 'api.log');
 
       // Save to disk for next startup
       await saveCacheToDisk(cache);
@@ -159,6 +200,7 @@ export function getCacheStatus() {
       admins: cache.admins.length,
       conversations: cache.conversations.length,
       helpCenterCollections: cache.helpCenterCollections.length,
+      helpCenterArticles: cache.helpCenterArticles.length,
     },
     isInitializing,
   };
@@ -285,6 +327,7 @@ if (ACCESS_TOKEN) {
       cache.admins = diskCache.admins;
       cache.conversations = diskCache.conversations;
       cache.helpCenterCollections = diskCache.helpCenterCollections || [];
+      cache.helpCenterArticles = diskCache.helpCenterArticles || [];
       cache.lastRefreshed = diskCache.lastRefreshed;
       logInfo('[INTERCOM] Using cached data from disk for instant startup', 'api.log');
     } else {

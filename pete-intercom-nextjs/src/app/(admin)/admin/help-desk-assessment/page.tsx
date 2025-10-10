@@ -228,7 +228,7 @@ export default function HelpDeskAssessmentPage() {
                           <div>
                             <div className="font-semibold text-gray-800">{collectionName}</div>
                             <div className="text-sm text-gray-600">
-                              {collection?.collection.article_count} articles ({collection?.percentage.toFixed(1)}% of total)
+                              {collection?.articles.length} articles ({collection?.percentage.toFixed(1)}% of total)
                             </div>
                           </div>
                           <div className="text-2xl font-bold text-red-600">
@@ -265,15 +265,14 @@ export default function HelpDeskAssessmentPage() {
                     Misplaced Articles ({assessment.criticalIssues.misplacedArticles.length})
                   </h3>
                   <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {assessment.criticalIssues.misplacedArticles.slice(0, 10).map((article, index) => (
+                    {assessment.criticalIssues.misplacedArticles.slice(0, 10).map((item, index) => (
                       <div key={index} className="bg-yellow-50 p-4 rounded-lg">
-                        <div className="font-semibold text-gray-800">{article.title}</div>
+                        <div className="font-semibold text-gray-800">{item.article}</div>
                         <div className="text-sm text-gray-600 mt-1">
-                          Currently in: <span className="font-medium">{article.currentCollection}</span>
+                          Currently in: <span className="font-medium">{item.currentCollection}</span>
                           {' → '}
-                          Should be in: <span className="font-medium text-green-600">{article.suggestedCollection}</span>
+                          Should be in: <span className="font-medium text-green-600">{item.suggestedCollection}</span>
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">{article.reason}</div>
                       </div>
                     ))}
                     {assessment.criticalIssues.misplacedArticles.length > 10 && (
@@ -307,7 +306,7 @@ export default function HelpDeskAssessmentPage() {
                       <p className="text-sm text-gray-600">{collection.collection.description}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-purple-600">{collection.collection.article_count}</div>
+                      <div className="text-3xl font-bold text-purple-600">{collection.articles.length}</div>
                       <div className="text-sm text-gray-500">{collection.percentage.toFixed(1)}% of total</div>
                     </div>
                   </div>
@@ -364,8 +363,8 @@ export default function HelpDeskAssessmentPage() {
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {assessment.criticalIssues.namingIssues.slice(0, 20).map((naming, index) => (
                   <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-gray-800">{naming.title}</div>
-                    <div className="text-xs text-gray-600 mt-1">{naming.issue}</div>
+                    <div className="text-sm font-medium text-gray-800">{naming.article}</div>
+                    <div className="text-xs text-gray-600 mt-1">{naming.issues.join(', ')}</div>
                   </div>
                 ))}
                 {assessment.criticalIssues.namingIssues.length > 20 && (

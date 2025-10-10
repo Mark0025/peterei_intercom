@@ -73,6 +73,7 @@ export interface IntercomCache {
   admins: IntercomAdmin[];
   conversations: IntercomConversation[];
   helpCenterCollections: HelpCenterCollection[];
+  helpCenterArticles: HelpCenterArticle[];
   lastRefreshed: Date | null;
 }
 

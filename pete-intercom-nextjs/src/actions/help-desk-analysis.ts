@@ -130,10 +130,11 @@ function findDuplicateArticles(articles: HelpCenterArticle[]): { title: string; 
  */
 function analyzeCollection(
   collection: HelpCenterCollection,
+  articles: HelpCenterArticle[],
   totalArticles: number
 ): CollectionAnalysis {
   const issues: string[] = [];
-  const articleCount = collection.article_count || 0;
+  const articleCount = articles.length;
   const percentage = totalArticles > 0 ? (articleCount / totalArticles) * 100 : 0;
 
   // Check if this is a dumping ground (>20% of total articles)
@@ -146,9 +147,25 @@ function analyzeCollection(
     issues.push(`Very small collection: only ${articleCount} article(s)`);
   }
 
+  // Check for naming issues in articles
+  for (const article of articles) {
+    const namingIssues = detectNamingIssues(article);
+    if (namingIssues.length > 0) {
+      issues.push(`Article "${article.title}": ${namingIssues.join(', ')}`);
+    }
+  }
+
+  // Check for misplaced articles
+  for (const article of articles) {
+    const misplaced = detectMisplacedArticles(article, collection.name);
+    if (misplaced) {
+      issues.push(`Article "${article.title}": ${misplaced.reason} → Suggest moving to ${misplaced.suggestedCollection}`);
+    }
+  }
+
   return {
     collection,
-    articles: [], // We'll use article_count from collection instead
+    articles,
     issues,
     percentage
   };
@@ -168,7 +185,7 @@ function generateRecommendations(assessment: HelpDeskAssessment): string[] {
     );
     recommendations.push(
       `🚨 CRITICAL: Dismantle "${criticalIssues.dumpingGroundCollections[0]}" collection and redistribute ${
-        dumpingGroundCollection?.collection.article_count || 0
+        dumpingGroundCollection?.articles.length || 0
       } articles to proper feature-based collections`
     );
   }
@@ -216,18 +233,24 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
     // Get data from cache (already fetched and cached by intercom service)
     const cache = await getIntercomCache();
     const collections = cache.helpCenterCollections;
+    const allArticles = cache.helpCenterArticles as HelpCenterArticle[];
 
     if (!collections || collections.length === 0) {
       throw new Error('No help center collections found in cache. The cache may need to be refreshed.');
     }
 
-    // Calculate total articles from collection article_count properties
-    const totalArticles = collections.reduce((sum, c) => sum + (c.article_count || 0), 0);
+    // Calculate total articles from actual cached articles
+    const totalArticles = allArticles.length;
 
-    // Analyze each collection
-    const collectionAnalyses: CollectionAnalysis[] = collections.map(collection =>
-      analyzeCollection(collection, totalArticles)
-    );
+    // Analyze each collection with its articles
+    const collectionAnalyses: CollectionAnalysis[] = collections.map(collection => {
+      // Filter articles for this collection
+      const collectionArticles = allArticles.filter(
+        article => article.collection_id === collection.id
+      );
+
+      return analyzeCollection(collection, collectionArticles, totalArticles);
+    });
 
     // Sort by percentage descending (largest collections first)
     collectionAnalyses.sort((a, b) => b.percentage - a.percentage);
@@ -242,6 +265,36 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
         return bPercent - aPercent; // Descending
       });
 
+    // Find duplicate articles across all collections
+    const duplicateArticles = findDuplicateArticles(allArticles);
+
+    // Find misplaced articles
+    const misplacedArticles: { article: string; currentCollection: string; suggestedCollection: string }[] = [];
+    for (const analysis of collectionAnalyses) {
+      for (const article of analysis.articles) {
+        const misplaced = detectMisplacedArticles(article, analysis.collection.name);
+        if (misplaced) {
+          misplacedArticles.push({
+            article: article.title,
+            currentCollection: analysis.collection.name,
+            suggestedCollection: misplaced.suggestedCollection
+          });
+        }
+      }
+    }
+
+    // Find naming issues
+    const namingIssues: { article: string; issues: string[] }[] = [];
+    for (const article of allArticles) {
+      const issues = detectNamingIssues(article);
+      if (issues.length > 0) {
+        namingIssues.push({
+          article: article.title,
+          issues
+        });
+      }
+    }
+
     // Calculate comparison with original audit
     const previousDumpingGroundPercentage = ORIGINAL_AUDIT_BASELINE.dumpingGroundPercentage;
     const currentDumpingGroundPercentage = collectionAnalyses
@@ -253,9 +306,9 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
       collections: collectionAnalyses,
       criticalIssues: {
         dumpingGroundCollections,
-        duplicateArticles: [], // Would need to fetch individual articles to detect duplicates
-        misplacedArticles: [], // Would need to fetch individual articles to detect misplacement
-        namingIssues: [] // Would need to fetch individual articles to detect naming issues
+        duplicateArticles,
+        misplacedArticles,
+        namingIssues
       },
       comparison: {
         previous: {
