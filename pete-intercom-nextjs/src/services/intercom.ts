@@ -21,6 +21,7 @@ const cache: IntercomCache = {
   companies: [],
   admins: [],
   conversations: [],
+  helpCenterCollections: [],
   lastRefreshed: null,
 };
 
@@ -110,20 +111,22 @@ export async function refreshIntercomCache(): Promise<void> {
 
   initializationPromise = (async () => {
     try {
-      const [contacts, companies, admins, conversations] = await Promise.all([
+      const [contacts, companies, admins, conversations, helpCenterCollections] = await Promise.all([
         getAllFromIntercom('/contacts', ['contacts', 'data']),
         getAllFromIntercom('/companies', ['companies', 'data']),
         getAllFromIntercom('/admins', ['admins', 'data']),
         getAllFromIntercom('/conversations', ['conversations', 'data']),
+        getAllFromIntercom('/help_center/collections', ['data']),
       ]);
 
       cache.contacts = contacts;
       cache.companies = companies;
       cache.admins = admins;
       cache.conversations = conversations;
+      cache.helpCenterCollections = helpCenterCollections;
       cache.lastRefreshed = new Date();
 
-      logInfo(`[INTERCOM] Cache refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}`, 'api.log');
+      logInfo(`[INTERCOM] Cache refresh complete. Contacts: ${contacts.length}, Companies: ${companies.length}, Admins: ${admins.length}, Conversations: ${conversations.length}, Help Center Collections: ${helpCenterCollections.length}`, 'api.log');
 
       // Save to disk for next startup
       await saveCacheToDisk(cache);
@@ -155,6 +158,7 @@ export function getCacheStatus() {
       companies: cache.companies.length,
       admins: cache.admins.length,
       conversations: cache.conversations.length,
+      helpCenterCollections: cache.helpCenterCollections.length,
     },
     isInitializing,
   };
@@ -280,6 +284,7 @@ if (ACCESS_TOKEN) {
       cache.companies = diskCache.companies;
       cache.admins = diskCache.admins;
       cache.conversations = diskCache.conversations;
+      cache.helpCenterCollections = diskCache.helpCenterCollections || [];
       cache.lastRefreshed = diskCache.lastRefreshed;
       logInfo('[INTERCOM] Using cached data from disk for instant startup', 'api.log');
     } else {

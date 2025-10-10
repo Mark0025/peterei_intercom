@@ -228,7 +228,7 @@ export default function HelpDeskAssessmentPage() {
                           <div>
                             <div className="font-semibold text-gray-800">{collectionName}</div>
                             <div className="text-sm text-gray-600">
-                              {collection?.articles.length} articles ({collection?.percentage.toFixed(1)}% of total)
+                              {collection?.collection.article_count} articles ({collection?.percentage.toFixed(1)}% of total)
                             </div>
                           </div>
                           <div className="text-2xl font-bold text-red-600">
@@ -307,7 +307,7 @@ export default function HelpDeskAssessmentPage() {
                       <p className="text-sm text-gray-600">{collection.collection.description}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-purple-600">{collection.articles.length}</div>
+                      <div className="text-3xl font-bold text-purple-600">{collection.collection.article_count}</div>
                       <div className="text-sm text-gray-500">{collection.percentage.toFixed(1)}% of total</div>
                     </div>
                   </div>

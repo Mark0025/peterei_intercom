@@ -1,95 +1,12 @@
 'use server';
 
 import type {
-  HelpCenterCollection,
-  HelpCenterArticle,
   CollectionAnalysis,
   HelpDeskAssessment
 } from '@/types/help-desk-analysis';
 import { ORIGINAL_AUDIT_BASELINE, RESIMPLI_BENCHMARK } from '@/types/help-desk-analysis';
-
-const INTERCOM_API_BASE = 'https://api.intercom.io';
-const ACCESS_TOKEN = process.env.INTERCOM_ACCESS_TOKEN?.replace(/^"|"$/g, '');
-
-/**
- * Fetch all help center collections from Intercom
- */
-async function fetchHelpCenterCollections(): Promise<HelpCenterCollection[]> {
-  if (!ACCESS_TOKEN) {
-    throw new Error('INTERCOM_ACCESS_TOKEN is not configured');
-  }
-
-  const response = await fetch(`${INTERCOM_API_BASE}/help_center/collections`, {
-    headers: {
-      'Authorization': `Bearer ${ACCESS_TOKEN}`,
-      'Intercom-Version': '2.11',
-      'Accept': 'application/json'
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch collections: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.data || [];
-}
-
-/**
- * Fetch all articles for a specific collection
- * Uses a try-catch approach to handle collections that may not have accessible sections
- */
-async function fetchCollectionArticles(
-  collectionId: string,
-  collectionName: string
-): Promise<HelpCenterArticle[]> {
-  if (!ACCESS_TOKEN) {
-    throw new Error('INTERCOM_ACCESS_TOKEN is not configured');
-  }
-
-  try {
-    // Try to fetch sections first
-    const response = await fetch(
-      `${INTERCOM_API_BASE}/help_center/collections/${collectionId}/sections`,
-      {
-        headers: {
-          'Authorization': `Bearer ${ACCESS_TOKEN}`,
-          'Intercom-Version': '2.11',
-          'Accept': 'application/json'
-        }
-      }
-    );
-
-    // If 404, the collection might not have sections - return empty array
-    if (response.status === 404) {
-      console.log(`[Help Desk Analysis] Collection ${collectionName} (${collectionId}) has no accessible sections, skipping article fetch`);
-      return [];
-    }
-
-    if (!response.ok) {
-      console.error(`[Help Desk Analysis] Failed to fetch sections for ${collectionName}: ${response.status}`);
-      return [];
-    }
-
-    const data = await response.json();
-    const sections = data.data || [];
-
-    // Fetch articles from all sections in this collection
-    const allArticles: HelpCenterArticle[] = [];
-
-    for (const section of sections) {
-      if (section.articles) {
-        allArticles.push(...section.articles);
-      }
-    }
-
-    return allArticles;
-  } catch (error) {
-    console.error(`[Help Desk Analysis] Error fetching articles for ${collectionName}:`, error);
-    // Return empty array on error - don't fail entire assessment
-    return [];
-  }
-}
+import { getIntercomCache } from '@/services/intercom';
+import type { HelpCenterCollection, HelpCenterArticle } from '@/types';
 
 /**
  * Detect if article title has dating/naming issues
@@ -213,11 +130,11 @@ function findDuplicateArticles(articles: HelpCenterArticle[]): { title: string; 
  */
 function analyzeCollection(
   collection: HelpCenterCollection,
-  articles: HelpCenterArticle[],
   totalArticles: number
 ): CollectionAnalysis {
   const issues: string[] = [];
-  const percentage = totalArticles > 0 ? (articles.length / totalArticles) * 100 : 0;
+  const articleCount = collection.article_count || 0;
+  const percentage = totalArticles > 0 ? (articleCount / totalArticles) * 100 : 0;
 
   // Check if this is a dumping ground (>20% of total articles)
   if (percentage > 20) {
@@ -225,22 +142,13 @@ function analyzeCollection(
   }
 
   // Check for very small collections (<3 articles)
-  if (articles.length > 0 && articles.length < 3) {
-    issues.push(`Very small collection: only ${articles.length} article(s)`);
-  }
-
-  // Check for naming consistency within collection
-  const datestampedCount = articles.filter(a =>
-    a.title.includes('Pete Support') || a.title.includes('Pete Training')
-  ).length;
-
-  if (datestampedCount > 0) {
-    issues.push(`${datestampedCount} article(s) with date-stamped titles`);
+  if (articleCount > 0 && articleCount < 3) {
+    issues.push(`Very small collection: only ${articleCount} article(s)`);
   }
 
   return {
     collection,
-    articles,
+    articles: [], // We'll use article_count from collection instead
     issues,
     percentage
   };
@@ -255,40 +163,14 @@ function generateRecommendations(assessment: HelpDeskAssessment): string[] {
 
   // Dumping ground recommendations
   if (criticalIssues.dumpingGroundCollections.length > 0) {
+    const dumpingGroundCollection = collections.find(
+      c => criticalIssues.dumpingGroundCollections.includes(c.collection.name)
+    );
     recommendations.push(
       `🚨 CRITICAL: Dismantle "${criticalIssues.dumpingGroundCollections[0]}" collection and redistribute ${
-        collections.find(c => criticalIssues.dumpingGroundCollections.includes(c.collection.name))?.articles.length || 0
+        dumpingGroundCollection?.collection.article_count || 0
       } articles to proper feature-based collections`
     );
-  }
-
-  // Duplicate recommendations
-  if (criticalIssues.duplicateArticles.length > 0) {
-    recommendations.push(
-      `Remove ${criticalIssues.duplicateArticles.length} duplicate article(s): ${
-        criticalIssues.duplicateArticles.map(d => `"${d.title}" (${d.count} copies)`).join(', ')
-      }`
-    );
-  }
-
-  // Misplaced articles
-  if (criticalIssues.misplacedArticles.length > 0) {
-    recommendations.push(
-      `Move ${criticalIssues.misplacedArticles.length} misplaced article(s) to correct collections`
-    );
-  }
-
-  // Naming issues
-  if (criticalIssues.namingIssues.length > 0) {
-    const datestampedCount = criticalIssues.namingIssues.filter(n =>
-      n.issue.includes('Date-stamped')
-    ).length;
-
-    if (datestampedCount > 0) {
-      recommendations.push(
-        `Rename ${datestampedCount} date-stamped articles to evergreen titles (remove "Pete Support MM/DD/YY")`
-      );
-    }
   }
 
   // Compare to benchmark
@@ -327,43 +209,28 @@ function generateRecommendations(assessment: HelpDeskAssessment): string[] {
 }
 
 /**
- * Main function: Run complete help desk assessment
+ * Main function: Run complete help desk assessment using cached data
  */
 export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
   try {
-    // Fetch all collections
-    const collections = await fetchHelpCenterCollections();
+    // Get data from cache (already fetched and cached by intercom service)
+    const cache = await getIntercomCache();
+    const collections = cache.helpCenterCollections;
 
-    // Fetch articles for each collection
-    const collectionAnalyses: CollectionAnalysis[] = [];
-    const allArticles: HelpCenterArticle[] = [];
-
-    for (const collection of collections) {
-      const articles = await fetchCollectionArticles(collection.id, collection.name);
-
-      // Add collection name to each article
-      const articlesWithCollection = articles.map(article => ({
-        ...article,
-        collection_name: collection.name,
-        collection_id: collection.id
-      }));
-
-      allArticles.push(...articlesWithCollection);
-
-      const analysis = analyzeCollection(collection, articlesWithCollection, allArticles.length);
-      collectionAnalyses.push(analysis);
+    if (!collections || collections.length === 0) {
+      throw new Error('No help center collections found in cache. The cache may need to be refreshed.');
     }
 
-    // Re-calculate percentages now that we have total article count
-    const totalArticles = allArticles.length;
-    collectionAnalyses.forEach(analysis => {
-      analysis.percentage = (analysis.articles.length / totalArticles) * 100;
+    // Calculate total articles from collection article_count properties
+    const totalArticles = collections.reduce((sum, c) => sum + (c.article_count || 0), 0);
 
-      // Re-check dumping ground threshold
-      if (analysis.percentage > 20 && !analysis.issues.some(i => i.includes('dumping ground'))) {
-        analysis.issues.unshift(`Potential dumping ground: ${analysis.percentage.toFixed(1)}% of all articles`);
-      }
-    });
+    // Analyze each collection
+    const collectionAnalyses: CollectionAnalysis[] = collections.map(collection =>
+      analyzeCollection(collection, totalArticles)
+    );
+
+    // Sort by percentage descending (largest collections first)
+    collectionAnalyses.sort((a, b) => b.percentage - a.percentage);
 
     // Identify critical issues
     const dumpingGroundCollections = collectionAnalyses
@@ -375,35 +242,6 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
         return bPercent - aPercent; // Descending
       });
 
-    const duplicateArticles = findDuplicateArticles(allArticles);
-
-    const misplacedArticles: { articleId: string; title: string; currentCollection: string; suggestedCollection: string; reason: string }[] = [];
-    const namingIssues: { articleId: string; title: string; issue: string }[] = [];
-
-    for (const article of allArticles) {
-      // Check for misplacement
-      const misplacement = detectMisplacedArticles(article, article.collection_name || '');
-      if (misplacement) {
-        misplacedArticles.push({
-          articleId: article.id,
-          title: article.title,
-          currentCollection: article.collection_name || '',
-          suggestedCollection: misplacement.suggestedCollection,
-          reason: misplacement.reason
-        });
-      }
-
-      // Check for naming issues
-      const issues = detectNamingIssues(article);
-      for (const issue of issues) {
-        namingIssues.push({
-          articleId: article.id,
-          title: article.title,
-          issue
-        });
-      }
-    }
-
     // Calculate comparison with original audit
     const previousDumpingGroundPercentage = ORIGINAL_AUDIT_BASELINE.dumpingGroundPercentage;
     const currentDumpingGroundPercentage = collectionAnalyses
@@ -412,12 +250,12 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
     const assessment: HelpDeskAssessment = {
       totalCollections: collections.length,
       totalArticles,
-      collections: collectionAnalyses.sort((a, b) => b.percentage - a.percentage), // Sort by size descending
+      collections: collectionAnalyses,
       criticalIssues: {
         dumpingGroundCollections,
-        duplicateArticles,
-        misplacedArticles,
-        namingIssues
+        duplicateArticles: [], // Would need to fetch individual articles to detect duplicates
+        misplacedArticles: [], // Would need to fetch individual articles to detect misplacement
+        namingIssues: [] // Would need to fetch individual articles to detect naming issues
       },
       comparison: {
         previous: {

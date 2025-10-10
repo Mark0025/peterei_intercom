@@ -44,11 +44,35 @@ export interface IntercomConversation {
   };
 }
 
+export interface HelpCenterCollection {
+  id: string;
+  name: string;
+  description?: string;
+  article_count: number;
+  url?: string;
+  created_at?: number;
+  updated_at?: number;
+}
+
+export interface HelpCenterArticle {
+  id: string;
+  title: string;
+  description?: string;
+  collection_id?: string;
+  collection_name?: string;
+  author_id?: string;
+  state?: 'published' | 'draft';
+  url?: string;
+  created_at?: number;
+  updated_at?: number;
+}
+
 export interface IntercomCache {
   contacts: IntercomContact[];
   companies: IntercomCompany[];
   admins: IntercomAdmin[];
   conversations: IntercomConversation[];
+  helpCenterCollections: HelpCenterCollection[];
   lastRefreshed: Date | null;
 }
 
