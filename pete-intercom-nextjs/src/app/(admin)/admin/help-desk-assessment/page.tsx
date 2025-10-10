@@ -257,13 +257,10 @@ export default function HelpDeskAssessmentPage() {
                   </div>
                   <div className="pt-3 border-t">
                     <div className="font-semibold text-gray-800 mb-2">Current Collections:</div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      {assessment.collections.slice(0, 5).map((c, i) => (
+                    <div className="text-sm text-gray-600 space-y-1 max-h-48 overflow-y-auto">
+                      {assessment.collections.map((c, i) => (
                         <div key={i}>• {c.collection.name} ({c.articles.length})</div>
                       ))}
-                      {assessment.collections.length > 5 && (
-                        <div className="text-gray-500">... and {assessment.collections.length - 5} more</div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -309,11 +306,11 @@ export default function HelpDeskAssessmentPage() {
                   </div>
                 </div>
 
-                {/* Pete Current Flow - LIVE DATA */}
+                {/* Pete Current Flow - LIVE DATA - ALL COLLECTIONS */}
                 <div className="border rounded-lg p-6 bg-blue-50">
-                  <h4 className="font-bold text-blue-700 mb-4">Pete Current Journey (Live)</h4>
-                  <div className="space-y-4">
-                    {assessment.collections.slice(0, 4).map((collection, idx) => (
+                  <h4 className="font-bold text-blue-700 mb-4">Pete Current Journey (Live) - All {assessment.collections.length} Collections</h4>
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {assessment.collections.map((collection, idx) => (
                       <div key={collection.collection.id} className="flex items-start">
                         <div className={`flex-shrink-0 w-8 h-8 ${collection.percentage > 20 ? 'bg-red-500' : 'bg-blue-500'} text-white rounded-full flex items-center justify-center font-bold mr-3`}>
                           {idx + 1}
@@ -334,11 +331,6 @@ export default function HelpDeskAssessmentPage() {
                         </div>
                       </div>
                     ))}
-                    {assessment.collections.length > 4 && (
-                      <div className="text-sm text-gray-500 pl-11">
-                        ... and {assessment.collections.length - 4} more collections
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -501,10 +493,10 @@ export default function HelpDeskAssessmentPage() {
               {assessment.criticalIssues.misplacedArticles.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-yellow-600 mb-3">
-                    Misplaced Articles ({assessment.criticalIssues.misplacedArticles.length})
+                    All Misplaced Articles ({assessment.criticalIssues.misplacedArticles.length})
                   </h3>
                   <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {assessment.criticalIssues.misplacedArticles.slice(0, 10).map((item, index) => (
+                    {assessment.criticalIssues.misplacedArticles.map((item, index) => (
                       <div key={index} className="bg-yellow-50 p-4 rounded-lg">
                         <div className="font-semibold text-gray-800">{item.article}</div>
                         <div className="text-sm text-gray-600 mt-1">
@@ -514,11 +506,6 @@ export default function HelpDeskAssessmentPage() {
                         </div>
                       </div>
                     ))}
-                    {assessment.criticalIssues.misplacedArticles.length > 10 && (
-                      <div className="text-center text-sm text-gray-500 pt-2">
-                        ... and {assessment.criticalIssues.misplacedArticles.length - 10} more misplaced articles
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -612,21 +599,16 @@ export default function HelpDeskAssessmentPage() {
           {assessment.criticalIssues.namingIssues.length > 0 && (
             <div className="bg-white rounded-xl shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                ✏️ Naming Issues ({assessment.criticalIssues.namingIssues.length})
+                ✏️ All Naming Convention Issues ({assessment.criticalIssues.namingIssues.length})
               </h2>
 
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {assessment.criticalIssues.namingIssues.slice(0, 20).map((naming, index) => (
+                {assessment.criticalIssues.namingIssues.map((naming, index) => (
                   <div key={index} className="bg-gray-50 p-3 rounded-lg">
                     <div className="text-sm font-medium text-gray-800">{naming.article}</div>
                     <div className="text-xs text-gray-600 mt-1">{naming.issues.join(', ')}</div>
                   </div>
                 ))}
-                {assessment.criticalIssues.namingIssues.length > 20 && (
-                  <div className="text-center text-sm text-gray-500 pt-2">
-                    ... and {assessment.criticalIssues.namingIssues.length - 20} more naming issues
-                  </div>
-                )}
               </div>
             </div>
           )}
