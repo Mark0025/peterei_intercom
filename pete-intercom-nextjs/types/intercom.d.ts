@@ -54,18 +54,46 @@ export interface HelpCenterCollection {
   updated_at?: number;
 }
 
+export interface ArticleStatistics {
+  type: 'article_statistics';
+  views: number;
+  conversions: number;
+  reactions: number;
+  happy_reaction_percentage: number;
+  neutral_reaction_percentage: number;
+  sad_reaction_percentage: number;
+}
+
+export interface TranslatedContent {
+  type: 'article_translated_content';
+  title?: string;
+  description?: string;
+  body?: string;
+  author_id?: number;
+  state?: 'published' | 'draft';
+  created_at?: number;
+  updated_at?: number;
+  url?: string;
+}
+
 export interface HelpCenterArticle {
+  type: 'article';
   id: string;
+  workspace_id?: string;
   title: string;
   description?: string;
+  body?: string;
+  author_id?: string;
+  state?: 'published' | 'draft';
+  created_at?: number;
+  updated_at?: number;
+  url?: string;
   parent_id?: string;
   parent_ids?: string[];
   parent_type?: 'collection' | 'section';
-  author_id?: string;
-  state?: 'published' | 'draft';
-  url?: string;
-  created_at?: number;
-  updated_at?: number;
+  default_locale?: string;
+  translated_content?: Record<string, TranslatedContent>;
+  statistics?: ArticleStatistics;
 }
 
 export interface IntercomCache {
