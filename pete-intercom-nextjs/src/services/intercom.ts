@@ -100,39 +100,19 @@ async function getAllFromIntercom(path: string, preferredKeys: string[] = []): P
   return results;
 }
 
-async function fetchAllHelpCenterArticles(collections: unknown[]): Promise<unknown[]> {
-  const articles: unknown[] = [];
+async function fetchAllHelpCenterArticles(): Promise<unknown[]> {
+  try {
+    logInfo('[INTERCOM] Fetching all help center articles...', 'api.log');
 
-  for (const collection of collections) {
-    const collectionId = (collection as { id: string }).id;
-    const collectionName = (collection as { name: string }).name;
+    // Fetch all articles using the /articles endpoint
+    const articles = await getAllFromIntercom('/articles', ['articles', 'data']);
 
-    try {
-      logInfo(`[INTERCOM] Fetching articles for collection: ${collectionName} (${collectionId})`, 'api.log');
-
-      // Fetch articles for this collection
-      const collectionArticles = await getAllFromIntercom(
-        `/help_center/collections/${collectionId}/articles`,
-        ['articles', 'data']
-      );
-
-      // Add collection info to each article
-      const articlesWithCollection = collectionArticles.map(article => ({
-        ...article,
-        collection_id: collectionId,
-        collection_name: collectionName
-      }));
-
-      articles.push(...articlesWithCollection);
-      logInfo(`[INTERCOM] Fetched ${collectionArticles.length} articles from ${collectionName}`, 'api.log');
-    } catch (err) {
-      // Gracefully handle errors (some collections might not have accessible articles)
-      logError(`[INTERCOM] Failed to fetch articles for collection ${collectionId}: ${err instanceof Error ? err.message : err}`, 'api.log');
-      // Continue with next collection
-    }
+    logInfo(`[INTERCOM] Fetched ${articles.length} total articles`, 'api.log');
+    return articles;
+  } catch (err) {
+    logError(`[INTERCOM] Failed to fetch articles: ${err instanceof Error ? err.message : err}`, 'api.log');
+    return [];
   }
-
-  return articles;
 }
 
 export async function refreshIntercomCache(): Promise<void> {
@@ -155,9 +135,8 @@ export async function refreshIntercomCache(): Promise<void> {
         getAllFromIntercom('/help_center/collections', ['data']),
       ]);
 
-      // Fetch all articles for all collections (sequential to avoid rate limiting)
-      logInfo('[INTERCOM] Fetching help center articles...', 'api.log');
-      const helpCenterArticles = await fetchAllHelpCenterArticles(helpCenterCollections);
+      // Fetch all articles (the API returns all articles with collection info)
+      const helpCenterArticles = await fetchAllHelpCenterArticles();
 
       cache.contacts = contacts;
       cache.companies = companies;

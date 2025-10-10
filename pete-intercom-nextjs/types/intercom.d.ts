@@ -58,8 +58,9 @@ export interface HelpCenterArticle {
   id: string;
   title: string;
   description?: string;
-  collection_id?: string;
-  collection_name?: string;
+  parent_id?: string;
+  parent_ids?: string[];
+  parent_type?: 'collection' | 'section';
   author_id?: string;
   state?: 'published' | 'draft';
   url?: string;

@@ -323,7 +323,7 @@ export default function HelpDeskAssessmentPage() {
 
                   {/* Issues */}
                   {collection.issues.length > 0 && (
-                    <div className="space-y-1">
+                    <div className="space-y-1 mb-4">
                       {collection.issues.map((issue, i) => (
                         <div key={i} className="flex items-start text-sm">
                           <span className="text-red-500 mr-2">⚠️</span>
@@ -331,6 +331,22 @@ export default function HelpDeskAssessmentPage() {
                         </div>
                       ))}
                     </div>
+                  )}
+
+                  {/* Articles List */}
+                  {collection.articles.length > 0 && (
+                    <details className="mt-4">
+                      <summary className="cursor-pointer text-sm font-medium text-purple-600 hover:text-purple-700">
+                        📄 View {collection.articles.length} articles
+                      </summary>
+                      <div className="mt-3 space-y-1 max-h-60 overflow-y-auto">
+                        {collection.articles.map((article) => (
+                          <div key={article.id} className="text-xs text-gray-600 pl-4 py-1 hover:bg-gray-50 rounded">
+                            • {article.title}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                   )}
                 </div>
               ))}

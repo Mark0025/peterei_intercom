@@ -245,9 +245,12 @@ export async function runHelpDeskAssessment(): Promise<HelpDeskAssessment> {
     // Analyze each collection with its articles
     const collectionAnalyses: CollectionAnalysis[] = collections.map(collection => {
       // Filter articles for this collection
-      const collectionArticles = allArticles.filter(
-        article => article.collection_id === collection.id
-      );
+      // Articles belong to a collection if their parent_id matches OR if the collection ID is in parent_ids array
+      const collectionArticles = allArticles.filter(article => {
+        if (article.parent_id === collection.id) return true;
+        if (article.parent_ids && article.parent_ids.includes(collection.id)) return true;
+        return false;
+      });
 
       return analyzeCollection(collection, collectionArticles, totalArticles);
     });
