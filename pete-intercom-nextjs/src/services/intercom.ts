@@ -21,6 +21,7 @@ const cache: IntercomCache = {
   companies: [],
   admins: [],
   conversations: [],
+  conversationThreads: [],  // Full thread data with notes
   helpCenterCollections: [],
   helpCenterArticles: [],
   lastRefreshed: null,
@@ -178,6 +179,7 @@ export function getCacheStatus() {
       companies: cache.companies.length,
       admins: cache.admins.length,
       conversations: cache.conversations.length,
+      conversationThreads: cache.conversationThreads.length,
       helpCenterCollections: cache.helpCenterCollections.length,
       helpCenterArticles: cache.helpCenterArticles.length,
     },
@@ -245,7 +247,7 @@ export async function searchCompanies(name?: string, live: boolean = false): Pro
   logInfo(`[INTERCOM] Search companies: name=${name || ''}, live=${live}`, 'api.log');
 
   let companies: IntercomCompany[];
-  
+
   if (live) {
     companies = await getAllFromIntercom('/companies', ['companies', 'data']);
   } else {
@@ -259,6 +261,42 @@ export async function searchCompanies(name?: string, live: boolean = false): Pro
 
   logInfo(`[INTERCOM] Search found ${results.length} companies`, 'api.log');
   return results;
+}
+
+/**
+ * Refresh conversation threads in cache
+ * This fetches full details for each conversation and builds complete threads
+ * Note: This is expensive - makes 1 API call per conversation
+ */
+export async function refreshConversationThreads(): Promise<void> {
+  logInfo('[INTERCOM] Refreshing conversation threads...', 'api.log');
+
+  try {
+    const { buildThreadsForConversations } = await import('./threadService');
+
+    // Get conversation IDs from cache
+    const conversationIds = cache.conversations.map((c: any) => c.id);
+
+    if (conversationIds.length === 0) {
+      logInfo('[INTERCOM] No conversations to build threads for', 'api.log');
+      return;
+    }
+
+    // Build threads (batched with rate limiting)
+    const threads = await buildThreadsForConversations(conversationIds);
+
+    // Update cache
+    cache.conversationThreads = threads;
+
+    logInfo(`[INTERCOM] Thread refresh complete. Built ${threads.length} threads`, 'api.log');
+
+    // Save to disk
+    const { saveCacheToDisk } = await import('./cacheStorage');
+    await saveCacheToDisk(cache);
+  } catch (err) {
+    logError(`[INTERCOM] Error refreshing threads: ${err instanceof Error ? err.message : err}`, 'api.log');
+    throw err;
+  }
 }
 
 export async function updateUserTrainingTopic(userId: string, topic: string): Promise<IntercomContact> {

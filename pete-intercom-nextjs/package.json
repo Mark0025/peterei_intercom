@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze:conversations": "bun src/scripts/full-conversation-analysis.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.1",

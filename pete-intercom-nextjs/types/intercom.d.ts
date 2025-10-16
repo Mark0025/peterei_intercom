@@ -44,6 +44,87 @@ export interface IntercomConversation {
   };
 }
 
+// Full conversation thread with all parts, notes, and messages
+export interface ConversationThread {
+  conversation_id: string;
+  state: 'open' | 'closed' | 'snoozed';
+  created_at: number;
+  updated_at: number;
+
+  // User info
+  user: {
+    id: string;
+    name?: string;
+    email?: string;
+  };
+
+  // Initial message
+  initial_message: {
+    body_html?: string;
+    body_clean: string;
+    created_at: number;
+    author?: {
+      type: string;
+      id: string;
+      name?: string;
+      email?: string;
+    };
+  };
+
+  // All conversation parts (messages, notes, system actions)
+  parts: Array<{
+    id: string;
+    type: string; // comment, note, assignment, close, etc.
+    body_html?: string | null;
+    body_clean: string | null;
+    created_at: number;
+    author_type?: string;
+    author_id?: string;
+    author_name?: string;
+    author_email?: string;
+  }>;
+
+  // Extracted notes (for easy access)
+  notes: Array<{
+    id: string;
+    body_html?: string;
+    body_clean: string;
+    created_at: number;
+    author_id: string;
+    author_name: string;
+    is_from_jon: boolean;
+    is_from_mark: boolean;
+  }>;
+
+  // Extracted admin responses
+  admin_responses: Array<{
+    id: string;
+    body_html?: string;
+    body_clean: string;
+    created_at: number;
+    author_id: string;
+    author_name: string;
+    is_from_jon: boolean;
+    is_from_mark: boolean;
+  }>;
+
+  // Extracted user messages
+  user_messages: Array<{
+    id: string;
+    body_html?: string;
+    body_clean: string;
+    created_at: number;
+    author_id?: string;
+    author_name?: string;
+  }>;
+
+  // Metadata
+  admin_assignee_id?: number;
+  total_parts: number;
+  total_comments: number;
+  total_notes: number;
+}
+
 export interface HelpCenterCollection {
   id: string;
   name: string;
@@ -101,6 +182,7 @@ export interface IntercomCache {
   companies: IntercomCompany[];
   admins: IntercomAdmin[];
   conversations: IntercomConversation[];
+  conversationThreads: ConversationThread[];  // Full thread data with notes
   helpCenterCollections: HelpCenterCollection[];
   helpCenterArticles: HelpCenterArticle[];
   lastRefreshed: Date | null;

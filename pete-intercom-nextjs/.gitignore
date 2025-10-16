@@ -47,3 +47,8 @@ data/questionnaire-responses/*.json
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Conversation analysis data files (large thread JSON files)
+data/conversation-analysis/threads-*.json
+data/conversation-analysis/*-questions-*.json
+data/conversation-analysis/*-resolutions-*.json
