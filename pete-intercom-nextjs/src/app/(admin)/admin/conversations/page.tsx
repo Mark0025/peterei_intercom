@@ -1,4 +1,4 @@
-import { getAllConversations, getConversationStats } from '@/actions/conversations';
+import { getAllConversations, getConversationStats, getConversationNoteMetadata } from '@/actions/conversations';
 import ConversationsPageClient from '@/components/conversations/ConversationsPageClient';
 import ConversationInsightsChat from '@/components/conversations/ConversationInsightsChat';
 import RefreshCacheButton from '@/components/conversations/RefreshCacheButton';
@@ -12,15 +12,17 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Disable static generation
 
 export default async function ConversationsPage() {
-  // Fetch conversations and stats from cache
+  // Fetch conversations, stats, and note metadata from cache
+  // Why: Note metadata enables client-side filtering by note presence without fetching full threads
   // Using Promise.all for parallel fetching (Next.js best practice)
-  const [conversationsResult, statsResult] = await Promise.all([
+  const [conversationsResult, statsResult, noteMetadataResult] = await Promise.all([
     getAllConversations(false), // Use cache by default for performance
     getConversationStats(),
+    getConversationNoteMetadata(), // NEW: Metadata for note-based filtering
   ]);
 
   // Handle errors
-  if (!conversationsResult.success || !statsResult.success) {
+  if (!conversationsResult.success || !statsResult.success || !noteMetadataResult.success) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -41,7 +43,7 @@ export default async function ConversationsPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              {conversationsResult.error || statsResult.error || 'Failed to load conversation data'}
+              {conversationsResult.error || statsResult.error || noteMetadataResult.error || 'Failed to load conversation data'}
             </p>
           </CardContent>
         </Card>
@@ -51,6 +53,7 @@ export default async function ConversationsPage() {
 
   const conversations = conversationsResult.data || [];
   const stats = statsResult.data!;
+  const noteMetadata = noteMetadataResult.data || {};
 
   return (
     <div className="min-h-screen">
@@ -76,7 +79,11 @@ export default async function ConversationsPage() {
       </div>
 
       {/* Client Component with Global Filters */}
-      <ConversationsPageClient conversations={conversations} stats={stats} />
+      <ConversationsPageClient
+        conversations={conversations}
+        stats={stats}
+        noteMetadata={noteMetadata}
+      />
 
       {/* Additional Info */}
       <div className="px-6 pb-6 mt-6">

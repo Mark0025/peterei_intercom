@@ -1,11 +1,19 @@
 'use client';
 
 /**
- * Conversation table - displays already filtered conversations
+ * Conversation Table Component
+ *
+ * Why: Displays Intercom conversations in a sortable, filterable table.
+ * Now enhanced with expandable rows to show full thread details on click.
+ *
+ * Strategy: Non-breaking enhancement
+ * - Existing: Basic table with conversation metadata
+ * - New: Click row → fetch thread details → show in expanded panel
+ * - Performance: Thread data fetched on-demand, not all at once
  */
 
-import { useMemo } from 'react';
-import type { IntercomConversation } from '@/types';
+import React, { useMemo, useState } from 'react';
+import type { IntercomConversation, ConversationThread } from '@/types';
 import {
   Table,
   TableBody,
@@ -16,16 +24,63 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import ThreadDetailsPanel from './ThreadDetailsPanel';
+import { getConversationThread } from '@/actions/conversations';
 
 interface ConversationTableProps {
   conversations: IntercomConversation[];
 }
 
 export default function ConversationTable({ conversations }: ConversationTableProps) {
+  // ========================================
+  // STATE: Expandable Row Functionality
+  // ========================================
+  // Why: Track which row is expanded and its thread data
+  // Strategy: Only one row can be expanded at a time (cleaner UX)
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [threadData, setThreadData] = useState<ConversationThread | null>(null);
+  const [loadingThreadId, setLoadingThreadId] = useState<string | null>(null);
+
   // Sort conversations by date (most recent first)
   const sortedConversations = useMemo(() => {
     return [...conversations].sort((a, b) => b.updated_at - a.updated_at);
   }, [conversations]);
+
+  /**
+   * Handle row click - toggle expansion and fetch thread data
+   *
+   * Why: On-demand loading keeps initial page fast. Only fetch thread
+   * details when user explicitly asks for them by clicking a row.
+   */
+  const handleRowClick = async (conversationId: string) => {
+    // If clicking the same row, collapse it
+    if (expandedRowId === conversationId) {
+      setExpandedRowId(null);
+      setThreadData(null);
+      return;
+    }
+
+    // Expand new row and fetch its thread data
+    setExpandedRowId(conversationId);
+    setLoadingThreadId(conversationId);
+    setThreadData(null);
+
+    try {
+      const result = await getConversationThread(conversationId);
+
+      if (result.success && result.data) {
+        setThreadData(result.data);
+      } else {
+        console.error('Failed to load thread:', result.error);
+        // Keep row expanded but show error state
+      }
+    } catch (error) {
+      console.error('Error fetching thread:', error);
+    } finally {
+      setLoadingThreadId(null);
+    }
+  };
 
   // Format timestamp
   const formatDate = (timestamp: number) => {
@@ -82,6 +137,7 @@ export default function ConversationTable({ conversations }: ConversationTablePr
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8"></TableHead>
                 <TableHead>ID</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>User</TableHead>
@@ -95,7 +151,7 @@ export default function ConversationTable({ conversations }: ConversationTablePr
             <TableBody>
               {sortedConversations.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                     No conversations found
                   </TableCell>
                 </TableRow>
@@ -109,9 +165,28 @@ export default function ConversationTable({ conversations }: ConversationTablePr
                                   conv.source?.author?.name ||
                                   conv.source?.author?.email;
 
+                  const isExpanded = expandedRowId === conv.id;
+                  const isLoading = loadingThreadId === conv.id;
+
                   return (
-                    <TableRow key={`${conv.id}-${index}`} className="hover:bg-muted/50 cursor-pointer">
-                      <TableCell className="font-mono text-xs">{conv.id.slice(0, 8)}...</TableCell>
+                    <React.Fragment key={`${conv.id}-${index}`}>
+                      {/* Main conversation row - Why: Existing data unchanged, just adding click handler */}
+                      <TableRow
+                        onClick={() => handleRowClick(conv.id)}
+                        className="hover:bg-muted/50 cursor-pointer transition-colors"
+                      >
+                        {/* Expand/Collapse Icon - Why: Visual indicator that row is clickable/expandable */}
+                        <TableCell className="w-8">
+                          {isLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : isExpanded ? (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </TableCell>
+
+                        <TableCell className="font-mono text-xs">{conv.id.slice(0, 8)}...</TableCell>
                       <TableCell className="font-medium max-w-xs truncate">
                         {conv.title || conv.source?.subject || 'Untitled Conversation'}
                       </TableCell>
@@ -155,6 +230,27 @@ export default function ConversationTable({ conversations }: ConversationTablePr
                         {formatDate(conv.updated_at)}
                       </TableCell>
                     </TableRow>
+
+                    {/* Expanded thread details row - Why: Progressive disclosure keeps UI clean */}
+                    {isExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="p-0 border-t-0">
+                          {loadingThreadId === conv.id ? (
+                            <div className="flex items-center justify-center p-8 bg-muted/30">
+                              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                              <span className="ml-2 text-muted-foreground">Loading thread details...</span>
+                            </div>
+                          ) : threadData ? (
+                            <ThreadDetailsPanel thread={threadData} />
+                          ) : (
+                            <div className="p-4 text-center text-muted-foreground bg-muted/30">
+                              Failed to load thread details. Please try again.
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
                   );
                 })
               )}
