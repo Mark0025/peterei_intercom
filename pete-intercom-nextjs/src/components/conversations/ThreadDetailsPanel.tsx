@@ -10,7 +10,6 @@
  *
  * Features:
  * - Collapsible sections for notes, admin responses, user messages
- * - Priority badges for Jon/Mark notes
  * - Chronological timeline of conversation flow
  * - HTML-cleaned text for readability
  */
@@ -47,19 +46,6 @@ function formatDate(timestamp: number): string {
   });
 }
 
-/**
- * Get priority badge for note authors
- * Why: Jon and Mark's notes are high priority - make them visually distinct
- */
-function getPriorityBadge(isFromJon: boolean, isFromMark: boolean) {
-  if (isFromJon) {
-    return <Badge variant="default" className="bg-purple-600">Jon (Priority)</Badge>;
-  }
-  if (isFromMark) {
-    return <Badge variant="default" className="bg-blue-600">Mark (Priority)</Badge>;
-  }
-  return null;
-}
 
 export default function ThreadDetailsPanel({ thread }: ThreadDetailsPanelProps) {
   // Track which sections are open
@@ -136,12 +122,9 @@ export default function ThreadDetailsPanel({ thread }: ThreadDetailsPanelProps) 
                         key={note.id}
                         className="p-3 bg-background rounded-md border space-y-2"
                       >
-                        {/* Author with priority badge */}
+                        {/* Author */}
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <strong className="text-sm">{note.author_name}</strong>
-                            {getPriorityBadge(note.is_from_jon, note.is_from_mark)}
-                          </div>
+                          <strong className="text-sm">{note.author_name}</strong>
                           <span className="text-xs text-muted-foreground">
                             {formatDate(note.created_at)}
                           </span>
@@ -190,10 +173,7 @@ export default function ThreadDetailsPanel({ thread }: ThreadDetailsPanelProps) 
                         className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-900 space-y-2"
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <strong className="text-sm">{response.author_name}</strong>
-                            {getPriorityBadge(response.is_from_jon, response.is_from_mark)}
-                          </div>
+                          <strong className="text-sm">{response.author_name}</strong>
                           <span className="text-xs text-muted-foreground">
                             {formatDate(response.created_at)}
                           </span>
