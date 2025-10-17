@@ -36,10 +36,10 @@ export default function ConversationTable({ conversations }: ConversationTablePr
   // ========================================
   // STATE: Expandable Row Functionality
   // ========================================
-  // Why: Track which row is expanded and its thread data
-  // Strategy: Only one row can be expanded at a time (cleaner UX)
-  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
-  const [threadData, setThreadData] = useState<ConversationThread | null>(null);
+  // Why: Track which rows are expanded and their thread data
+  // Strategy: Allow multiple rows to be expanded at once
+  const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
+  const [threadDataMap, setThreadDataMap] = useState<Map<string, ConversationThread>>(new Map());
   const [loadingThreadId, setLoadingThreadId] = useState<string | null>(null);
 
   // Sort conversations by date (most recent first)
@@ -52,25 +52,33 @@ export default function ConversationTable({ conversations }: ConversationTablePr
    *
    * Why: On-demand loading keeps initial page fast. Only fetch thread
    * details when user explicitly asks for them by clicking a row.
+   * Now supports multiple rows expanded at once.
    */
   const handleRowClick = async (conversationId: string) => {
-    // If clicking the same row, collapse it
-    if (expandedRowId === conversationId) {
-      setExpandedRowId(null);
-      setThreadData(null);
+    // If clicking an already-expanded row, collapse it
+    if (expandedRowIds.has(conversationId)) {
+      setExpandedRowIds(prev => {
+        const next = new Set(prev);
+        next.delete(conversationId);
+        return next;
+      });
+      setThreadDataMap(prev => {
+        const next = new Map(prev);
+        next.delete(conversationId);
+        return next;
+      });
       return;
     }
 
     // Expand new row and fetch its thread data
-    setExpandedRowId(conversationId);
+    setExpandedRowIds(prev => new Set(prev).add(conversationId));
     setLoadingThreadId(conversationId);
-    setThreadData(null);
 
     try {
       const result = await getConversationThread(conversationId);
 
       if (result.success && result.data) {
-        setThreadData(result.data);
+        setThreadDataMap(prev => new Map(prev).set(conversationId, result.data));
       } else {
         console.error('Failed to load thread:', result.error);
         // Keep row expanded but show error state
@@ -165,7 +173,7 @@ export default function ConversationTable({ conversations }: ConversationTablePr
                                   conv.source?.author?.name ||
                                   conv.source?.author?.email;
 
-                  const isExpanded = expandedRowId === conv.id;
+                  const isExpanded = expandedRowIds.has(conv.id);
                   const isLoading = loadingThreadId === conv.id;
 
                   return (
@@ -240,8 +248,8 @@ export default function ConversationTable({ conversations }: ConversationTablePr
                               <Loader2 className="h-6 w-6 animate-spin text-primary" />
                               <span className="ml-2 text-muted-foreground">Loading thread details...</span>
                             </div>
-                          ) : threadData ? (
-                            <ThreadDetailsPanel thread={threadData} />
+                          ) : threadDataMap.get(conv.id) ? (
+                            <ThreadDetailsPanel thread={threadDataMap.get(conv.id)!} />
                           ) : (
                             <div className="p-4 text-center text-muted-foreground bg-muted/30">
                               Failed to load thread details. Please try again.
