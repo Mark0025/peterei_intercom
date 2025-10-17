@@ -5,7 +5,7 @@
  * Uses existing cache infrastructure from @/services/intercom
  */
 
-import type { IntercomConversation, ActionResult } from '@/types';
+import type { IntercomConversation, ConversationThread, ActionResult } from '@/types';
 import { getIntercomCache, refreshIntercomCache } from '@/services/intercom';
 
 interface ConversationFilters {
@@ -161,4 +161,229 @@ export async function filterConversations(
     data: filtered,
     message: `Found ${filtered.length} conversations matching filters`,
   };
+}
+
+/**
+ * ========================================
+ * CONVERSATION THREAD ACTIONS (NEW)
+ * ========================================
+ *
+ * Why: The cache now includes full conversation threads with notes, messages, and admin responses.
+ * These actions provide access to the rich thread data without breaking existing UI that uses
+ * basic conversation metadata.
+ *
+ * Strategy: Progressive enhancement - existing functions remain unchanged, new functions
+ * provide access to detailed thread data only when needed (e.g., when user clicks a conversation).
+ */
+
+/**
+ * Get full thread details for a single conversation
+ *
+ * Why: Frontend needs detailed thread data (notes, messages, responses) when user clicks
+ * on a conversation row. Fetching on-demand keeps initial page load fast.
+ *
+ * @param conversationId - The Intercom conversation ID
+ * @returns Full ConversationThread with notes, messages, and metadata
+ */
+export async function getConversationThread(
+  conversationId: string
+): Promise<ActionResult<ConversationThread>> {
+  try {
+    const cache = await getIntercomCache();
+
+    // Find thread by conversation ID
+    const thread = cache.conversationThreads.find(
+      t => t.conversation_id === conversationId
+    );
+
+    if (!thread) {
+      return {
+        success: false,
+        error: `Thread not found for conversation ${conversationId}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: thread,
+    };
+  } catch (error) {
+    console.error('[getConversationThread] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Search threads by content (notes, admin responses, user messages)
+ *
+ * Why: Users need to find conversations based on what was discussed, not just IDs or states.
+ * This searches the actual content of notes and messages.
+ *
+ * @param query - Search term to find in thread content
+ * @returns Array of threads matching the query
+ */
+export async function searchThreadsByContent(
+  query: string
+): Promise<ActionResult<ConversationThread[]>> {
+  try {
+    if (!query || query.trim().length < 2) {
+      return {
+        success: false,
+        error: 'Search query must be at least 2 characters',
+      };
+    }
+
+    const cache = await getIntercomCache();
+    const searchTerm = query.toLowerCase().trim();
+
+    // Search in notes, admin responses, and user messages
+    // Why: Notes contain internal context, responses are customer-facing,
+    // user messages are the questions - all are valuable for search
+    const matchingThreads = cache.conversationThreads.filter(thread => {
+      // Search in notes
+      const hasNoteMatch = thread.notes.some(note =>
+        note.body_clean.toLowerCase().includes(searchTerm)
+      );
+
+      // Search in admin responses
+      const hasResponseMatch = thread.admin_responses.some(response =>
+        response.body_clean.toLowerCase().includes(searchTerm)
+      );
+
+      // Search in user messages
+      const hasMessageMatch = thread.user_messages.some(message =>
+        message.body_clean.toLowerCase().includes(searchTerm)
+      );
+
+      return hasNoteMatch || hasResponseMatch || hasMessageMatch;
+    });
+
+    return {
+      success: true,
+      data: matchingThreads,
+      message: `Found ${matchingThreads.length} threads containing "${query}"`,
+    };
+  } catch (error) {
+    console.error('[searchThreadsByContent] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get threads with notes from priority admins (Jon and Mark)
+ *
+ * Why: Jon and Mark's notes often contain critical context and decisions.
+ * This provides quick access to conversations they've reviewed.
+ *
+ * @returns Threads that have notes from Jon or Mark
+ */
+export async function getThreadsWithPriorityNotes(): Promise<ActionResult<ConversationThread[]>> {
+  try {
+    const cache = await getIntercomCache();
+
+    // Filter threads that have notes from Jon or Mark
+    // Why: These admins provide strategic insight, so their notes are high priority
+    const priorityThreads = cache.conversationThreads.filter(thread =>
+      thread.notes.some(note => note.is_from_jon || note.is_from_mark)
+    );
+
+    // Sort by most recent first (based on thread updated_at)
+    priorityThreads.sort((a, b) => b.updated_at - a.updated_at);
+
+    return {
+      success: true,
+      data: priorityThreads,
+      message: `Found ${priorityThreads.length} threads with priority notes`,
+    };
+  } catch (error) {
+    console.error('[getThreadsWithPriorityNotes] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get threads that have any notes at all
+ *
+ * Why: Notes indicate conversations that have been reviewed by the team.
+ * This helps find conversations that have internal context vs. just customer messages.
+ *
+ * @returns Threads with at least one note
+ */
+export async function getThreadsWithNotes(): Promise<ActionResult<ConversationThread[]>> {
+  try {
+    const cache = await getIntercomCache();
+
+    const threadsWithNotes = cache.conversationThreads.filter(
+      thread => thread.notes.length > 0
+    );
+
+    // Sort by most notes first (indicates more team involvement)
+    threadsWithNotes.sort((a, b) => b.notes.length - a.notes.length);
+
+    return {
+      success: true,
+      data: threadsWithNotes,
+      message: `Found ${threadsWithNotes.length} threads with notes`,
+    };
+  } catch (error) {
+    console.error('[getThreadsWithNotes] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+/**
+ * Get note metadata for all conversations (for client-side filtering)
+ *
+ * Why: Frontend needs to know which conversations have notes without fetching full thread data.
+ * This provides a lightweight map for fast client-side filtering by note presence.
+ *
+ * @returns Map of conversation_id to note metadata (hasNotes, hasJonNotes, hasMarkNotes)
+ */
+export async function getConversationNoteMetadata(): Promise<ActionResult<Record<string, {
+  hasNotes: boolean;
+  hasJonNotes: boolean;
+  hasMarkNotes: boolean;
+}>>> {
+  try {
+    const cache = await getIntercomCache();
+
+    // Build metadata map from all threads
+    // Why: Client-side filtering needs quick lookup without fetching full thread data
+    const metadata: Record<string, {
+      hasNotes: boolean;
+      hasJonNotes: boolean;
+      hasMarkNotes: boolean;
+    }> = {};
+
+    cache.conversationThreads.forEach(thread => {
+      metadata[thread.conversation_id] = {
+        hasNotes: thread.notes.length > 0,
+        hasJonNotes: thread.notes.some(note => note.is_from_jon),
+        hasMarkNotes: thread.notes.some(note => note.is_from_mark),
+      };
+    });
+
+    return {
+      success: true,
+      data: metadata,
+    };
+  } catch (error) {
+    console.error('[getConversationNoteMetadata] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 }
