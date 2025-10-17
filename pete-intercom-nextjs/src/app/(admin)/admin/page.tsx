@@ -174,61 +174,92 @@ export default function AdminPage() {
         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
         gap: '20px',
       }}>
-        {adminTools.map((tool) => (
-          <Link
-            key={tool.href}
-            href={tool.links ? tool.links[0].href : tool.href}
-            style={{
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '20px',
-              backgroundColor: '#fff',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              textDecoration: 'none',
-              display: 'block',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(45,114,210,0.2)';
-              e.currentTarget.style.borderColor = '#2d72d2';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-              e.currentTarget.style.borderColor = '#ddd';
-            }}
-          >
-            <h3 className={typography.h3} style={{ margin: '0 0 10px 0', color: '#2d72d2' }}>{tool.title}</h3>
-            <p className={typography.paragraph} style={{ margin: '0 0 15px 0', color: '#666' }}>{tool.desc}</p>
+        {adminTools.map((tool) => {
+          // Why: Avoid nested <Link> tags (invalid HTML) when tool has child links
+          // If tool has links array → use div wrapper to prevent nesting
+          // If tool has no links → use Link wrapper for single-destination card
+          const cardStyles = {
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            padding: '20px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            textDecoration: 'none',
+            display: 'block',
+            cursor: tool.links ? 'default' : 'pointer',
+            transition: 'all 0.2s ease'
+          };
 
-            {tool.links && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-                {tool.links.map((link, idx) => (
-                  <Link
-                    key={idx}
-                    href={link.href}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      fontSize: '0.85em',
-                      color: '#2d72d2',
-                      textDecoration: 'none',
-                      padding: '4px 0',
-                      borderBottom: '1px solid #e0e0e0'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.textDecoration = 'underline';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.textDecoration = 'none';
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+          const handleMouseOver = (e: React.MouseEvent<HTMLElement>) => {
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(45,114,210,0.2)';
+            e.currentTarget.style.borderColor = '#2d72d2';
+          };
+
+          const handleMouseOut = (e: React.MouseEvent<HTMLElement>) => {
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            e.currentTarget.style.borderColor = '#ddd';
+          };
+
+          const cardContent = (
+            <>
+              <h3 className={typography.h3} style={{ margin: '0 0 10px 0', color: '#2d72d2' }}>{tool.title}</h3>
+              <p className={typography.paragraph} style={{ margin: '0 0 15px 0', color: '#666' }}>{tool.desc}</p>
+
+              {tool.links && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                  {tool.links.map((link, idx) => (
+                    <Link
+                      key={idx}
+                      href={link.href}
+                      style={{
+                        fontSize: '0.85em',
+                        color: '#2d72d2',
+                        textDecoration: 'none',
+                        padding: '4px 0',
+                        borderBottom: '1px solid #e0e0e0'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.textDecoration = 'underline';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.textDecoration = 'none';
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          );
+
+          // If tool has child links, use div wrapper (avoid nested Links)
+          if (tool.links) {
+            return (
+              <div
+                key={tool.href}
+                style={cardStyles}
+                onMouseOver={handleMouseOver}
+                onMouseOut={handleMouseOut}
+              >
+                {cardContent}
               </div>
-            )}
-          </Link>
-        ))}
+            );
+          }
+
+          // If no child links, use Link wrapper (single destination)
+          return (
+            <Link
+              key={tool.href}
+              href={tool.href}
+              style={cardStyles}
+              onMouseOver={handleMouseOver}
+              onMouseOut={handleMouseOut}
+            >
+              {cardContent}
+            </Link>
+          );
+        })}
       </div>
     </>
   );

@@ -21,9 +21,18 @@ interface ConversationStats {
 interface ConversationsPageClientProps {
   conversations: IntercomConversation[];
   stats: ConversationStats;
+  noteMetadata: Record<string, {
+    hasNotes: boolean;
+    hasJonNotes: boolean;
+    hasMarkNotes: boolean;
+  }>;
 }
 
-export default function ConversationsPageClient({ conversations, stats }: ConversationsPageClientProps) {
+export default function ConversationsPageClient({
+  conversations,
+  stats,
+  noteMetadata
+}: ConversationsPageClientProps) {
   const [filteredConversations, setFilteredConversations] = useState<IntercomConversation[]>(conversations);
 
   // Calculate stats dynamically from filtered conversations
@@ -32,8 +41,10 @@ export default function ConversationsPageClient({ conversations, stats }: Conver
   return (
     <>
       {/* Global Filter Bar - Cascades to all sections below */}
+      {/* Why: Pass note metadata to enable filtering by note presence without API calls */}
       <GlobalFilterBar
         conversations={conversations}
+        noteMetadata={noteMetadata}
         onFilterChange={setFilteredConversations}
       />
 
