@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { refreshIntercomCache, getIntercomCache, getCacheStatus } from '@/services/intercom';
+import { refreshIntercomCache, getIntercomCache, getCacheStatus, refreshConversationThreads } from '@/services/intercom';
 import { logInfo, logError } from '@/services/logger';
 
 export async function GET() {
@@ -18,11 +18,19 @@ export async function GET() {
 export async function POST() {
   try {
     logInfo('[INTERCOM_CACHE_API] Manual cache refresh requested', 'api.log');
+
+    // Why: Refresh basic conversation data AND full thread details
+    // Strategy: Run basic refresh first, then populate threads (takes ~2-3 minutes)
     await refreshIntercomCache();
+    logInfo('[INTERCOM_CACHE_API] Basic cache refreshed, now refreshing conversation threads...', 'api.log');
+
+    await refreshConversationThreads();
+    logInfo('[INTERCOM_CACHE_API] Conversation threads refreshed successfully', 'api.log');
+
     const status = getCacheStatus();
-    
+
     return NextResponse.json({
-      message: 'Cache refreshed successfully',
+      message: `Cache refreshed successfully with ${status.counts.conversationThreads} threads`,
       ...status
     });
   } catch (error) {
