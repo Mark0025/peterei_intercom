@@ -343,6 +343,7 @@ if (ACCESS_TOKEN) {
       cache.companies = diskCache.companies;
       cache.admins = diskCache.admins;
       cache.conversations = diskCache.conversations;
+      cache.conversationThreads = diskCache.conversationThreads || [];
       cache.helpCenterCollections = diskCache.helpCenterCollections || [];
       cache.helpCenterArticles = diskCache.helpCenterArticles || [];
       cache.lastRefreshed = diskCache.lastRefreshed;
